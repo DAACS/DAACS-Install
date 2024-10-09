@@ -80,6 +80,7 @@ create_web_instance_helper(){
 
     webserver_docker_file="${root_dest}/${instance_type}/Docker-Webserver-prod.docker.yml"
     echo $webserver_docker_file
+    
     # catted=export $(cat ./install/env-prod/.env-prod-webserver ./install/env-prod/.env-prod-webserver-mongo) && docker compose -f ./install/yml/Docker-Webserver-prod.docker.yml up -d
 
     # export $(cat ./install/env-prod/.env-prod-queueserver ./install/env-prod/.env-prod-queuemongo) && docker compose -f ./install/yml/Docker-Queueserver.prod.yml up -d
