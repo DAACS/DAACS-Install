@@ -1,0 +1,14 @@
+version: "3.2"
+
+services:
+  nginx-proxy-cache:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile-ngnix
+    restart: unless-stopped
+    container_name: nginx-proxy-cache
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+      - /var/www/html/certs:/etc/nginx/certs
+      - ./nginx/vhost.d:/etc/nginx/vhost.d:ro 
+    network_mode: host

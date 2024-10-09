@@ -1,0 +1,60 @@
+version: "3.3"
+
+services:
+  productionmongo:
+    image: mongo
+    restart: unless-stopped
+    env_file: 
+      - ../env-prod/.env-prod-webserver-mongo-init
+      - ../env-prod/.env-prod-webserver-mongo
+      - ../env-prod/.env-prod-oauth
+    networks:
+      - myNetwork
+    ports:
+      - ${MONGODB_MAPPED_PORT}:27017
+    volumes:
+      - ./mongodb/assessments-media-self-hosted.json:/docker-entrypoint-initdb.d/assessments-final.json
+      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    container_name: ${MONGODB_CONTAINER_NAME}
+
+  productionmemcached:
+    image: memcached
+    entrypoint:
+      - memcached
+    env_file: 
+      - ../env-prod/.env-prod-memcached
+    networks:
+      - myNetwork
+    command: ["-m", "512m", "-I", "2m"]
+    ports:
+      - ${MEMCACHED_MAPPED_PORT}:11211
+    container_name:
+      ${MEMCACHED_CONTAINER_NAME}
+
+  productionwebserver:
+    command: >
+        /bin/sh -c "cd /usr/src/app && npm run-script start-production --prefix=./DAACS-Webserver"
+    expose:
+      - ${PORT}
+      - 443
+    restart: unless-stopped
+    networks:
+      - nginx-proxy
+      - myNetwork
+    env_file: 
+      - ../env-prod/.env-prod-webserver
+      - ../env-prod/.env-prod-webserver-mongo
+      - ../env-prod/.env-prod-oauth
+      - ../env-prod/.env-prod-email
+    volumes:
+      - "/var/www/html/${FOLDER_START}:/usr/src/app"
+    image: node
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS}
+
+networks:
+  nginx-proxy:
+    external: true
+  myNetwork:
+    external: true

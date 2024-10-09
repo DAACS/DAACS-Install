@@ -1,0 +1,17 @@
+./create_system_instance_users.sh 
+
+victor_admin,victor_jenkins
+test.daacs.net
+DO00BGQVVV7HTKYCBWX2
+yQhyiNJZTOWavEZRNSSOjKtM2Eh+qnuBemfMrogQTVA
+jenkinskeys
+nyc3
+webmangroup
+
+
+
+create_daacs_instance.sh
+/var/www/html
+DAACS-Webserver
+DAACS-Frontend
+/root/DAACS-Install

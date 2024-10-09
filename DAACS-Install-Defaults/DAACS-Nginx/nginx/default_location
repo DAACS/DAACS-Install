@@ -1,0 +1,16 @@
+location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|mp3|ogg|ogv|webm|htc|woff2|woff|vtt)$ {
+    proxy_cache mycache;
+    expires 1M;
+    access_log on;
+    proxy_cache_valid 200 30m;
+    proxy_cache_min_uses 1;
+    proxy_cache_key $uri$is_args$args$slice_range;
+    add_header X-Proxy-Cache $upstream_cache_status;
+    access_log /var/log/nginx/access.log cache;
+    proxy_buffering on;
+    proxy_ignore_headers "Set-Cookie";
+    proxy_hide_header "Set-Cookie";
+    proxy_ignore_headers Cache-Control;
+    proxy_pass http://$host;
+}
+
