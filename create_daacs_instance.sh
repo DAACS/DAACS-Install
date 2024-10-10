@@ -31,8 +31,11 @@ Select instance type to create: " instance_type
 read -p "Environment type (dev, qa, prod, etc, etc): " environment_type
 read -p "Enter base path for install of DAACS env files (Leave blank to use default path): " install_env_path
 
+install_root=""
+
 if [ "$install_env_path" = "" ]; then
-    install_env_path="$(get_absoluate_path_from_our_folder)/DAACS-Install-Defaults"
+    install_root=$(get_absoluate_path_from_our_folder)
+    install_env_path="$install_root/DAACS-Install-Defaults"
 fi
 
 case "$instance_type" in
@@ -45,7 +48,7 @@ case "$instance_type" in
         echo "NGINX not running..."
     fi 
 
-    create_web_instance_helper "$instance_type" "$install_env_path" "$environment_type"
+    create_web_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
     
     ;;
     *)

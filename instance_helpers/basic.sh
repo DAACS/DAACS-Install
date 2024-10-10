@@ -161,3 +161,8 @@ write_env_to_file(){
     fi
 
 }
+
+#Get environment variable and value from env file
+get_environment_value_from_file_by_env_name(){
+    echo $(cat ${1} | grep "${2}")
+}
