@@ -1,0 +1,44 @@
+version: "3.3"
+
+services:
+  #mongo_service_name:
+    image: mongo
+    restart: unless-stopped
+    env_file: 
+      - ${ENV_DIR}webserver-mongo-init
+      - ${ENV_DIR}webserver-mongo
+      - ${ENV_DIR}oauth
+    networks:
+      - myNetwork
+    ports:
+      - ${MONGODB_MAPPED_PORT}:27017
+    volumes:
+      - ${ASSESSMENTS}/assessments/*:/docker-entrypoint-initdb.d/assessments/
+      - ${ASSESSMENTS}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    container_name: ${MONGODB_CONTAINER_NAME}
+
+  #webserver_service_name:
+    command: >
+        /bin/sh -c "cd /usr/src/app && npm run-script start-dev --prefix=./DAACS-Webserver"
+    expose:
+      - ${PORT}
+      - 443
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    env_file: 
+      - ${ENV_DIR}webserver
+      - ${ENV_DIR}webserver-mongo
+      - ${ENV_DIR}oauth
+      - ${ENV_DIR}memcached
+      - ${ENV_DIR}email
+    volumes:
+      - "${FOLDER_START}:/usr/src/app"
+    image: node
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS}
+
+networks:
+  myNetwork:
+    external: true

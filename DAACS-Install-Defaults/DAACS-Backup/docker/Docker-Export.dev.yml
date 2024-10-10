@@ -1,0 +1,19 @@
+version: "3.3"
+
+services:
+  backupdata:
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    env_file: 
+      - ../env-dev/.env-dev-webserver-mongo
+      - ../env-dev/.env-dev-digitalocean
+    volumes:
+      - "/var/www/html/${FOLDER_START}:/usr/src/app"
+    build: 
+      context: .
+      dockerfile: ./Dockerfile-export
+
+networks:
+  myNetwork:
+    external: true

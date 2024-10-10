@@ -1,0 +1,43 @@
+version: "3.3"
+
+services:
+  productionqmongo:
+    image: mongo
+    restart: unless-stopped
+    env_file: 
+      - ../env-prod/.env-prod-queuemongo-init
+      - ../env-prod/.env-prod-queuemongo
+      - ../env-prod/.env-prod-oauth
+    networks:
+      - myNetwork
+    ports:
+      - ${MONGODB_MAPPED_PORT}:27017
+    volumes:
+      - ./mongodb/mongo-queue-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    container_name: ${MONGODB_CONTAINER_NAME}
+
+  productionqwebserver:
+    restart: unless-stopped
+    image: daacs-qserver
+    build: 
+      context: .
+      dockerfile: ./Dockerfile-queue-dev.debian
+    env_file: 
+      - ../env-prod/.env-prod-queueserver
+      - ../env-prod/.env-prod-queuemongo
+      - ../env-prod/.env-prod-oauth
+      - ../env-prod/.env-prod-email
+    command: >
+      /bin/sh -c "cd /usr/src/app && chmod +x lightsidetest.sh && ./lightsidetest.sh && cd /usr/src/app && npm run-script production"
+    expose:
+      - 80
+      - 443
+    networks:
+      - myNetwork
+    volumes:
+      - "/var/www/html/${FOLDER_START}:/usr/src/app"
+    container_name: ${WEBSERVER_CONTAINER_NAME}
+
+networks:
+  myNetwork:
+    external: true
