@@ -1,20 +1,20 @@
 version: "3.3"
 
-#mongo_service_name:
-  devmongo:
+services:
+  #mongo_service_name:
     image: mongo
     restart: unless-stopped
     env_file: 
-      - ../env-dev/.env-dev-webserver-mongo-init
-      - ../env-dev/.env-dev-webserver-mongo
-      - ../env-dev/.env-dev-oauth
+      - ${ENV_DIR}webserver-mongo-init
+      - ${ENV_DIR}webserver-mongo
+      - ${ENV_DIR}oauth
     networks:
       - myNetwork
     ports:
       - ${MONGODB_MAPPED_PORT}:27017
     volumes:
-      - ./mongodb/assessments-media-self-hosted.json:/docker-entrypoint-initdb.d/assessments-final.json
-      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ${ASSESSMENTS}/assessments/*:/docker-entrypoint-initdb.d/assessments/
+      - ${ASSESSMENTS}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     container_name: ${MONGODB_CONTAINER_NAME}
 
   #webserver_service_name:
@@ -27,13 +27,13 @@ version: "3.3"
     networks:
       - myNetwork
     env_file: 
-      - ../env-dev/.env-dev-webserver
-      - ../env-dev/.env-dev-webserver-mongo
-      - ../env-dev/.env-dev-oauth
-      - ../env-dev/.env-dev-memcached
-      - ../env-dev/.env-dev-email
+      - ${ENV_DIR}webserver
+      - ${ENV_DIR}webserver-mongo
+      - ${ENV_DIR}oauth
+      - ${ENV_DIR}memcached
+      - ${ENV_DIR}email
     volumes:
-      - "/var/www/html/${FOLDER_START}:/usr/src/app"
+      - "${FOLDER_START}:/usr/src/app"
     image: node
     deploy:
       mode: replicated

@@ -1,6 +1,11 @@
 #!/bin/bash
 
+get_absoluate_path_from_our_folder(){
+    absolute_path=$(realpath ./)
+    echo $absolute_path
+}
 
+#Helper function to check if the array is empty
 is_array_empty() {
    arr=("$@")
 
@@ -12,11 +17,13 @@ is_array_empty() {
 
 }
 
+#Splits string value 
 split_string_to_array(){
-    # $input=$1
     IFS=' ' read -ra ADDR <<< "$1"
     echo "${ADDR[@]}"
 }
+
+#Gets env directory name baased upon environment 
 get_env_type_definition(){
 
         case "$1" in
@@ -36,6 +43,7 @@ get_env_type_definition(){
 
 }
 
+#Gets instance directory name baased upon instance type 
 get_instance_type_definition(){
 
     case "$1" in
@@ -61,6 +69,7 @@ get_instance_type_definition(){
     esac
 }
 
+#Helper function to fill out env files
 fill_out_env_file(){
 
     input_file=$1
@@ -83,13 +92,12 @@ fill_out_env_file(){
     for i in "${arr[@]}"; do
         user_input=""
         read -p "Enter value for $i: " user_input
-        # printf '%s\n' "$i$user_input"
         file_output="$file_output$i$user_input\n" 
     done
     echo "$file_output"
 }
 
-
+#Helper function to get env files based upon instance type
 get_env_files_for_editing(){
 
     # 1 - DAACS-Website
@@ -99,30 +107,6 @@ get_env_files_for_editing(){
     # 5 - DAACS-Memcached
 
     instance_type=$(get_instance_type_definition "$1")
-    environment_type=""
-
-    # case "$1" in
-    #     "1") 
-    #         instance_type="DAACS-Website"
-    #     ;;
-    #     "2") 
-    #         instance_type="DAACS-Qserver"
-    #     ;;
-    #     "3") 
-    #         instance_type="DAACS-Nginx"
-    #     ;;
-    #     "4") 
-    #         instance_type="DAACS-Backup"
-    #     ;;
-    #     "5") 
-    #         instance_type="DAACS-Memcached"
-    #     ;;
-    #     *)
-    #         echo "Invalid instance option"
-    #         exit -1
-    #     ;;
-    # esac
-
     environment_type=$(get_env_type_definition $3)
     search_dir="$2/$instance_type/$environment_type"
 
@@ -137,7 +121,7 @@ get_env_files_for_editing(){
 
 }
 
-
+#Helper function to write env files to it's instance directory name in 
 write_env_to_file(){
 
     # root_dest=""
