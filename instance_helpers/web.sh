@@ -25,6 +25,7 @@ write_service_subsititions_to_docker_file(){
     webserver_port="${11}"
     webserver_replicas="${12}"
     database_container_name="${13}"
+    database_port="${14}"
 
     docker_file=""
 
@@ -61,17 +62,17 @@ write_service_subsititions_to_docker_file(){
 
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
-    #todo make these come from input file dynamically
     assessments_env="ASSESSMENTS=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
     port="$webserver_port"
     replicas=$webserver_replicas
     mongo_container_name=$database_container_name
+    mongo_port=$database_port
     
 
     # # run docker file - webserver
-    catted="${assessments_env} ${folder_start_env} ${env_dir} ${port} ${replicas} ${mongo_container_name}"
+    catted="${assessments_env} ${folder_start_env} ${env_dir} ${port} ${replicas} ${mongo_container_name} ${mongo_port}"
     catted+=" docker compose -f ${webserver_docker_file_to} up -d"
     eval "$catted"    
 }
@@ -122,7 +123,7 @@ create_web_instance_helper(){
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$1")
 
-    # # Create env files for install
+    # Create env files for install
     IFS=' ' read -ra ADDR <<< "$env_to_create"
     for i in "${ADDR[@]}"; do
         filename=$(basename "$i")
@@ -147,10 +148,11 @@ create_web_instance_helper(){
     # # build frontend
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
-    # # filename - enviroment variables for oauth
+    # # Build frontend
     env_oauth_file="${absolute_dir}oauth"
-    catted=$(cat "${env_oauth_file}") npx ember build --prod
-    $catted
+    api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
+    catted="export ${api_client_id} && npx ember build --prod"
+    eval "$catted"  
 
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
     if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
@@ -164,10 +166,11 @@ create_web_instance_helper(){
     env_webserver_mongo_file="${absolute_dir}webserver-mongo"
 
     mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
+    database_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
 
-    write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$base_path_folder_destination" "$web_server_path" "$frontend_path" "$install_env_path" "$environment_type_defintion" "$mongo_service_name" "$webserver_service_name" "$root_dest" "$webserver_port" "$webserver_replicas" "$mongo_container_name"
+    write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$base_path_folder_destination" "$web_server_path" "$frontend_path" "$install_env_path" "$environment_type_defintion" "$mongo_service_name" "$webserver_service_name" "$root_dest" "$webserver_port" "$webserver_replicas" "$mongo_container_name" "$database_port"
 
     exit 1
 }
