@@ -13,8 +13,8 @@ services:
     ports:
       - ${MONGODB_MAPPED_PORT}:27017
     volumes:
-      - ${ASSESSMENTS}/assessments:/docker-entrypoint-initdb.d/assessments/
-      - ${ASSESSMENTS}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ${LOCAL_PATH_TO_MONGODB_DIR}/assessments:/docker-entrypoint-initdb.d/assessments/
+      - ${LOCAL_PATH_TO_MONGODB_DIR}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     container_name: ${MONGODB_CONTAINER_NAME}
 
   #webserver_service_name:
