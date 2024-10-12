@@ -63,5 +63,3 @@ case "$instance_type" in
     echo "Invalid option"
 ;;
 esac
-
-exit 1
