@@ -51,7 +51,7 @@ get_instance_type_definition(){
             echo "DAACS-Website"
         ;;
         "2") 
-            echo "DAACS-Qserver"
+            echo "DAACS-QServer"
         ;;
         "3") 
             echo "DAACS-Nginx"
@@ -165,4 +165,65 @@ write_env_to_file(){
 #Get environment variable and value from env file
 get_environment_value_from_file_by_env_name(){
     echo $(cat ${1} | grep "${2}")
+}
+
+#Runs fill out env program for all env's
+run_fillout_program(){
+
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        retval=$( fill_out_env_file "$i")
+        write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
+    done
+}
+
+clone_repo(){
+    
+    base_path_folder_destination=$1
+    install_folder_destination=$2
+    repo=$3
+    
+    cd $base_path_folder_destination
+    command="git clone ${repo} ${base_path_folder_destination}/${install_folder_destination}"
+    eval "$command"
+}
+
+get_node_modules(){
+
+    cd "${1}"
+    npm ci 
+}
+
+
+
+write_service_subsititions_to_docker_file(){
+
+    instance_type_defintion="${1}"
+    install_folder_destination="${2}"
+    install_env_path="${3}"
+    environment_type_defintion="${4}"
+    docker_changes_format="${5}"
+    docker_file="${6}"
+    
+    # # copy docker file to new location to save for later use
+    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
+
+    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+    echo "$webserver_docker_file_to"
+}
+
+
+run_docker_with_envs(){
+
+    webserver_docker_file_to="${1}"
+    envs_for_docker_process="${2}"
+
+    # # run docker file
+    catted="${envs_for_docker_process}"
+    catted+=" docker compose -f ${webserver_docker_file_to} up -d"  
+    eval "$catted"    
 }
