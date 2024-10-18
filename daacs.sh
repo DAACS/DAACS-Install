@@ -4,7 +4,7 @@
 main(){
         
     step1_option=$(pretty_read "
-        ctrl+c or type ${Red}quit${Color_Off} to exit\n
+        Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exit\n
         1 - Install system dependencies\n
         2 - Create system users\n
         3 - Create/Update instance\n

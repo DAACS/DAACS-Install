@@ -179,6 +179,7 @@ run_fillout_program(){
     done
 }
 
+#Clones repo into destination folder - todo need to check if dir is empty and ask to clear it if it isn't
 clone_repo(){
     
     base_path_folder_destination=$1

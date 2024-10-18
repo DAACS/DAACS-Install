@@ -3,7 +3,8 @@
 # ./DAACS-Install-Defaults - folder for default .env files
 . ./instance_helpers/web.sh
 . ./instance_helpers/qserver.sh
-# . ./instance_helpers/basic.sh
+. ./instance_helpers/nginx.sh
+. ./instance_helpers/backup.sh
 
 : '
 1 - Pick instance type to create
@@ -56,6 +57,27 @@ case "$instance_type" in
 "2") 
 
     create_qserver_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+
+;;
+
+
+"3") 
+
+    create_nginx_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+
+;;
+
+
+"4") 
+
+    create_backup_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+
+;;
+
+
+"5") 
+
+    create_memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 
 ;;
 
