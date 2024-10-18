@@ -4,13 +4,13 @@ services:
     networks:
       - myNetwork
     env_file: 
-      - ${ENV_DIR}webserver-mongo
-      - ${ENV_DIR}digitalocean
+      - ${MONGO_ENV_DIR}webserver-mongo
+      - ${BACKUP_ENV_DIR}digitalocean
     volumes:
       - "${FOLDER_START}:/usr/src/app"
     build: 
       context: .
-      dockerfile: ./Dockerfile-export
+      dockerfile: $DIR/Dockerfile-export
 
 networks:
   myNetwork:
