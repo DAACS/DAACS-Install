@@ -2,9 +2,21 @@ FROM node:latest
 
 RUN apt-get update && apt-get -y install cron vim 
 
-# Copy hello-cron file to the cron.d directory
-COPY ./docker_copy/export-cron /etc/cron.d/export-cron
- 
+#create cron file
+RUN touch /etc/cron.d/export-cron
+
+#Adding Cron commands to file
+RUN <<EOF 
+ls -l
+
+echo '# must be ended with a new line (Unix) and not CRLF (Windows)
+0 0 * * * export $(xargs -0 -a /proc/1/environ); cd /usr/src/app && node upload_to_spaces.js >> /var/log/cron.log
+# An empty line is required at the end of this file for a valid cron file. 
+
+' >> /etc/cron.d/export-cron
+
+EOF
+
 # Give execution rights on the cron job
 RUN chmod 0644 /etc/cron.d/export-cron
 
