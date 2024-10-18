@@ -43,16 +43,16 @@ create_backup_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$1")
     
     # # Create env files for install but only if asked - todo
-    # run_fillout_program "$env_to_create"
+    run_fillout_program "$env_to_create"
 
     backup_env_file_path="$install_root/new-env-setups/$backup_service_name/$environment_type_defintion/$environment_type_defintion-"
     mongo_env_file_path="$install_root/new-env-setups/$folder_instance/$environment_type_defintion/$environment_type_defintion-"
 
     # # # get code from repo
-    # clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:moomoo-dev/DAACS-Backup.git"
+    clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:moomoo-dev/DAACS-Backup.git"
 
     # # # # # # install node modules for web server
-    # get_node_modules "$base_path_folder_destination/$install_folder_destination/" 
+    get_node_modules "$base_path_folder_destination/$install_folder_destination/" 
 
     docker_file=""
 
