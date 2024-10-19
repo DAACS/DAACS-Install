@@ -1,7 +1,5 @@
 #!/bin/bash 
 
-# export $(cat ./install/env-dev/.env-dev-digitalocean) && docker compose -f ./install/yml/Docker-Export.dev.yml up -d
-
 create_backup_instance_helper(){
 
     instance_type=$1
@@ -37,21 +35,20 @@ create_backup_instance_helper(){
         exit -1
     fi
 
-
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$1")
     
-    # # Create env files for install but only if asked - todo
+    # # # Create env files for install but only if asked - todo
     run_fillout_program "$env_to_create"
 
     backup_env_file_path="$install_root/new-env-setups/$backup_service_name/$environment_type_defintion/$environment_type_defintion-"
     mongo_env_file_path="$install_root/new-env-setups/$folder_instance/$environment_type_defintion/$environment_type_defintion-"
 
-    # # # get code from repo
+    # # # # get code from repo
     clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:moomoo-dev/DAACS-Backup.git"
 
-    # # # # # # install node modules for web server
+    # # # # # # # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/" 
 
     docker_file=""
@@ -90,4 +87,4 @@ create_backup_instance_helper(){
     env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} "
     echo "$env_string"
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
-}
+}   

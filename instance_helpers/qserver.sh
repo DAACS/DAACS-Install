@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./instance_helpers/basic.sh
+source "$current_dir/instance_helpers/basic.sh"
 
 : '
 Instructions:

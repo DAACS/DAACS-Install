@@ -27,19 +27,19 @@ main(){
     case "$step1_option" in
     "1") 
         clear
-        . ./DAACS-system-install.sh
+        source "$current_dir/DAACS-system-install.sh"
 
     ;;
 
     "2") 
         clear
-        . ./create_system_instance_users.sh
+        source "$current_dir/create_system_instance_users.sh"
 
     ;;
 
     "3") 
         clear
-        . ./create_daacs_instance.sh
+        source "$current_dir/create_daacs_instance.sh"
 
     ;;
 
