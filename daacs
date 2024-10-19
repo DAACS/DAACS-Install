@@ -1,5 +1,8 @@
 #!/bin/bash
-. ./instance_helpers/colors.sh
+
+current_dir="$(dirname $0)"
+
+source "$current_dir/instance_helpers/colors.sh"
 
 main(){
         
