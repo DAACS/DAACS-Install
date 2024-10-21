@@ -213,6 +213,7 @@ write_service_subsititions_to_docker_file(){
     webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
 
     cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    
     sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
     echo "$webserver_docker_file_to"
 }
@@ -225,6 +226,6 @@ run_docker_with_envs(){
 
     # # run docker file
     catted="${envs_for_docker_process}"
-    catted+=" docker compose -f ${webserver_docker_file_to} up -d"  
+    catted+=" docker compose -f ${webserver_docker_file_to} up -d"      
     eval "$catted"    
 }
