@@ -3,6 +3,7 @@ services:
     build: 
       context: .
       dockerfile: ./Dockerfile-ngnix
+      # image: daacs-nginx
     restart: unless-stopped
     container_name: nginx-proxy-cache
     ports:
