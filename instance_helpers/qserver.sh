@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./instance_helpers/basic.sh
+source "$current_dir/instance_helpers/basic.sh"
 
 : '
 Instructions:
@@ -25,6 +25,12 @@ create_qserver_instance_helper(){
     read -p "Enter name for mongo service (todo check for clashes before moving on): " mongo_service_name
     read -p "Enter name for q server service (todo check for clashes before moving on): " qserver_service_name
     
+    if [ "$base_path_folder_destination" = "" ]; 
+    then
+        echo "Please choose an base install destination."
+        exit 1
+    fi
+
     if [ "$install_folder_destination" = "" ]; 
     then
         echo "Please choose an install destination."

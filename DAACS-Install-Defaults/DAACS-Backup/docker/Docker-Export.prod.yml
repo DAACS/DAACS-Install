@@ -1,6 +1,7 @@
 services:
   #backup_service_name:
     restart: unless-stopped
+    image: daacs-backup-cron
     networks:
       - myNetwork
     env_file: 

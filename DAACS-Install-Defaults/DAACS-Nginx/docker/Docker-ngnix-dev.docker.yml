@@ -1,10 +1,11 @@
 version: "3.2"
 
 services:
-  nginx-proxy-cache:
+  #nginx_service_name:
     build: 
       context: .
       dockerfile: ./Dockerfile-ngnix
+            # image: daacs-nginx
     restart: unless-stopped
     container_name: nginx-proxy-cache
     volumes:

@@ -1,9 +1,9 @@
-version: "3.5"
 services:
-  nginx-proxy-cache:
+  #nginx_service_name:
     build: 
       context: .
       dockerfile: ./Dockerfile-ngnix
+      # image: daacs-nginx
     restart: unless-stopped
     container_name: nginx-proxy-cache
     ports:
@@ -14,7 +14,6 @@ services:
       - letsencrypt-certs:/etc/nginx/certs
       - letsencrypt-vhost-d:/etc/nginx/vhost.d
       - letsencrypt-html:/usr/share/nginx/html
-      # - ./nginx/vhost.d:/etc/nginx/vhost.d:ro 
 
 #need to check if nginx/vhost.d works in prod
   letsencrypt-proxy:
@@ -27,7 +26,7 @@ services:
       - letsencrypt-vhost-d:/etc/nginx/vhost.d
       - letsencrypt-html:/usr/share/nginx/html
     environment:
-      - DEFAULT_EMAIL=
+      - DEFAULT_EMAIL=${DEFAULT_EMAIL}
       - NGINX_PROXY_CONTAINER=nginx-proxy-cache
 
 networks:

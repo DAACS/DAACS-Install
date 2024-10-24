@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ./DAACS-Install-Defaults - folder for default .env files
-. ./instance_helpers/web.sh
-. ./instance_helpers/qserver.sh
-. ./instance_helpers/nginx.sh
-. ./instance_helpers/backup.sh
+source "$current_dir/instance_helpers/web.sh"
+source "$current_dir/instance_helpers/qserver.sh"
+source "$current_dir/instance_helpers/nginx.sh"
+source "$current_dir/instance_helpers/backup.sh"
 
 : '
 1 - Pick instance type to create
@@ -36,7 +36,7 @@ read -p "Enter base path for install of DAACS env files (Leave blank to use defa
 install_root=""
 
 if [ "$install_env_path" = "" ]; then
-    install_root=$(get_absoluate_path_from_our_folder)
+    install_root=$current_dir
     install_env_path="$install_root/DAACS-Install-Defaults"
 fi
 
@@ -78,10 +78,11 @@ case "$instance_type" in
 "5") 
 
     create_memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
-
 ;;
 
 *)
     echo "Invalid option"
 ;;
 esac
+
+# clear
