@@ -9,74 +9,6 @@ Instructions:
     # Pick install env path if differs from base env
 '
 
-
-# write_service_subsititions_to_docker_file(){
-
-#     instance_type_defintion=$1
-#     install_folder_destination=$2
-#     base_path_folder_destination=$3
-#     web_server_path=$4
-#     frontend_path=$5
-#     install_env_path=$6
-#     environment_type_defintion=$7
-#     mongo_service_name=$8
-#     webserver_service_name=$9
-#     root_dest="${10}"
-#     webserver_port="${11}"
-#     webserver_replicas="${12}"
-#     database_container_name="${13}"
-#     database_port="${14}"
-
-#     docker_file=""
-
-#         case "$environment_type_defintion" in
-#         "env-dev") 
-#             docker_file="Docker-Webserver-dev.docker.yml"
-#         ;;
-#         "env-prod") 
-#             docker_file="Docker-Webserver-prod.docker.yml"
-#         ;;
-#         *)
-#             echo "Invalid instance option"
-#             exit -1
-#         ;;
-#     esac
-
-
-
-#     # # copy docker file to new location to save for later use
-#     webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
-
-#     webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
-
-#     cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
-
-#     sed  -i -e "s/#mongo_service_name/$mongo_service_name/g ; s/#webserver_service_name/$webserver_service_name/g" "$webserver_docker_file_to"
-
-#     # # /var/www/html/               /football                      /DAACS-Webserver
-#     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
-
-#     # #/root/DAACS-Install/DAACS-Install-Defaults /DAACS-Webserver 
-#     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-#     full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
-
-#     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-
-#     assessments_env="ASSESSMENTS=$full_daacs_install_defaults_path_to_docker"
-#     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
-#     env_dir="ENV_DIR=$absolute_dir"
-#     port="$webserver_port"
-#     replicas=$webserver_replicas
-#     mongo_container_name=$database_container_name
-#     mongo_port=$database_port
-    
-
-#     # # run docker file - webserver
-#     catted="${assessments_env} ${folder_start_env} ${env_dir} ${port} ${replicas} ${mongo_container_name} ${mongo_port}"
-#     catted+=" docker compose -f ${webserver_docker_file_to} up -d"
-#     eval "$catted"    
-# }
-
 create_web_instance_helper(){
 
     instance_type=$1
@@ -124,10 +56,16 @@ create_web_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$1")
 
     # Create env files for install
-    run_fillout_program "$env_to_create"
+    # run_fillout_program "$env_to_create"
 
     # # # get code from repo
-    clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:moomoo-dev/DAACS-Website.git"
+    if [ "$environment_type" = "prod" ]; then
+        clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Website.git"
+    fi
+
+    if [ "$environment_type" = "dev" ]; then
+        clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:DAACS/DAACS-Website.git"
+    fi
 
     # # # # # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -156,23 +94,32 @@ create_web_instance_helper(){
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
     
-    # # Create directories needed for DAACS-Server-Folders/ 
+    # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"
-    mkdir "${daacs_server_folder_dir}"
+    mkdir -p "${daacs_server_folder_dir}"
 
     uploads_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SERVER_UPLOADS_DIR")
-    mkdir "${daacs_server_folder_dir}/${uploads_dir##*=}"
+    mkdir -p "${daacs_server_folder_dir}/${uploads_dir##*=}"
 
     pdf_uploads_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PDF_UPLOADS_DIR")
-    mkdir "${daacs_server_folder_dir}/${pdf_uploads_dir##*=}"
+    mkdir -p "${daacs_server_folder_dir}/${pdf_uploads_dir##*=}"
 
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
-    mkdir "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
+    mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
     # # Build frontend
     env_oauth_file="${absolute_dir}oauth"
     api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
-    catted="export ${api_client_id} && npx ember build --prod"
+    
+    if [ "$environment_type" = "prod" ]; then
+        catted="export ${api_client_id} && npx ember build --prod"
+
+    fi
+
+    if [ "$environment_type" = "dev" ]; then
+        catted="export ${api_client_id} && npx ember build" 
+    fi
+
     cd "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
     eval "$catted"  
 
@@ -204,7 +151,7 @@ create_web_instance_helper(){
     env_dir="ENV_DIR=$absolute_dir"
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port}"
-    
+
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
     exit 1
