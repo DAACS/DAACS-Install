@@ -56,7 +56,7 @@ create_web_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$1")
 
     # Create env files for install
-    # run_fillout_program "$env_to_create"
+    run_fillout_program "$env_to_create"
 
     # # # get code from repo
     if [ "$environment_type" = "prod" ]; then

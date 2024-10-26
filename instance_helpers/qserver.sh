@@ -52,13 +52,20 @@ create_qserver_instance_helper(){
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$1")
 
-    # # Create env files for install
+    # Create env files for install
     run_fillout_program "$env_to_create"
 
-    # # get code from repo
-    clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:moomoo-dev/DAACS-Qserver.git"
-        
-    # # # # install node modules for q server
+    # get code from repo
+    if [ "$environment_type" = "prod" ]; then
+        clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Qserver.git"
+    fi
+
+    if [ "$environment_type" = "dev" ]; then
+        clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:DAACS/DAACS-Qserver.git"
+    fi
+
+
+    # # # install node modules for q server
     get_node_modules "$base_path_folder_destination/$install_folder_destination" 
 
     root_dest="$install_root/new-env-setups"
@@ -81,7 +88,7 @@ create_qserver_instance_helper(){
     qserver_container_name=$(get_environment_value_from_file_by_env_name "${env_queueserver_file}" "WEBSERVER_CONTAINER_NAME")
 
     docker_file=""
-
+ 
         case "$environment_type_defintion" in
         "env-dev") 
             docker_file="Docker-Queueserver.dev.yml"
@@ -105,6 +112,12 @@ create_qserver_instance_helper(){
     local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
+
+
+    qserver_files_from="$install_env_path/${instance_type_defintion}/docker/Dockerfile-queue-dev.debian"
+    qserver_files_to="${root_dest}/${qserver_service_name}/docker/Dockerfile-queue-dev.debian"
+    cp "${qserver_files_from}" "${qserver_files_to}"
+    
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
