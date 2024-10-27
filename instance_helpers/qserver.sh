@@ -12,45 +12,7 @@ Instructions:
 
 qserver_instance_helper(){
 
-    # instance_type="${1}"
-    # install_env_path="${2}"
-    # environment_type="${3}"
-    # install_root="${4}"
-
-    # printf "\nCREATING Web instance....\n"
-
-    # read -p "Enter absolute path destination for install of DAACS: " base_path_folder_destination
-    # read -p "Enter folder destination for install of DAACS: " install_folder_destination
-    # read -p "Enter folder name for install of DAACS web server (Relative to install path): " web_server_path
-    # read -p "Enter folder name for install of DAACS frontend (Relative to install path): " frontend_path
-    # read -p "(n)ew or (u)pdate or (r)efresh: " new_or_update
-    
-    # if [ "$base_path_folder_destination" = "" ]; 
-    # then
-    #     echo "Please choose an base path destination."
-    #     exit 1
-    # fi
-
-        
-    # if [ "$install_folder_destination" = "" ]; 
-    # then
-    #     echo "Please choose an install destination."
-    #     exit 1
-    # fi
-    
-    # if [ "$web_server_path" = "" ]; 
-    # then
-    #     web_server_path="DAACS-Webserver"
-    # fi
-
-    # if [ "$frontend_path" = "" ]; then
-    #     frontend_path="DAACS-Frontend"
-    # fi
-
-
-
-
-     instance_type=$1
+    instance_type=$1
     install_env_path=$2 #/root/DAACS-Install/DAACS-Install_Defaults
     environment_type=$3
     install_root=$4 #/root/DAACS-Install
