@@ -97,6 +97,41 @@ fill_out_env_file(){
     echo "$file_output"
 }
 
+#Helper function to fill out env files
+fill_out_env_file_for_updating(){
+
+    input_file=$1
+
+    if [ "$input_file" = "" ]; 
+    then
+        echo "Input file source path is empty."
+        exit 1
+    fi
+
+    readarray -t arr < $input_file
+
+    are_we_empty=$(is_array_empty "${arr[@]}")
+
+    if [ $are_we_empty == true ]; then
+        echo "Missing variables in file"
+        exit 1
+    fi
+
+    for i in "${arr[@]}"; do
+        user_input=""
+        read -p "Enter value for $i: " user_input
+
+        #START HERE if user_input is -e then skip 
+        #START HERE if user_input is blank then "" 
+
+        expression="s/=[^][\w+]*/=${user_input}/g"
+        new_new=$(echo $i | sed -E "${expression}")
+        string_reaplce_in_file_expression="s/${i}/${new_new}/g"
+        sed -i -E "$string_reaplce_in_file_expression" $input_file
+    done
+}
+
+
 #Helper function to get env files based upon instance type
 get_env_files_for_editing(){
 
@@ -109,6 +144,24 @@ get_env_files_for_editing(){
     instance_type=$(get_instance_type_definition "$1")
     environment_type=$(get_env_type_definition $3)
     search_dir="$2/$instance_type/$environment_type"
+
+    declare -a arr
+
+    for entry in "$search_dir"/*
+    do
+        arr=("${arr[@]}" "$entry")
+    done
+
+    echo "${arr[@]}"
+
+}
+
+get_env_files_for_updating(){
+
+    environment_type=$(get_env_type_definition $2)
+    search_dir=""
+
+    search_dir="$1/$environment_type"
 
     declare -a arr
 
@@ -179,6 +232,24 @@ run_fillout_program(){
     done
 }
 
+
+#Runs fill out env program for all env's
+run_fillout_program_for_update(){
+
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        echo "$filename"
+        read -p "Do we want to update ${filename} ? (y)es or (n)o : " should_update_file
+
+        if [ "$should_update_file" == "y" ]; then
+            fill_out_env_file_for_updating "$i"
+        fi
+    done
+}
+
+
 #Clones repo into destination folder - todo need to check if dir is empty and ask to clear it if it isn't
 clone_repo(){
     
@@ -191,12 +262,44 @@ clone_repo(){
     eval "$command"
 }
 
+get_repo_latest(){
+
+    base_path_folder_destination=$1
+    install_folder_destination=$2
+    
+    command="cd $base_path_folder_destination/$install_folder_destination &&  git pull"
+    eval "$command"
+
+}
+
 get_node_modules(){
 
     cd "${1}"
     npm ci 
 }
 
+
+
+generate_docker_file_path(){
+
+    to_or_from="${1}"
+    install_folder_destination="${2}"
+    docker_file="${3}"
+    install_env_path="${4}"
+    instance_type_defintion="${5}"
+
+    return_string=""
+
+    if [ "$to_or_from" == "to" ]; then
+        return_string="${root_dest}/${install_folder_destination}/docker/${docker_file}"
+    fi
+
+    if [ "$to_or_from" == "from" ]; then
+        return_string="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    fi
+
+    echo "$return_string"
+}
 
 
 write_service_subsititions_to_docker_file(){
@@ -227,5 +330,6 @@ run_docker_with_envs(){
     # # run docker file
     catted="${envs_for_docker_process}"
     catted+=" docker compose -f ${webserver_docker_file_to} up -d"      
-    eval "$catted"    
+    output=$(eval "$catted")
+
 }

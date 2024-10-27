@@ -50,7 +50,7 @@ case "$instance_type" in
         echo "NGINX not running..."
     fi 
 
-    create_web_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    web_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 
 ;;
 
