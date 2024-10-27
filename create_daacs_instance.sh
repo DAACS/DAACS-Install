@@ -56,7 +56,7 @@ case "$instance_type" in
 
 "2") 
 
-    create_qserver_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    qserver_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 
 ;;
 
