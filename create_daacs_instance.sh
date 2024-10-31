@@ -70,7 +70,7 @@ case "$instance_type" in
 
 "4") 
 
-    create_backup_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    backup_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 
 ;;
 

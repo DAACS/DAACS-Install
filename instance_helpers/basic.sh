@@ -119,17 +119,82 @@ fill_out_env_file_for_updating(){
 
     for i in "${arr[@]}"; do
         user_input=""
+
+        #OLD WAY
+        # read -p "Enter value for $i: " user_input
+        # i_escaped=$(escape_backslash "${i}")
+        # user_input_escaped=$(escape_backslash "${user_input}")
+        # expression="s/=[^][\w+]*/=${user_input_escaped}/g"
+        # new_new=$(echo $i | sed -E "${expression}")
+        # new_new_escaped=$(escape_backslash "${new_new}")
+        # string_reaplce_in_file_expression="s/${i_escaped}/${new_new_escaped}/g"
+        # sed -i -E "$string_reaplce_in_file_expression" $input_file
+
+        #NEW WAY 
+
         read -p "Enter value for $i: " user_input
+        unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
+        value1=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$i")
+        value2=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$user_input")
+        string_reaplce_in_file_expression="s/${value1}/${value2}/g"
+        sed -i -E -e "$string_reaplce_in_file_expression" $input_file
 
-        #START HERE if user_input is -e then skip 
-        #START HERE if user_input is blank then "" 
 
-        expression="s/=[^][\w+]*/=${user_input}/g"
-        new_new=$(echo $i | sed -E "${expression}")
-        string_reaplce_in_file_expression="s/${i}/${new_new}/g"
-        sed -i -E "$string_reaplce_in_file_expression" $input_file
     done
 }
+
+get_env_and_equal(){
+    value=$1
+    expression='s/=(.*\n(\?=[A-Z])|.*$)/=/g'
+    new_env_equal=$(echo $value | sed -E -e "${expression}")
+    unescape_backslash_new_env_equal=$(unescape_backslash "$new_env_equal")
+    echo "$unescape_backslash_new_env_equal"
+}
+
+
+get_env_value(){
+
+    value=$1
+    i_escaped=$(escape_backslash "${value}")
+    expression="s/[^][\w+]*=//g"
+    new_new=$(echo $value | sed -E "${expression}")
+    echo "$new_new"
+}
+
+
+get_reconfigure_env(){
+    beginning_env=$1
+    end_env=$2
+    end_env=$(get_env_value "$end_env")
+    end_env=$(escape_backslash "$end_env")
+    echo "$beginning_env$end_env"
+
+}
+
+unescape_backslash(){
+    echo $(echo "${1}" | sed -E -e 's/\\//g')
+
+}
+
+escape_backslash(){
+
+    # echo $(echo "${1}" | sed 's/\//\\\//g')
+    # echo $(echo "${1}" | sed -e "s/'/'\\\\''/g; 1s/^/'/; \$s/\$/'/")
+    # echo $(echo "${1}" | sed -e 's/[[:alpha:]]/\\&/g')
+    # echo  "$1"
+
+    echo $(echo "${1}" | sed -E -e 's/\+|\/|\*|\!|\@|\#|\$|\%|\|\*&|\(|\)|\_|\-|\=|\[|\]|\{|\}|\;|\’|\”|\,|\\<|\\>|\/|\?/\\&/g')
+}
+
+# |\<|\>|\/|\?
+
+
+    # # echo $(echo "${1}" | sed 's/\//\\\//g')
+    # echo $(echo "${1}" | sed -e 's/./\\&/g; 1{$s/^$/""/}; 1!s/^/"/; $!s/$/"/')
+    # # echo $(echo "${1}" | sed -e " s/\[^\\w\]/ ")
+    # # echo $(echo "${1}" | sed -e 's/[[:alpha:]]/\\&/g')
+    # # echo $(echo "${1}" | sed -e "s/!\"\#\$\%\&\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\{\|\}\~./\\&/g")
+
 
 
 #Helper function to get env files based upon instance type
@@ -142,8 +207,8 @@ get_env_files_for_editing(){
     # 5 - DAACS-Memcached
 
     instance_type=$(get_instance_type_definition "$1")
-    environment_type=$(get_env_type_definition $3)
-    search_dir="$2/$instance_type/$environment_type"
+    e_type=$(get_env_type_definition "$3")
+    search_dir="$2/$instance_type/$e_type"
 
     declare -a arr
 
@@ -158,10 +223,10 @@ get_env_files_for_editing(){
 
 get_env_files_for_updating(){
 
-    environment_type=$(get_env_type_definition $2)
+    e_type=$(get_env_type_definition $2)
     search_dir=""
 
-    search_dir="$1/$environment_type"
+    search_dir="$1/$e_type"
 
     declare -a arr
 
@@ -195,17 +260,17 @@ write_env_to_file(){
         exit -1
     fi
 
-    environment_type=$2
+    e_type=$2
 
     #if root_dest = "" then  EXIT -1
 
-    if  ! $(test -d "$root_dest/$3/$environment_type") ;
+    if  ! $(test -d "$root_dest/$3/$e_type") ;
     # if  ! (( $(test -d "$env_instance_path") )) ;
     then
-        mkdir -p "$root_dest/$3/$environment_type"
+        mkdir -p "$root_dest/$3/$e_type"
     fi
 
-    destdir="$root_dest/$3/$environment_type/$filename"
+    destdir="$root_dest/$3/$e_type/$filename"
     touch "$destdir"
 
     if [ -f "$destdir" ]
@@ -230,6 +295,7 @@ run_fillout_program(){
         retval=$( fill_out_env_file "$i")
         write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
     done
+
 }
 
 
@@ -257,6 +323,8 @@ clone_repo(){
     install_folder_destination=$2
     repo=$3
     
+    mkdir -p "${base_path_folder_destination}/${install_folder_destination}"
+
     cd $base_path_folder_destination
     command="git clone ${repo} ${base_path_folder_destination}/${install_folder_destination}"
     eval "$command"
