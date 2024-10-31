@@ -70,7 +70,7 @@ create_qserver_instance_helper(){
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    instance_type_defintion=$(get_instance_type_definition "$1")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
 
     # Create env files for install
     run_fillout_program "$env_to_create"
