@@ -120,6 +120,7 @@ $6 - digitalocean space
 $7 - digitalocean region
 
 '
+#for jenkins docker,sudo
 
 read -p "Enter your users name for mantanice : " users1
 read -p "Enter your users groups : " groups
