@@ -16,27 +16,15 @@ web_instance_helper(){
     environment_type="${3}"
     install_root="${4}"
 
-    printf "\nCREATING Web instance....\n"
+    printf "\nWeb instance....\n"
 
-    read -p "Enter absolute path destination for install of DAACS: " base_path_folder_destination
-    read -p "Enter folder destination for install of DAACS: " install_folder_destination
-    read -p "Enter folder name for install of DAACS web server (Relative to install path): " web_server_path
-    read -p "Enter folder name for install of DAACS frontend (Relative to install path): " frontend_path
-    read -p "(n)ew or (u)pdate or (r)efresh: " new_or_update
-    
-    if [ "$base_path_folder_destination" = "" ]; 
-    then
-        echo "Please choose an base path destination."
-        exit 1
-    fi
-
-        
-    if [ "$install_folder_destination" = "" ]; 
-    then
-        echo "Please choose an install destination."
-        exit 1
-    fi
-    
+    base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
+    install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
+    web_server_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS web server (Relative to install path): " false)
+    frontend_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS frontend (Relative to install path): " false)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate or (r)efresh: " true)
+  
+  
     if [ "$web_server_path" = "" ]; 
     then
         web_server_path="DAACS-Webserver"
@@ -46,7 +34,6 @@ web_instance_helper(){
         frontend_path="DAACS-Frontend"
     fi
 
-
     case "$new_or_update" in
     "n") 
         
@@ -54,8 +41,14 @@ web_instance_helper(){
     ;;
 
     "u") 
+        does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
+        does_dir_env=$(does_dir_exsist "$install_root/new-env-setups/$install_folder_destination")
 
-        update_web_instance_helper
+        if [[ $does_dir_exist == true && $does_dir_env == true ]]; then
+            update_web_instance_helper
+        else
+            echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
+        fi
     ;;
     
     *)
@@ -66,6 +59,8 @@ web_instance_helper(){
 
 
 create_web_instance_helper(){
+
+    printf "\nCREATING Web instance....\n"
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
@@ -142,7 +137,6 @@ create_web_instance_helper(){
     cd "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
     eval "$catted"  
 
-
     docker_file=""
 
         case "$environment_type_defintion" in
@@ -158,9 +152,6 @@ create_web_instance_helper(){
         ;;
     esac
 
-    webserver_docker_file_to=""
-
-    #new one need to update for web
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#webserver_service_name/$webserver_service_name/g" $docker_file)
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
@@ -180,9 +171,11 @@ create_web_instance_helper(){
 
 update_web_instance_helper(){
 
-    read -p "Should I rebuild frontend? (y)es or (n)o : " should_rebuild_frontend
-    read -p "Should I get latest code? (y)es or (n)o : " should_get_latest
-    read -p "Should I update envs? (y)es or (n)o : " should_update_envs
+    printf "\nUpdating Web instance....\n"
+
+    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o : " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
@@ -264,4 +257,25 @@ update_web_instance_helper(){
 
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
+}
+
+
+restart_web_servers_with_stagger(){
+
+echo false
+
+}
+
+
+restart_web_servers(){
+
+
+echo false
+
+}
+
+get_webservers_docker_ids(){
+
+echo false
+
 }

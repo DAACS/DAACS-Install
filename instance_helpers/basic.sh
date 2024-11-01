@@ -409,15 +409,28 @@ get_docker_service_count(){
     echo "$command_count"
 }
 
-ask_for_docker_service_and_check(){
+ask_read_question_or_try_again(){
 
     question_text="$1"
+    try_again="$2"
  
     read -p "$question_text" service_name
 
-    if [ "$service_name" = "" ]; then
-        service_name=$(ask_for_docker_service_and_check "$1")
+    if [[ "$service_name" = ""  &&  $try_again == true ]]; then
+        service_name=$(ask_read_question_or_try_again "$1"  "$try_again")
     fi
+
+    echo $service_name
+
+}
+
+
+ask_for_docker_service_and_check(){
+
+    question_text="$1"
+    try_again=true
+ 
+    service_name=$(ask_read_question_or_try_again "$question_text" "$try_again")
 
     service_count=$(get_docker_service_count "$service_name")
     
@@ -426,4 +439,15 @@ ask_for_docker_service_and_check(){
     fi 
     echo $service_name
 
+
+}
+
+does_dir_exsist(){
+
+    update_dir="$1"
+    if [ -d "$update_dir" ]; then
+        echo true
+    else
+        echo false
+    fi
 }
