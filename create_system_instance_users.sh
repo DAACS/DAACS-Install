@@ -1,4 +1,5 @@
 #!/bin/bash 
+source "$current_dir/instance_helpers/basic.sh"
 
 user_data_dir="$current_dir/user-data"
 
@@ -38,7 +39,7 @@ function create_user(){
   fi
 
   useradd -m -d $myBaseDir $USERNAME $group_add
-
+  usermod -s /bin/bash $USERNAME
   mkdir "$myBaseDir/.ssh"
   touch "$myBaseDir/.ssh/authorized_keys"
   ssh-keygen -t ed25519 -f $USERNAME -f "$myBaseDir/.ssh/${USERNAME}_rsa" -N ''
@@ -108,12 +109,13 @@ $7 - digitalocean region
 '
 #for jenkins docker,sudo
 
-read -p "Enter your users name for mantanice : " users1
-read -p "Enter your users groups : " groups
-read -p "Enter your instance domain ex(www.website.com): " instance
-read -p "Enter your digitalocean access token: " accesstoken
-read -p "Enter your digitalocean access secret: " accesssecret
-read -p "Enter your digitalocean space: " space
-read -p "Enter your digitalocean access region: " region
+username=$(ask_read_question_or_try_again "Enter username : " true)
+groups=$(ask_read_question_or_try_again "Enter your users groups : " true)
+instance=$(ask_read_question_or_try_again "Enter your instance domain ex(www.website.com): " true)
+accesstoken=$(ask_read_question_or_try_again "Enter your digitalocean access token: " true)
+accesssecret=$(ask_read_question_or_try_again "Enter your digitalocean access secret: " true)
+space=$(ask_read_question_or_try_again "Enter your digitalocean space: " true)
+region=$(ask_read_question_or_try_again "Enter your digitalocean access region: " true)
 
-create_user "$instance" "$accesstoken" "$accesssecret" "$space" "$region" "$users1" "$groups"
+
+create_user "$instance" "$accesstoken" "$accesssecret" "$space" "$region" "$username" "$groups"

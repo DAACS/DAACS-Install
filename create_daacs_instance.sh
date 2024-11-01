@@ -5,6 +5,7 @@ source "$current_dir/instance_helpers/web.sh"
 source "$current_dir/instance_helpers/qserver.sh"
 source "$current_dir/instance_helpers/nginx.sh"
 source "$current_dir/instance_helpers/backup.sh"
+source "$current_dir/instance_helpers/basic.sh"
 
 : '
 1 - Pick instance type to create
@@ -30,8 +31,8 @@ read -p "
     5 - DAACS-Memcached
 
 Select instance type to create: " instance_type
-read -p "Environment type (dev, qa, prod, etc, etc): " environment_type
-read -p "Enter base path for install of DAACS env files (Leave blank to use default path): " install_env_path
+environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
+install_env_path=$(ask_read_question_or_try_again "Enter base path for install of DAACS env files (Leave blank to use default path): " false)
 
 install_root=""
 
@@ -85,4 +86,3 @@ case "$instance_type" in
 ;;
 esac
 
-# clear
