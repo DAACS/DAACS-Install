@@ -53,13 +53,8 @@ backup_instance_helper(){
 
 create_backup_instance_helper(){
 
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " backup_service_name
-   
 
-       if [ "$backup_service_name" = "" ]; then
-        echo "Cannot leave docker backup service name empty."
-        exit -1
-    fi
+    backup_service_name=$(ask_for_docker_service_and_check "Enter name for backup service : " )
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")

@@ -54,19 +54,8 @@ qserver_instance_helper(){
 
 create_qserver_instance_helper(){
 
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " mongo_service_name
-    read -p "Enter name for q server service (todo check for clashes before moving on): " qserver_service_name
-
-    if [ "$mongo_service_name" = "" ]; then
-        echo "Cannot leave docker mongo service name empty."
-        exit -1
-    fi
-
-    if [ "$qserver_service_name" = "" ]; then
-        echo "Cannot leave docker Q service name empty."
-        exit -1
-    fi
-
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    qserver_service_name=$(ask_for_docker_service_and_check "Enter name for Q server service : " )
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")

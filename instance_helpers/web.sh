@@ -71,18 +71,8 @@ create_web_instance_helper(){
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
 
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " mongo_service_name
-    read -p "Enter name for web service (todo check for clashes before moving on): " webserver_service_name
-
-       if [ "$mongo_service_name" = "" ]; then
-        echo "Cannot leave docker mongo service name empty."
-        exit -1
-    fi
-
-    if [ "$webserver_service_name" = "" ]; then
-        echo "Cannot leave docker web service name empty."
-        exit -1
-    fi
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
 
     # Create env files for install
     run_fillout_program "$env_to_create"

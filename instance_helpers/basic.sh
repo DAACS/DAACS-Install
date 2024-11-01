@@ -401,3 +401,29 @@ run_docker_with_envs(){
     output=$(eval "$catted")
 
 }
+
+
+get_docker_service_count(){
+    command_count=$(docker ps --filter "label=com.docker.compose.service=$service_name" | wc -l)
+    command_count=$(($command_count - 1))
+    echo "$command_count"
+}
+
+ask_for_docker_service_and_check(){
+
+    question_text="$1"
+ 
+    read -p "$question_text" service_name
+
+    if [ "$service_name" = "" ]; then
+        service_name=$(ask_for_docker_service_and_check "$1")
+    fi
+
+    service_count=$(get_docker_service_count "$service_name")
+    
+    if [ "$service_count" -gt 0  ]; then
+        service_name=$(ask_for_docker_service_and_check "$1")
+    fi 
+    echo $service_name
+
+}

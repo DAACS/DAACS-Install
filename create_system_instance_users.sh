@@ -2,27 +2,13 @@
 
 user_data_dir="$current_dir/user-data"
 
-function check_if_dir_exsist(){
-
-  if test -d $1; then
-    echo true
-  fi
-}
-
-function change_users_main_group(){
-   usermod -g $1 $2
-}
-
-
 function check_if_sudo_is_in_group(){
 
   groups="$1"
   IFS=',' read -ra ADDR <<< "$groups"
 
   has_sudo=false
-  for i in "${ADDR[@]}"; do
-    #   echo "$i"
-    
+  for i in "${ADDR[@]}"; do  
     if [ "$i" = "sudo" ]; then
       has_sudo=true
       break;
