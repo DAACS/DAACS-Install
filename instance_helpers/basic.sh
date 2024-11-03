@@ -420,7 +420,6 @@ run_docker_with_envs(){
 
 get_services_ids_by_service_name(){
     service_name="$1"
-    # ids=$(docker ps --filter "label=com.docker.compose.service=$service_name" --format "{{.ID}}" | tr -d ' \n')
     ids=$(docker ps --filter "label=com.docker.compose.service=$service_name" --format "{{.ID}}" | awk '{printf "%s ", $0}')
     echo "$ids"
 }
