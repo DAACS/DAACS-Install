@@ -61,7 +61,7 @@ create_qserver_instance_helper(){
     root_dest="$install_root/new-env-setups"
 
     # Create env files for install
-    run_fillout_program "$env_to_create" "$root_dest"
+    run_fillout_program "$env_to_create"
 
     # get code from repo
     if [ "$environment_type" = "prod" ]; then
@@ -108,7 +108,7 @@ create_qserver_instance_helper(){
         ;;
     esac
 
-    webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#qserver_service_name/$qserver_service_name/g" $docker_file)
+    qserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#qserver_service_name/$qserver_service_name/g" $docker_file)
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
@@ -127,7 +127,13 @@ create_qserver_instance_helper(){
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
-    run_docker_with_envs "$webserver_docker_file_to" "$env_string"
+    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+
+    add_services_service_file "$qserver_service_name" "$services_file_dir/$qserver_service_name"
+    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 }
 
@@ -182,7 +188,7 @@ update_qserver_instance_helper(){
     esac
 
     
-    webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
@@ -195,6 +201,12 @@ update_qserver_instance_helper(){
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
-    run_docker_with_envs "$webserver_docker_file_to" "$env_string"
+    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
 
 }

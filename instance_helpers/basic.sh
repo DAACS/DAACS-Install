@@ -262,6 +262,19 @@ write_env_to_file(){
 
 }
 
+
+refresh_all_services_in_service_helper(){
+
+    root_dest="$1/new-env-setups"
+    services_file_dir="$root_dest/$2/services"
+    service_name="$3"
+    count="$4"
+    q_mode="$5"
+
+    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
+
+}
+
 #Get environment variable and value from env file
 get_environment_value_from_file_by_env_name(){
     echo $(cat ${1} | grep "${2}")
@@ -544,7 +557,7 @@ refresh_instance_helper(){
     fi
 
     if [ "$q_mode" == "" ]; then 
-        q_mode=true
+        q_mode=false
     fi
     
     if [ "$service_name" != "" ]; then 

@@ -12,10 +12,11 @@ main(){
 step1_option=$(pretty_read "
 Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exit\n
 1 - Install system dependencies\n
-2 - Create system users\n
-3 - Create/Update/Refresh instance\n
-4 - Reset service\n
-5 - Install daacs command in path\n\n
+2 - Install daacs command in path\n
+3 - Create system users\n
+4 - Create/Update/Refresh instance\n
+5 - Reset service\n
+6 - Reset all services in folder\n
 Select an option: ")
 
     if [ "$step1_option" = "" ]; then
@@ -36,34 +37,7 @@ Select an option: ")
 
     ;;
 
-    "2") 
-        clear
-        source "$current_dir/create_system_instance_users.sh"
-
-    ;;
-
-    "3") 
-        clear
-        source "$current_dir/create_daacs_instance.sh"
-
-    ;;
-
-    "4") 
-        clear
-        source "$current_dir/instance_helpers/basic.sh"
-    
-        service_name=$(ask_read_question_or_try_again "Service name?: " true)
-        stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once?: " true)
-
-        if [[ ! $stagger_amount =~ ^[0-9]+$ ]] ; then
-            
-            printf "Stagger amount must be a number\n"
-        else
-            restart_services_with_stagger_by_service_name "$service_name" "$stagger_amount"
-        fi
-    ;;
-    "5")
-
+    "2")
 
         home_directory=""
         if [ -z "${HOME}" ];
@@ -85,6 +59,53 @@ Select an option: ")
             echo "$command" >> $HOME/.bashrc
 
         fi
+    ;;
+
+    "3") 
+        clear
+        source "$current_dir/create_system_instance_users.sh"
+
+    ;;
+
+    "4") 
+        clear
+        source "$current_dir/create_daacs_instance.sh"
+
+    ;;
+
+    "5") 
+        clear
+        source "$current_dir/instance_helpers/basic.sh"
+    
+        service_name=$(ask_read_question_or_try_again "Service name?: " true)
+        stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once?: " true)
+
+        if [[ ! $stagger_amount =~ ^[0-9]+$ ]] ; then
+            
+            printf "Stagger amount must be a number\n"
+        else
+            restart_services_with_stagger_by_service_name "$service_name" "$stagger_amount"
+        fi
+    ;;
+
+    "6")
+
+        install_root=""
+        source "$current_dir/instance_helpers/basic.sh"
+        
+        install_env_path=$(ask_read_question_or_try_again "Enter base path for install of DAACS env files (Leave blank to use default path): " false)
+
+        if [ "$install_env_path" = "" ]; then
+            install_root=$current_dir
+            install_env_path="$install_root/DAACS-Install-Defaults"
+        fi
+        
+        install_folder_destination=$(ask_read_question_or_try_again "Enter folder to restart all services for install of DAACS: " true)
+        stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
+        quiet_mode=$(ask_read_question_or_try_again "Output?: " false)
+
+        refresh_all_services_in_service_helper "$install_root" "$install_folder_destination" "" "$stagger_count" "$quiet_mode"
+
     ;;
 
     *)
