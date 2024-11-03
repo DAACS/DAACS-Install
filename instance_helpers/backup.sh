@@ -112,8 +112,8 @@ update_backup_instance_helper(){
 
     printf "\nUPDATING backup instance....\n"
 
-    read -p "Should I get latest code? (y)es or (n)o : " should_get_latest
-    read -p "Should I update envs? (y)es or (n)o : " should_update_envs
+    read -p "Should I get latest code? (y)es or (n)o: " should_get_latest
+    read -p "Should I update envs? (y)es or (n)o: " should_update_envs
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then

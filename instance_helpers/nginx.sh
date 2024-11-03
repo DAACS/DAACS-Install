@@ -8,7 +8,7 @@ create_nginx_instance_helper(){
     install_root=$4 #/root/DAACS-Install
 
     printf "\nCREATING nginx instance....\n"
-    nginx_service_name=$(ask_for_docker_service_and_check "Enter name for nginx service : " )
+    nginx_service_name=$(ask_for_docker_service_and_check "Enter name for nginx service: " )
 
     default_email_input=""
 

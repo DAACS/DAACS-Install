@@ -9,13 +9,14 @@ source "$current_dir/instance_helpers/colors.sh"
 
 main(){
         
-    step1_option=$(pretty_read "
-        Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exit\n
-        1 - Install system dependencies\n
-        2 - Create system users\n
-        3 - Create/Update/Refresh instance\n
-        4 - Reset service\n
-        Select an option:  ")
+step1_option=$(pretty_read "
+Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exit\n
+1 - Install system dependencies\n
+2 - Create system users\n
+3 - Create/Update/Refresh instance\n
+4 - Reset service\n
+5 - Install daacs command in path\n\n
+Select an option: ")
 
     if [ "$step1_option" = "" ]; then
         echo "must select an option"
@@ -51,8 +52,8 @@ main(){
         clear
         source "$current_dir/instance_helpers/basic.sh"
     
-        service_name=$(ask_read_question_or_try_again "Service name? : " true)
-        stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once? : " true)
+        service_name=$(ask_read_question_or_try_again "Service name?: " true)
+        stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once?: " true)
 
         if [[ ! $stagger_amount =~ ^[0-9]+$ ]] ; then
             
@@ -60,8 +61,30 @@ main(){
         else
             restart_services_with_stagger_by_service_name "$service_name" "$stagger_amount"
         fi
+    ;;
+    "5")
 
+
+        home_directory=""
+        if [ -z "${HOME}" ];
+        then 
+            home_directory="/home/$USER"
+            echo "export HOME=${home_directory}" >> $HOME/.bashrc
+            else
+            home_directory="$HOME"
+
+        fi 
+
+        if grep -wq "$current_dir" "$home_directory/.bashrc"
+        then
+            $(pretty_read "${Color_Off}${Red}daacs${Color_Off} command already installed...")
+        else
         
+            $(pretty_read "${Color_Off}${Red}daacs${Color_Off} command installed now...")
+            command="PATH=$current_dir:$PATH"
+            echo "$command" >> $HOME/.bashrc
+
+        fi
     ;;
 
     *)

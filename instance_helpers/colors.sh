@@ -84,6 +84,6 @@ pretty_print(){
 pretty_read(){
     input_text="$1"
     output_variable=""
-    read -p "$(echo -e ${input_text})" output_variable
+    read -p "$(echo -e ${input_text}) " output_variable
     echo "$output_variable"
 }   
