@@ -37,7 +37,7 @@ web_instance_helper(){
     case "$new_or_update" in
     "n") 
         
-        create_web_instance_helper
+        create_web_instance_helper 
     ;;
 
     "u") 
@@ -51,6 +51,14 @@ web_instance_helper(){
         fi
     ;;
     
+    "r") 
+        refresh_service_name=$(ask_read_question_or_try_again "service name: " false)
+        stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
+        quiet_mode=$(ask_read_question_or_try_again "Output? : " false)
+
+            refresh_web_instance_helper "$install_root" "$install_folder_destination" "$refresh_service_name" "$stagger_count" "$quiet_mode"
+    ;;
+
     *)
         echo "Invalid option"
     ;;
@@ -65,6 +73,7 @@ create_web_instance_helper(){
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
@@ -87,7 +96,6 @@ create_web_instance_helper(){
     # # # # # install node modules for frontend
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 
-    root_dest="$install_root/new-env-setups"
 
     # # build frontend
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
@@ -98,7 +106,7 @@ create_web_instance_helper(){
         mkdir -p "$root_dest/$install_folder_destination/docker/"
     fi
 
-    # # filename - enviroment variables for webserver
+    # filename - enviroment variables for webserver
     env_webserver_file="${absolute_dir}webserver"
     # # filename - enviroment variables for webserver mongo
     env_webserver_mongo_file="${absolute_dir}webserver-mongo"
@@ -107,6 +115,8 @@ create_web_instance_helper(){
     mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
+
+    todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"
@@ -121,7 +131,7 @@ create_web_instance_helper(){
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
-    # # Build frontend
+    # Build frontend
     env_oauth_file="${absolute_dir}oauth"
     api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
@@ -167,10 +177,15 @@ create_web_instance_helper(){
 
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
 
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+    add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
+    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+
 }
 
 update_web_instance_helper(){
-
+  
     printf "\nUpdating Web instance....\n"
 
     should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o : " true)
@@ -257,25 +272,22 @@ update_web_instance_helper(){
 
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
+    
 }
 
+refresh_web_instance_helper(){
 
-restart_web_servers_with_stagger(){
+    root_dest="$1/new-env-setups"
+    services_file_dir="$root_dest/$2/services"
+    service_name="$3"
+    count="$4"
+    q_mode="$5"
 
-echo false
-
-}
-
-
-restart_web_servers(){
-
-
-echo false
-
-}
-
-get_webservers_docker_ids(){
-
-echo false
+    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
 
 }

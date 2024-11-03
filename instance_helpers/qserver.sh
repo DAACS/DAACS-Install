@@ -21,7 +21,7 @@ qserver_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate or (r)efresh: " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
     
     case "$new_or_update" in
     "n") 
