@@ -22,7 +22,7 @@ web_instance_helper(){
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
     web_server_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS web server (Relative to install path): " false)
     frontend_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS frontend (Relative to install path): " false)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate or (r)efresh: " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
   
   
     if [ "$web_server_path" = "" ]; 
@@ -50,14 +50,6 @@ web_instance_helper(){
             echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
         fi
     ;;
-    
-    "r") 
-        refresh_service_name=$(ask_read_question_or_try_again "service name: " false)
-        stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
-        quiet_mode=$(ask_read_question_or_try_again "Output?: " false)
-
-            refresh_web_instance_helper "$install_root" "$install_folder_destination" "$refresh_service_name" "$stagger_count" "$quiet_mode"
-    ;;
 
     *)
         echo "Invalid option"
@@ -80,7 +72,7 @@ create_web_instance_helper(){
 
 
     # Create env files for install
-    run_fillout_program "$env_to_create" "$root_dest"
+    run_fillout_program "$env_to_create"
 
     # # # # get code from repo
     if [ "$environment_type" = "prod" ]; then
@@ -279,16 +271,4 @@ update_web_instance_helper(){
         update_services_ids_in_service_file "$entry"
     done
     
-}
-
-refresh_web_instance_helper(){
-
-    root_dest="$1/new-env-setups"
-    services_file_dir="$root_dest/$2/services"
-    service_name="$3"
-    count="$4"
-    q_mode="$5"
-
-    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
-
 }
