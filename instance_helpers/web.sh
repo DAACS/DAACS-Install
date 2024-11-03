@@ -70,18 +70,19 @@ create_web_instance_helper(){
 
     printf "\nCREATING Web instance....\n"
 
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
 
-    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
-    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
 
     # Create env files for install
-    run_fillout_program "$env_to_create"
+    run_fillout_program "$env_to_create" "$root_dest"
 
-    # # # get code from repo
+    # # # # get code from repo
     if [ "$environment_type" = "prod" ]; then
         clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Website.git"
     fi
@@ -116,7 +117,7 @@ create_web_instance_helper(){
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
 
-    todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
+    # todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"

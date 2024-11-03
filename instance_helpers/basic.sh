@@ -229,10 +229,7 @@ get_env_files_for_updating(){
 
 #Helper function to write env files to it's instance directory name in 
 write_env_to_file(){
-
-    # root_dest=""
-    root_dest="./new-env-setups"
-
+    
     if [ "$1" = "" ]; then
         echo "Missing write data"
         exit -1
@@ -250,10 +247,7 @@ write_env_to_file(){
 
     e_type=$2
 
-    #if root_dest = "" then  EXIT -1
-
     if  ! $(test -d "$root_dest/$3/$e_type") ;
-    # if  ! (( $(test -d "$env_instance_path") )) ;
     then
         mkdir -p "$root_dest/$3/$e_type"
     fi

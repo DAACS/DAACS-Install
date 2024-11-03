@@ -12,10 +12,10 @@ Instructions:
 
 qserver_instance_helper(){
 
-    instance_type=$1
-    install_env_path=$2 #/root/DAACS-Install/DAACS-Install_Defaults
-    environment_type=$3
-    install_root=$4 #/root/DAACS-Install
+    instance_type="${1}"
+    install_env_path="${2}"
+    environment_type="${3}"
+    install_root="${4}"
 
     printf "\nQ server instance....\n"
 
@@ -58,9 +58,10 @@ create_qserver_instance_helper(){
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
 
     # Create env files for install
-    run_fillout_program "$env_to_create"
+    run_fillout_program "$env_to_create" "$root_dest"
 
     # get code from repo
     if [ "$environment_type" = "prod" ]; then
@@ -74,8 +75,6 @@ create_qserver_instance_helper(){
 
     # # # install node modules for q server
     get_node_modules "$base_path_folder_destination/$install_folder_destination" 
-
-    root_dest="$install_root/new-env-setups"
 
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
     if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
