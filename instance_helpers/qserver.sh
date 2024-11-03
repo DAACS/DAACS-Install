@@ -136,8 +136,8 @@ create_qserver_instance_helper(){
 update_qserver_instance_helper(){
     printf "\nUPDATING Q server instance....\n"
 
-    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
-    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then

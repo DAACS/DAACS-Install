@@ -54,7 +54,7 @@ web_instance_helper(){
     "r") 
         refresh_service_name=$(ask_read_question_or_try_again "service name: " false)
         stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
-        quiet_mode=$(ask_read_question_or_try_again "Output? : " false)
+        quiet_mode=$(ask_read_question_or_try_again "Output?: " false)
 
             refresh_web_instance_helper "$install_root" "$install_folder_destination" "$refresh_service_name" "$stagger_count" "$quiet_mode"
     ;;
@@ -188,9 +188,9 @@ update_web_instance_helper(){
   
     printf "\nUpdating Web instance....\n"
 
-    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o : " true)
-    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
-    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
+    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o: " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
