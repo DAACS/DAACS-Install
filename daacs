@@ -38,25 +38,25 @@ Select an option: ")
     ;;
 
     "2")
+        source "$current_dir/instance_helpers/basic.sh"
 
         home_directory=""
         if [ -z "${HOME}" ];
         then 
             home_directory="/home/$USER"
-            echo "export HOME=${home_directory}" >> $HOME/.bashrc
+                sed -i "1s/^/export HOME=${home_directory}\n/" "$home_directory/.bashrc"
             else
             home_directory="$HOME"
-
         fi 
 
         if grep -wq "$current_dir" "$home_directory/.bashrc"
         then
-            $(pretty_read "${Color_Off}${Red}daacs${Color_Off} command already installed...")
+            $(pretty_print "${Color_Off}${Red}daacs${Color_Off} command already installed...")
         else
         
-            $(pretty_read "${Color_Off}${Red}daacs${Color_Off} command installed now...")
-            command="PATH=$current_dir:$PATH"
-            echo "$command" >> $HOME/.bashrc
+            command="PATH=$(escape_backslash "$current_dir:${PATH}")"
+            sed -i -e "1s/^/$command\n/" "$home_directory/.bashrc"
+            pretty_print "${Color_Off}${Red}daacs${Color_Off} command installed now..."
 
         fi
     ;;
