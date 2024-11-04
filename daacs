@@ -158,7 +158,7 @@ else
     elif [[ "$parameterQ" == "false" ]]; then
         parameterQ=false
     else
-        parameterQ=true
+        parameterQ=false
     fi
 
     # Begin script in case all parameters are correct
@@ -170,10 +170,3 @@ else
         restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
     fi
 fi
-
-
-
-exit 1
-
-
-
