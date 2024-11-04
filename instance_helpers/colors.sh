@@ -77,7 +77,7 @@ On_IWhite='\033[0;107m'   # White
 pretty_print(){
 
     text=$1
-    echo "echo ${text}"
+    echo "$(echo -e ${text})"
 }   
 
 
