@@ -19,7 +19,10 @@ is_array_empty() {
 
 #Splits string value 
 split_string_to_array(){
-    IFS=' ' read -ra ADDR <<< "$1"
+    string_val="$1"
+    delimiter="$2"
+
+    IFS="$delimiter" read -ra ADDR <<< "$string_val"
     echo "${ADDR[@]}"
 }
 
@@ -141,6 +144,19 @@ fill_out_env_file_for_updating(){
 
 
     done
+}
+
+replace_env_variable_in_file(){
+
+    i="$1"
+    user_input="$2"
+    input_file="$3"
+
+    unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
+    value1=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$i")
+    value2=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$user_input")
+    string_reaplce_in_file_expression="s/${value1}/${value2}/g"
+    sed -i -E -e "$string_reaplce_in_file_expression" $input_file
 }
 
 get_env_and_equal(){
@@ -400,4 +416,192 @@ run_docker_with_envs(){
     catted+=" docker compose -f ${webserver_docker_file_to} up -d"      
     output=$(eval "$catted")
 
+}
+
+get_services_ids_by_service_name(){
+    service_name="$1"
+    ids=$(docker ps --filter "label=com.docker.compose.service=$service_name" --format "{{.ID}}" | awk '{printf "%s ", $0}')
+    echo "$ids"
+}
+
+
+add_services_service_file(){
+
+    service_name="$1"
+    me=$(get_services_ids_by_service_name "$service_name")
+    service_name=$(echo $service_name | tr 'a-z' 'A-Z')
+    service_entry="$service_name=$me"
+    service_touch_file_dir="$2"
+
+    touch "$service_touch_file_dir"
+
+    echo "$service_entry" >> $service_touch_file_dir
+
+}
+
+update_services_ids_in_service_file(){
+    file_dir="$1"
+    readarray -t arr < $file_dir
+
+    #loop through service file and get left hand side without equal and lowercase
+    for i in "${arr[@]}"; do
+        user_input=""
+ 
+        unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
+        unescape_backslash_new_env_equal=${unescape_backslash_new_env_equal::-1}
+        unescape_backslash_new_env_equal=$(echo $unescape_backslash_new_env_equal | tr 'A-Z' 'a-z')
+        #get ids for each service and replace value
+        ids=$(get_services_ids_by_service_name "$unescape_backslash_new_env_equal")
+        #replace values in service file
+        replace_env_variable_in_file "$i" "$ids" "$file_dir"
+    done
+
+}
+
+restart_services_with_stagger_by_service_name(){
+    service_name="$1"
+    stagger_count="$2"
+    ids=$(get_services_ids_by_service_name "$service_name")
+    IFS=" " read -ra ADDR <<< "$ids"
+    length=$(echo ${#ADDR[@]})
+    reset_string=""
+    quite_mode="${3}"
+    quite_mode_command=""
+    
+    if [ "$quite_mode" == true ]; then        
+        quite_mode_command=">/dev/null 2>&1"
+    fi
+
+    
+    if [ $length -eq 0 ]; then
+        printf "No services to restart...\n"
+        return
+    fi
+
+    if [ $stagger_count -gt $length ]; then
+        printf "Stagger cant be higher than amount of processess... setting to 1...\n"
+        stagger_count=1
+    fi
+        
+    if [ $length -eq 1 ]; then
+        restart_server_string="docker restart ${ADDR[0]} $quite_mode_command"
+            # echo "$restart_server_string"
+            eval "$restart_server_string"
+
+    else
+        
+        restart_server_string=""
+        for ((i=0; i<$length; i+=$stagger_count))
+        do
+            server_list=""
+            start_here=0
+            
+            if [ $stagger_count -gt 1 ]; then 
+                start_here=$(( $i +  $stagger_count - 1  ))   
+
+                for ((i2=$start_here ; i2>=$i; i2--))
+                do
+                    server_list="${ADDR[$i2]} $server_list"
+                done
+            else  
+               
+                server_list="$server_list ${ADDR[$i]}"
+                
+            fi
+            if [ "$server_list" != "" ]; then
+                restart_server_string="docker restart ${server_list} $quite_mode_command"
+                # echo "$restart_server_string"
+                eval "$restart_server_string"
+            fi
+        done
+    fi
+}
+
+get_docker_service_count(){
+    command_count=$(docker ps --filter "label=com.docker.compose.service=$service_name" | wc -l)
+    command_count=$(($command_count - 1))
+    echo "$command_count"
+}
+
+ask_read_question_or_try_again(){
+
+    question_text="$1"
+    try_again="$2"
+ 
+    read -p "$question_text" service_name
+
+    if [[ "$service_name" = ""  &&  $try_again == true ]]; then
+        service_name=$(ask_read_question_or_try_again "$1"  "$try_again")
+    fi
+
+    echo $service_name
+
+}
+
+
+ask_for_docker_service_and_check(){
+
+    question_text="$1"
+    try_again=true
+ 
+    service_name=$(ask_read_question_or_try_again "$question_text" "$try_again")
+
+    service_count=$(get_docker_service_count "$service_name")
+    
+    if [ "$service_count" -gt 0  ]; then
+        service_name=$(ask_for_docker_service_and_check "$1")
+    fi 
+    echo $service_name
+
+
+}
+
+does_dir_exsist(){
+
+    update_dir="$1"
+    if [ -d "$update_dir" ]; then
+        echo true
+    else
+        echo false
+    fi
+}
+
+refresh_instance_helper(){
+
+    service_name="$3"
+    s_file_dir="${2}"
+    stagger_amount="$4"
+    q_mode="$5"
+
+    if [ "$stagger_amount" == "" ]; then 
+        stagger_amount=1
+    fi
+
+    if [ "$q_mode" == "" ]; then 
+        q_mode=true
+    fi
+    
+    if [ "$service_name" != "" ]; then 
+        
+        entry=`cat $s_file_dir/$service_name`
+        unescape_backslash_new_env_equal=$(get_env_and_equal "$entry")
+        unescape_backslash_new_env_equal=${unescape_backslash_new_env_equal::-1}
+        unescape_backslash_new_env_equal=$(echo $unescape_backslash_new_env_equal | tr 'A-Z' 'a-z')
+        restart_services_with_stagger_by_service_name  "$unescape_backslash_new_env_equal" "$stagger_amount" "$q_mode"
+        return
+    fi
+
+    for entry in "$s_file_dir"/*
+    do
+        
+        readarray -t arr < $entry
+        #loop through service file and get left hand side without equal and lowercase
+        for i in "${arr[@]}"; do
+            user_input=""
+            unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
+            unescape_backslash_new_env_equal=${unescape_backslash_new_env_equal::-1}
+            unescape_backslash_new_env_equal=$(echo $unescape_backslash_new_env_equal | tr 'A-Z' 'a-z')
+            restart_services_with_stagger_by_service_name  "$unescape_backslash_new_env_equal"  "$stagger_amount" "$q_mode"
+        done
+    done
 }

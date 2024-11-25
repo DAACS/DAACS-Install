@@ -1,5 +1,4 @@
 #!/bin/bash
-
 current_dir="$(dirname $0)"
 
 if [ "$current_dir" = "." ]; then 
@@ -14,7 +13,8 @@ main(){
         Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exit\n
         1 - Install system dependencies\n
         2 - Create system users\n
-        3 - Create/Update instance\n
+        3 - Create/Update/Refresh instance\n
+        4 - Reset service\n
         Select an option:  ")
 
     if [ "$step1_option" = "" ]; then
@@ -47,13 +47,89 @@ main(){
 
     ;;
 
+    "4") 
+        clear
+        source "$current_dir/instance_helpers/basic.sh"
+    
+        service_name=$(ask_read_question_or_try_again "Service name? : " true)
+        stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once? : " true)
+
+        if [[ ! $stagger_amount =~ ^[0-9]+$ ]] ; then
+            
+            printf "Stagger amount must be a number\n"
+        else
+            restart_services_with_stagger_by_service_name "$service_name" "$stagger_amount"
+        fi
+
+        
+    ;;
+
     *)
         echo "Invalid option"
         main
 
     ;;
     esac
+    main
+
 }
 
-main
+
+
+helpFunction()
+{
+   echo ""
+   echo "Usage: $0 -f refresh -s service_name -a 2 -q true "
+   echo -e "\t-f Function to run (refresh)"
+   echo -e "\t-s Service name to run function on"
+   echo -e "\t-a The amount of times to sequence function"
+   echo -e "\t-q Quite mode: (Output or no output )"
+   exit 1 # Exit script after printing help
+}
+
+while getopts "f:s:a:q" opt
+do
+   case "$opt" in
+      f ) parameterF="$OPTARG" ;;
+      s ) parameterS="$OPTARG" ;;
+      a ) parameterA="$OPTARG" ;;
+      q ) parameterQ="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+#example ./daacs -f refresh -s testweb -a 2
+if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
+then
+    main
+else
+
+    if [[ "$parameterA" == "" ]]; then
+        parameterA=1
+    fi
+
+
+    if [[ "$parameterQ" == "true" ]]; then
+        parameterQ=true
+    elif [[ "$parameterQ" == "false" ]]; then
+        parameterQ=false
+    else
+        parameterQ=true
+    fi
+
+    # Begin script in case all parameters are correct
+    if [[ "$parameterS" == "" ]]  ; then
+        helpFunction
+    else
+        printf "Running reset on ${parameterS} \n"
+        source "$current_dir/instance_helpers/basic.sh"
+        restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
+    fi
+fi
+
+
+
+exit 1
+
+
 

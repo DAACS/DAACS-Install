@@ -17,24 +17,12 @@ qserver_instance_helper(){
     environment_type=$3
     install_root=$4 #/root/DAACS-Install
 
-    printf "\nCREATING Q server instance....\n"
+    printf "\nQ server instance....\n"
 
-    read -p "Enter absolute path destination for install of DAACS: " base_path_folder_destination
-    read -p "Enter folder destination for install of DAACS: " install_folder_destination
-    read -p "(n)ew or (u)pdate or (r)efresh: " new_or_update
+    base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
+    install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
     
-    if [ "$base_path_folder_destination" = "" ]; 
-    then
-        echo "Please choose an base install destination."
-        exit 1
-    fi
-
-    if [ "$install_folder_destination" = "" ]; 
-    then
-        echo "Please choose an install destination."
-        exit 1
-    fi
-
     case "$new_or_update" in
     "n") 
         
@@ -43,7 +31,15 @@ qserver_instance_helper(){
 
     "u") 
 
-        update_qserver_instance_helper
+        does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
+        does_dir_env=$(does_dir_exsist "$install_root/new-env-setups/$install_folder_destination")
+
+        if [[ $does_dir_exist == true && $does_dir_env == true ]]; then
+            update_qserver_instance_helper
+        else
+            echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
+        fi
+
     ;;
     
     *)
@@ -54,19 +50,10 @@ qserver_instance_helper(){
 
 create_qserver_instance_helper(){
 
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " mongo_service_name
-    read -p "Enter name for q server service (todo check for clashes before moving on): " qserver_service_name
+    printf "\nCREATING Q server instance....\n"
 
-    if [ "$mongo_service_name" = "" ]; then
-        echo "Cannot leave docker mongo service name empty."
-        exit -1
-    fi
-
-    if [ "$qserver_service_name" = "" ]; then
-        echo "Cannot leave docker Q service name empty."
-        exit -1
-    fi
-
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    qserver_service_name=$(ask_for_docker_service_and_check "Enter name for Q server service : " )
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
@@ -147,9 +134,10 @@ create_qserver_instance_helper(){
 
 
 update_qserver_instance_helper(){
+    printf "\nUPDATING Q server instance....\n"
 
-    read -p "Should I get latest code? (y)es or (n)o : " should_get_latest
-    read -p "Should I update envs? (y)es or (n)o : " should_update_envs
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then

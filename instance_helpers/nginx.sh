@@ -8,14 +8,7 @@ create_nginx_instance_helper(){
     install_root=$4 #/root/DAACS-Install
 
     printf "\nCREATING nginx instance....\n"
-
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " nginx_service_name
-
-
-    if [ "$nginx_service_name" = "" ]; then
-        echo "Cannot leave docker nginx service name empty."
-        exit -1
-    fi
+    nginx_service_name=$(ask_for_docker_service_and_check "Enter name for nginx service : " )
 
     default_email_input=""
 
@@ -29,7 +22,6 @@ create_nginx_instance_helper(){
         fi
     fi
 
-    # # env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$1")
     root_dest="$install_root/new-env-setups"

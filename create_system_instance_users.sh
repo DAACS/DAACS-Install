@@ -1,22 +1,45 @@
 #!/bin/bash 
+source "$current_dir/instance_helpers/basic.sh"
 
-function check_if_dir_exsist(){
+user_data_dir="$current_dir/user-data"
 
-  if test -d $1; then
-    echo true
-  fi
+function check_if_sudo_is_in_group(){
+
+  groups="$1"
+  IFS=',' read -ra ADDR <<< "$groups"
+
+  has_sudo=false
+  for i in "${ADDR[@]}"; do  
+    if [ "$i" = "sudo" ]; then
+      has_sudo=true
+      break;
+    fi
+  done
+
+  echo "$has_sudo"
 }
 
-function change_users_main_group(){
-   usermod -g $1 $2
-}
-
-function create_user_and_save_keys(){
-  #$1 - username
+function create_user(){
   
-  USERNAME=$1
+  instance="$1" 
+  accesstoken="$2" 
+  accesssecret="$3"
+  space="$4"
+  region="$5"
+  USERNAME="$6" 
+  groups="$7"
+
   myBaseDir="/home/$USERNAME"
-  useradd -m -d $myBaseDir $USERNAME -G docker,sudo,root
+  group_add=""
+  is_sudo=false
+
+  if [ "$groups" != "" ]; then
+    group_add="-G $groups"
+    is_sudo=$(check_if_sudo_is_in_group "$groups")
+  fi
+
+  useradd -m -d $myBaseDir $USERNAME $group_add
+  usermod -s /bin/bash $USERNAME
   mkdir "$myBaseDir/.ssh"
   touch "$myBaseDir/.ssh/authorized_keys"
   ssh-keygen -t ed25519 -f $USERNAME -f "$myBaseDir/.ssh/${USERNAME}_rsa" -N ''
@@ -24,10 +47,17 @@ function create_user_and_save_keys(){
   chown "$USERNAME:$USERNAME" "$myBaseDir/.ssh" "$myBaseDir/.ssh/authorized_keys" "$myBaseDir/.ssh/${USERNAME}_rsa.pub" "$myBaseDir/.ssh/${USERNAME}_rsa"
   zipFileName="${USERNAME}_keys.zip"
 
-  cd "$myBaseDir/.ssh" && echo $PWD && ls -l && zip "${zipFileName}" "./${USERNAME}_rsa" "./${USERNAME}_rsa.pub" && mv "${zipFileName}" /root/ && cd /root/
+  cd "$myBaseDir/.ssh" && echo $PWD && ls -l && zip "${zipFileName}" "./${USERNAME}_rsa" "./${USERNAME}_rsa.pub" && mv "${zipFileName}" "$user_data_dir"
 
+  #add this only for sudo group users
+  if [ "$is_sudo" == true ]; then
+      echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+  fi
+
+  send_keys_to_digitalocean "$USERNAME" "$instance"  "$accesstoken" "$accesssecret" "$space" "$region"
 
 }
+
 
 
 function send_keys_to_digitalocean(){
@@ -40,7 +70,7 @@ function send_keys_to_digitalocean(){
 
   USERNAME=$1
   zipFileName="${USERNAME}_keys.zip"
-
+  cd "$user_data_dir"
   # Step 1: Define the parameters for the Space you want to upload to.
   SPACE="$5" # Find your endpoint in the control panel, under Settings.
   REGION="$6" # Must be "us-east-1" when creating new Spaces. Otherwise, use the region in your endpoint (for example, nyc3).
@@ -65,45 +95,27 @@ function send_keys_to_digitalocean(){
       -H "Authorization: AWS ${KEY}:$signature" \
       "https://$space.${REGION}.digitaloceanspaces.com$space_path$file"
 
-
-  rm "${zipFileName}"
 }
 : '
 
 $1 - users to create
-$2 - instance domain
-$3 - digitalocean access token
-$4 - digitalocean access secret 
-$5 - digitalocean space
-$6 - digitalocean region
-$7 - web management group
+$2 - users to create
+$3 - instance domain
+$4 - digitalocean access token
+$5 - digitalocean access secret 
+$6 - digitalocean space
+$7 - digitalocean region
 
 '
+#for jenkins docker,sudo
 
-read -p "Enter your users comma seperated no spaces. First user is for mantanice, second is for jenkins : " users
-read -p "Enter your instance domain ex(www.website.com): " instance
-read -p "Enter your digitalocean access token: " accesstoken
-read -p "Enter your digitalocean access secret: " accesssecret
-read -p "Enter your digitalocean space: " space
-read -p "Enter your digitalocean access region: " region
-read -p "Web management group: " groups_name
+username=$(ask_read_question_or_try_again "Enter username : " true)
+groups=$(ask_read_question_or_try_again "Enter your users groups : " true)
+instance=$(ask_read_question_or_try_again "Enter your instance domain ex(www.website.com): " true)
+accesstoken=$(ask_read_question_or_try_again "Enter your digitalocean access token: " true)
+accesssecret=$(ask_read_question_or_try_again "Enter your digitalocean access secret: " true)
+space=$(ask_read_question_or_try_again "Enter your digitalocean space: " true)
+region=$(ask_read_question_or_try_again "Enter your digitalocean access region: " true)
 
-# create web directories
-mkdir -p /var/www/html
 
-# # #create Web manangement group
-groupadd -f ${groups_name}
-
-# # Split the string by comma and store the result in an array
-IFS=',' read -ra ADDR <<< "$users"
-
-# # Print each element of the array
-for i in "${ADDR[@]}"; do
-  create_user_and_save_keys "$i"
-  send_keys_to_digitalocean "$i" "$instance" "$accesstoken" "$accesssecret" "$space" "$region"
-  change_users_main_group  "$groups_name" "$i"
-
-done
-
-# #I need to change chown /var/www/html to jenkinscdci:webmanagement 
-chown -R "${ADDR[0]}":${groups_name} /var/www
+create_user "$instance" "$accesstoken" "$accesssecret" "$space" "$region" "$username" "$groups"

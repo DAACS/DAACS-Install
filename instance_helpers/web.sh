@@ -16,27 +16,15 @@ web_instance_helper(){
     environment_type="${3}"
     install_root="${4}"
 
-    printf "\nCREATING Web instance....\n"
+    printf "\nWeb instance....\n"
 
-    read -p "Enter absolute path destination for install of DAACS: " base_path_folder_destination
-    read -p "Enter folder destination for install of DAACS: " install_folder_destination
-    read -p "Enter folder name for install of DAACS web server (Relative to install path): " web_server_path
-    read -p "Enter folder name for install of DAACS frontend (Relative to install path): " frontend_path
-    read -p "(n)ew or (u)pdate or (r)efresh: " new_or_update
-    
-    if [ "$base_path_folder_destination" = "" ]; 
-    then
-        echo "Please choose an base path destination."
-        exit 1
-    fi
-
-        
-    if [ "$install_folder_destination" = "" ]; 
-    then
-        echo "Please choose an install destination."
-        exit 1
-    fi
-    
+    base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
+    install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
+    web_server_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS web server (Relative to install path): " false)
+    frontend_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS frontend (Relative to install path): " false)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate or (r)efresh: " true)
+  
+  
     if [ "$web_server_path" = "" ]; 
     then
         web_server_path="DAACS-Webserver"
@@ -46,18 +34,31 @@ web_instance_helper(){
         frontend_path="DAACS-Frontend"
     fi
 
-
     case "$new_or_update" in
     "n") 
         
-        create_web_instance_helper
+        create_web_instance_helper 
     ;;
 
     "u") 
+        does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
+        does_dir_env=$(does_dir_exsist "$install_root/new-env-setups/$install_folder_destination")
 
-        update_web_instance_helper
+        if [[ $does_dir_exist == true && $does_dir_env == true ]]; then
+            update_web_instance_helper
+        else
+            echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
+        fi
     ;;
     
+    "r") 
+        refresh_service_name=$(ask_read_question_or_try_again "service name: " false)
+        stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
+        quiet_mode=$(ask_read_question_or_try_again "Output? : " false)
+
+            refresh_web_instance_helper "$install_root" "$install_folder_destination" "$refresh_service_name" "$stagger_count" "$quiet_mode"
+    ;;
+
     *)
         echo "Invalid option"
     ;;
@@ -67,22 +68,15 @@ web_instance_helper(){
 
 create_web_instance_helper(){
 
+    printf "\nCREATING Web instance....\n"
+
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
 
-    read -p "Enter name for mongo service (todo check for clashes before moving on): " mongo_service_name
-    read -p "Enter name for web service (todo check for clashes before moving on): " webserver_service_name
-
-       if [ "$mongo_service_name" = "" ]; then
-        echo "Cannot leave docker mongo service name empty."
-        exit -1
-    fi
-
-    if [ "$webserver_service_name" = "" ]; then
-        echo "Cannot leave docker web service name empty."
-        exit -1
-    fi
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
 
     # Create env files for install
     run_fillout_program "$env_to_create"
@@ -102,7 +96,6 @@ create_web_instance_helper(){
     # # # # # install node modules for frontend
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 
-    root_dest="$install_root/new-env-setups"
 
     # # build frontend
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
@@ -113,7 +106,7 @@ create_web_instance_helper(){
         mkdir -p "$root_dest/$install_folder_destination/docker/"
     fi
 
-    # # filename - enviroment variables for webserver
+    # filename - enviroment variables for webserver
     env_webserver_file="${absolute_dir}webserver"
     # # filename - enviroment variables for webserver mongo
     env_webserver_mongo_file="${absolute_dir}webserver-mongo"
@@ -122,6 +115,8 @@ create_web_instance_helper(){
     mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
+
+    todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"
@@ -136,7 +131,7 @@ create_web_instance_helper(){
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
-    # # Build frontend
+    # Build frontend
     env_oauth_file="${absolute_dir}oauth"
     api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
@@ -151,7 +146,6 @@ create_web_instance_helper(){
 
     cd "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
     eval "$catted"  
-
 
     docker_file=""
 
@@ -168,9 +162,6 @@ create_web_instance_helper(){
         ;;
     esac
 
-    webserver_docker_file_to=""
-
-    #new one need to update for web
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#webserver_service_name/$webserver_service_name/g" $docker_file)
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
@@ -186,13 +177,20 @@ create_web_instance_helper(){
 
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
 
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+    add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
+    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+
 }
 
 update_web_instance_helper(){
+  
+    printf "\nUpdating Web instance....\n"
 
-    read -p "Should I rebuild frontend? (y)es or (n)o : " should_rebuild_frontend
-    read -p "Should I get latest code? (y)es or (n)o : " should_get_latest
-    read -p "Should I update envs? (y)es or (n)o : " should_update_envs
+    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o : " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
@@ -274,4 +272,22 @@ update_web_instance_helper(){
 
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
+    
+}
+
+refresh_web_instance_helper(){
+
+    root_dest="$1/new-env-setups"
+    services_file_dir="$root_dest/$2/services"
+    service_name="$3"
+    count="$4"
+    q_mode="$5"
+
+    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
+
 }
