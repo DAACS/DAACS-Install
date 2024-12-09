@@ -45,16 +45,17 @@ create_backup_instance_helper(){
 
     printf "\nCREATING backup instance....\n"
 
-    backup_service_name=$(ask_for_docker_service_and_check "Enter name for backup service : " )
+    backup_service_name=$(ask_for_docker_service_and_check "Enter name for backup service: " )
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
     
     # # # Create env files for install but only if asked - todo
     run_fillout_program "$env_to_create"
 
-    backup_env_file_path="$install_root/new-env-setups/$backup_service_name/$environment_type_defintion/$environment_type_defintion-"
+    backup_env_file_path="$install_root/new-env-setups/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     mongo_env_file_path="$install_root/new-env-setups/$folder_instance/$environment_type_defintion/$environment_type_defintion-"
 
     # get code from repo
@@ -85,8 +86,6 @@ create_backup_instance_helper(){
         ;;
     esac
 
-    root_dest="$install_root/new-env-setups"
-
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
     if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
     then
@@ -103,6 +102,11 @@ create_backup_instance_helper(){
 
     env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} "
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
+    
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+    add_services_service_file "$backup_service_name" "$services_file_dir/$backup_service_name"
+
 }   
 
 
@@ -112,8 +116,8 @@ update_backup_instance_helper(){
 
     printf "\nUPDATING backup instance....\n"
 
-    read -p "Should I get latest code? (y)es or (n)o : " should_get_latest
-    read -p "Should I update envs? (y)es or (n)o : " should_update_envs
+    read -p "Should I get latest code? (y)es or (n)o: " should_get_latest
+    read -p "Should I update envs? (y)es or (n)o: " should_update_envs
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
@@ -161,5 +165,11 @@ update_backup_instance_helper(){
 
     env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} "
     run_docker_with_envs "$backup_docker_file_to" "$env_string"
+
+   services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
 
 }

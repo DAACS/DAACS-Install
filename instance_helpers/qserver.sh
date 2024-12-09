@@ -12,10 +12,10 @@ Instructions:
 
 qserver_instance_helper(){
 
-    instance_type=$1
-    install_env_path=$2 #/root/DAACS-Install/DAACS-Install_Defaults
-    environment_type=$3
-    install_root=$4 #/root/DAACS-Install
+    instance_type="${1}"
+    install_env_path="${2}"
+    environment_type="${3}"
+    install_root="${4}"
 
     printf "\nQ server instance....\n"
 
@@ -58,6 +58,7 @@ create_qserver_instance_helper(){
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
 
     # Create env files for install
     run_fillout_program "$env_to_create"
@@ -74,8 +75,6 @@ create_qserver_instance_helper(){
 
     # # # install node modules for q server
     get_node_modules "$base_path_folder_destination/$install_folder_destination" 
-
-    root_dest="$install_root/new-env-setups"
 
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
     if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
@@ -109,7 +108,7 @@ create_qserver_instance_helper(){
         ;;
     esac
 
-    webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#qserver_service_name/$qserver_service_name/g" $docker_file)
+    qserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ; s/#qserver_service_name/$qserver_service_name/g" $docker_file)
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
@@ -128,7 +127,13 @@ create_qserver_instance_helper(){
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
-    run_docker_with_envs "$webserver_docker_file_to" "$env_string"
+    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+
+    add_services_service_file "$qserver_service_name" "$services_file_dir/$qserver_service_name"
+    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 }
 
@@ -136,8 +141,8 @@ create_qserver_instance_helper(){
 update_qserver_instance_helper(){
     printf "\nUPDATING Q server instance....\n"
 
-    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
-    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
@@ -183,7 +188,7 @@ update_qserver_instance_helper(){
     esac
 
     
-    webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
@@ -196,6 +201,12 @@ update_qserver_instance_helper(){
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
-    run_docker_with_envs "$webserver_docker_file_to" "$env_string"
+    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
 
 }

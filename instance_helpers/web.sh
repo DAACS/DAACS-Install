@@ -22,7 +22,7 @@ web_instance_helper(){
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
     web_server_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS web server (Relative to install path): " false)
     frontend_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS frontend (Relative to install path): " false)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate or (r)efresh: " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
   
   
     if [ "$web_server_path" = "" ]; 
@@ -50,14 +50,6 @@ web_instance_helper(){
             echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
         fi
     ;;
-    
-    "r") 
-        refresh_service_name=$(ask_read_question_or_try_again "service name: " false)
-        stagger_count=$(ask_read_question_or_try_again "stagger count: " false)
-        quiet_mode=$(ask_read_question_or_try_again "Output? : " false)
-
-            refresh_web_instance_helper "$install_root" "$install_folder_destination" "$refresh_service_name" "$stagger_count" "$quiet_mode"
-    ;;
 
     *)
         echo "Invalid option"
@@ -70,18 +62,19 @@ create_web_instance_helper(){
 
     printf "\nCREATING Web instance....\n"
 
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
 
-    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
-    webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
 
     # Create env files for install
     run_fillout_program "$env_to_create"
 
-    # # # get code from repo
+    # # # # get code from repo
     if [ "$environment_type" = "prod" ]; then
         clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Website.git"
     fi
@@ -188,9 +181,9 @@ update_web_instance_helper(){
   
     printf "\nUpdating Web instance....\n"
 
-    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o : " true)
-    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o : " true)
-    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o : " true)
+    should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o: " true)
+    should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
@@ -278,16 +271,4 @@ update_web_instance_helper(){
         update_services_ids_in_service_file "$entry"
     done
     
-}
-
-refresh_web_instance_helper(){
-
-    root_dest="$1/new-env-setups"
-    services_file_dir="$root_dest/$2/services"
-    service_name="$3"
-    count="$4"
-    q_mode="$5"
-
-    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
-
 }

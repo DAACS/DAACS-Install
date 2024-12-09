@@ -123,18 +123,6 @@ fill_out_env_file_for_updating(){
     for i in "${arr[@]}"; do
         user_input=""
 
-        #OLD WAY
-        # read -p "Enter value for $i: " user_input
-        # i_escaped=$(escape_backslash "${i}")
-        # user_input_escaped=$(escape_backslash "${user_input}")
-        # expression="s/=[^][\w+]*/=${user_input_escaped}/g"
-        # new_new=$(echo $i | sed -E "${expression}")
-        # new_new_escaped=$(escape_backslash "${new_new}")
-        # string_reaplce_in_file_expression="s/${i_escaped}/${new_new_escaped}/g"
-        # sed -i -E "$string_reaplce_in_file_expression" $input_file
-
-        #NEW WAY 
-
         read -p "Enter value for $i: " user_input
         unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
         value1=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$i")
@@ -194,24 +182,8 @@ unescape_backslash(){
 
 escape_backslash(){
 
-    # echo $(echo "${1}" | sed 's/\//\\\//g')
-    # echo $(echo "${1}" | sed -e "s/'/'\\\\''/g; 1s/^/'/; \$s/\$/'/")
-    # echo $(echo "${1}" | sed -e 's/[[:alpha:]]/\\&/g')
-    # echo  "$1"
-
     echo $(echo "${1}" | sed -E -e 's/\+|\/|\*|\!|\@|\#|\$|\%|\|\*&|\(|\)|\_|\-|\=|\[|\]|\{|\}|\;|\’|\”|\,|\\<|\\>|\/|\?/\\&/g')
 }
-
-# |\<|\>|\/|\?
-
-
-    # # echo $(echo "${1}" | sed 's/\//\\\//g')
-    # echo $(echo "${1}" | sed -e 's/./\\&/g; 1{$s/^$/""/}; 1!s/^/"/; $!s/$/"/')
-    # # echo $(echo "${1}" | sed -e " s/\[^\\w\]/ ")
-    # # echo $(echo "${1}" | sed -e 's/[[:alpha:]]/\\&/g')
-    # # echo $(echo "${1}" | sed -e "s/!\"\#\$\%\&\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\{\|\}\~./\\&/g")
-
-
 
 #Helper function to get env files based upon instance type
 get_env_files_for_editing(){
@@ -257,10 +229,7 @@ get_env_files_for_updating(){
 
 #Helper function to write env files to it's instance directory name in 
 write_env_to_file(){
-
-    # root_dest=""
-    root_dest="./new-env-setups"
-
+    
     if [ "$1" = "" ]; then
         echo "Missing write data"
         exit -1
@@ -278,10 +247,7 @@ write_env_to_file(){
 
     e_type=$2
 
-    #if root_dest = "" then  EXIT -1
-
     if  ! $(test -d "$root_dest/$3/$e_type") ;
-    # if  ! (( $(test -d "$env_instance_path") )) ;
     then
         mkdir -p "$root_dest/$3/$e_type"
     fi
@@ -293,6 +259,19 @@ write_env_to_file(){
     then 
         printf "$1" > "$destdir"
     fi
+
+}
+
+
+refresh_all_services_in_service_helper(){
+
+    root_dest="$1/new-env-setups"
+    services_file_dir="$root_dest/$2/services"
+    service_name="$3"
+    count="$4"
+    q_mode="$5"
+
+    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
 
 }
 
@@ -587,7 +566,7 @@ refresh_instance_helper(){
     fi
 
     if [ "$q_mode" == "" ]; then 
-        q_mode=true
+        q_mode=false
     fi
     
     if [ "$service_name" != "" ]; then 

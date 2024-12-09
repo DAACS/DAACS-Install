@@ -19,6 +19,7 @@ function check_if_sudo_is_in_group(){
   echo "$has_sudo"
 }
 
+
 function create_user(){
   
   instance="$1" 
@@ -38,27 +39,29 @@ function create_user(){
     is_sudo=$(check_if_sudo_is_in_group "$groups")
   fi
 
-  useradd -m -d $myBaseDir $USERNAME $group_add
-  usermod -s /bin/bash $USERNAME
-  mkdir "$myBaseDir/.ssh"
-  touch "$myBaseDir/.ssh/authorized_keys"
-  ssh-keygen -t ed25519 -f $USERNAME -f "$myBaseDir/.ssh/${USERNAME}_rsa" -N ''
-  cat "$myBaseDir/.ssh/${USERNAME}_rsa.pub" >> "$myBaseDir/.ssh/authorized_keys" 
-  chown "$USERNAME:$USERNAME" "$myBaseDir/.ssh" "$myBaseDir/.ssh/authorized_keys" "$myBaseDir/.ssh/${USERNAME}_rsa.pub" "$myBaseDir/.ssh/${USERNAME}_rsa"
+  sudo useradd -m -d $myBaseDir $USERNAME $group_add
+  sudo usermod -s /bin/bash $USERNAME
+  sudo mkdir "$myBaseDir/.ssh"
+  sudo touch "$myBaseDir/.ssh/authorized_keys"
+  sudo ssh-keygen -t ed25519 -f $USERNAME -f "$myBaseDir/.ssh/${USERNAME}_rsa" -N ''
+  sudo chown "$USERNAME:$USERNAME" "$myBaseDir/.ssh" "$myBaseDir/.ssh/authorized_keys" "$myBaseDir/.ssh/${USERNAME}_rsa.pub" "$myBaseDir/.ssh/${USERNAME}_rsa"
+
   zipFileName="${USERNAME}_keys.zip"
 
-  cd "$myBaseDir/.ssh" && echo $PWD && ls -l && zip "${zipFileName}" "./${USERNAME}_rsa" "./${USERNAME}_rsa.pub" && mv "${zipFileName}" "$user_data_dir"
+  run_as_other_user="cd ${myBaseDir}/.ssh && cat $myBaseDir/.ssh/${USERNAME}_rsa.pub >> $myBaseDir/.ssh/authorized_keys && zip /home/$USERNAME/${zipFileName} ./${USERNAME}_rsa ./${USERNAME}_rsa.pub"
+  sudo -u $USERNAME sh -c "$run_as_other_user"
+  sudo mv "$myBaseDir/${zipFileName}" "$user_data_dir"
 
-  #add this only for sudo group users
+  # add this only for sudo group users
   if [ "$is_sudo" == true ]; then
-      echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      
+    echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers > /dev/null
+
   fi
 
   send_keys_to_digitalocean "$USERNAME" "$instance"  "$accesstoken" "$accesssecret" "$space" "$region"
 
 }
-
-
 
 function send_keys_to_digitalocean(){
   #$1 - username
