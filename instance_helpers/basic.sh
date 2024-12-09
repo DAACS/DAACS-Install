@@ -630,11 +630,11 @@ get_web_server_env_values(){
 
     absolute_dir="${1}" 
     file_name="${2}" 
-    my_array="${3}"
-
+    local -n arr=$3
     env_file="${absolute_dir}${file_name}"
+
      declare -a env_array
-    for i in "${my_array[@]}"; do
+    for i in "${arr[@]}"; do
         value=$(get_environment_value_from_file_by_env_name "${env_file}" "${i}")
         env_array+=("${value}")
     done
@@ -675,9 +675,10 @@ recreate_service(){
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     docker_file=$(get_docker_file_by_enviroment_and_by_instsance_type "$instance_type" "$environment_type_defintion")
 
-    declare -a web_env_array=([0]="REPLICAS" [1]="PORT")
-    declare -a mong_env_array=([0]="MONGODB_MAPPED_PORT" [1]="MONGODB_CONTAINER_NAME")
-    dest=( $(get_web_server_env_values "$absolute_dir" "webserver" "$web_env_array" "$should_be_real") $(get_web_server_env_values "$absolute_dir" "webserver-mongo" "$mong_env_array" "$should_be_real") )
+    web_env_array=("REPLICAS" "PORT")
+    declare -a mong_env_array=("MONGODB_MAPPED_PORT" "MONGODB_CONTAINER_NAME")
+
+    dest=( $(get_web_server_env_values "$absolute_dir" "webserver" web_env_array) $(get_web_server_env_values "$absolute_dir" "webserver-mongo" mong_env_array ) )
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
@@ -688,6 +689,7 @@ recreate_service(){
     env_dir="ENV_DIR=$absolute_dir"
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${dest[1]} ${dest[0]} ${dest[3]} ${dest[2]}"
+
 
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
     create_docker_services "${env_string}" "${webserver_docker_file_to}" "${force_recreate}" "${service_name}"
