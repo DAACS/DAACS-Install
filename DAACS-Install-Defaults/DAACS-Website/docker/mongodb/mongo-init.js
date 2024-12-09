@@ -20,6 +20,7 @@ db.createUser({
 
 db.createCollection("user_assessments");
 db.createCollection("tokens");
+db.createCollection("qitems");
 db.createCollection("assessmentcategorygroups");
 db.createCollection("request_helps");
 
