@@ -116,7 +116,7 @@ create_web_instance_helper(){
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
 
-    todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
+    # todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"

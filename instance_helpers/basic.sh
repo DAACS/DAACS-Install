@@ -410,10 +410,19 @@ run_docker_with_envs(){
 
     webserver_docker_file_to="${1}"
     envs_for_docker_process="${2}"
+    should_recreate="${3}"
+    service_name=""
+    sould_recreate_command_args=""
+    
+    if [ "$should_recreate" = true ]; then
+        sould_recreate_command_args=" --force-recreate"
+        service_name=" ${4}"
+    fi
 
     # # run docker file
     catted="${envs_for_docker_process}"
-    catted+=" docker compose -f ${webserver_docker_file_to} up -d"      
+    catted+=" docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name}"   
+    # echo "$catted"   
     output=$(eval "$catted")
 
 }
@@ -604,4 +613,104 @@ refresh_instance_helper(){
             restart_services_with_stagger_by_service_name  "$unescape_backslash_new_env_equal"  "$stagger_amount" "$q_mode"
         done
     done
+}
+
+
+get_docker_file_by_enviroment_and_by_instsance_type(){
+
+    instance_type="${1}"
+    environment_type_defintion="${2}"
+    docker_file=""
+
+    case "$instance_type" in
+        "1") 
+
+        case "$environment_type_defintion" in
+            "env-dev") 
+                docker_file="Docker-Webserver-dev.docker.yml"
+            ;;
+            "env-prod") 
+                docker_file="Docker-Webserver-prod.docker.yml"
+            ;;
+            *)
+                echo "Invalid instance option"
+                exit -1
+            ;;
+        esac
+
+
+        ;;
+
+    esac
+
+    echo "$docker_file"
+}
+
+
+get_web_server_env_values(){
+
+    absolute_dir="${1}" 
+    file_name="${2}" 
+    my_array="${3}"
+
+    env_file="${absolute_dir}${file_name}"
+     declare -a env_array
+    for i in "${my_array[@]}"; do
+        value=$(get_environment_value_from_file_by_env_name "${env_file}" "${i}")
+        env_array+=("${value}")
+    done
+    echo "${env_array[@]}"
+}
+
+create_docker_services(){
+    env_string="${1}"
+    webserver_docker_file_to="${2}"
+    force_recreate="${3}"
+    service_name="${4}"
+    
+    run_docker_with_envs "$webserver_docker_file_to" "$env_string" "$force_recreate" "$service_name"
+}
+
+
+recreate_service(){
+
+    base_path_folder_destination="${2}"
+    install_folder_destination="${3}"
+    instance_type="${4}"
+    environment_type="${5}"
+    service_name="${1}"
+
+    force_recreate=true #only for recreate
+
+    install_root=""
+    install_env_path=""
+
+    if [ "$install_env_path" = "" ]; then
+        install_root=$current_dir
+        install_env_path="$install_root/DAACS-Install-Defaults"
+    fi
+
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    docker_file=$(get_docker_file_by_enviroment_and_by_instsance_type "$instance_type" "$environment_type_defintion")
+
+    declare -a web_env_array=([0]="REPLICAS" [1]="PORT")
+    declare -a mong_env_array=([0]="MONGODB_MAPPED_PORT" [1]="MONGODB_CONTAINER_NAME")
+    dest=( $(get_web_server_env_values "$absolute_dir" "webserver" "$web_env_array" "$should_be_real") $(get_web_server_env_values "$absolute_dir" "webserver-mongo" "$mong_env_array" "$should_be_real") )
+
+    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
+    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+
+    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
+    folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+    env_dir="ENV_DIR=$absolute_dir"
+
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${dest[1]} ${dest[0]} ${dest[3]} ${dest[2]}"
+
+    webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    create_docker_services "${env_string}" "${webserver_docker_file_to}" "${force_recreate}" "${service_name}"
+
 }

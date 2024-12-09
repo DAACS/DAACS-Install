@@ -15,6 +15,7 @@ main(){
         2 - Create system users\n
         3 - Create/Update/Refresh instance\n
         4 - Reset service\n
+        5 - Recreate service\n\n
         Select an option:  ")
 
     if [ "$step1_option" = "" ]; then
@@ -64,6 +65,32 @@ main(){
         
     ;;
 
+    "5")
+
+        source "$current_dir/instance_helpers/basic.sh"
+
+        # 1 - DAACS-Website
+        # 2 - DAACS-Qserver
+        # 3 - DAACS-Nginx
+        # 4 - DAACS-Backup 
+        # 5 - DAACS-Memcached
+        base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
+        install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
+
+read -p "
+1 - DAACS-Website
+2 - DAACS-Qserver
+3 - DAACS-Nginx
+4 - DAACS-Backup 
+5 - DAACS-Memcached
+Select instance type to create: " instance_type
+        environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
+        service_name=$(ask_read_question_or_try_again "Service name? : " true)
+
+        recreate_service "$service_name" "$base_path_folder_destination" "$install_folder_destination" "$instance_type" "$environment_type"
+        
+    ;;
+
     *)
         echo "Invalid option"
         main
@@ -87,18 +114,25 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q" opt
+while getopts "f:s:a:q:b:d:t:i:e:" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;;
       s ) parameterS="$OPTARG" ;;
       a ) parameterA="$OPTARG" ;;
       q ) parameterQ="$OPTARG" ;;
+      b ) parameterB="$OPTARG" ;;
+      d ) parameterD="$OPTARG" ;;
+      t ) parameterT="$OPTARG" ;;
+      i ) parameterI="$OPTARG" ;;
+      e ) parameterE="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
+#example
+#daacs -f refresh -s testweb -a 2
+#daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
 
-#example ./daacs -f refresh -s testweb -a 2
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
     main
@@ -118,12 +152,28 @@ else
     fi
 
     # Begin script in case all parameters are correct
-    if [[ "$parameterS" == "" ]]  ; then
+    if [[ "$parameterS" == "help" ]]  ; then
         helpFunction
     else
-        printf "Running reset on ${parameterS} \n"
-        source "$current_dir/instance_helpers/basic.sh"
-        restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
+
+
+        case "$parameterF" in
+            
+            "refresh") 
+                printf "Running refresh on ${parameterS} \n"
+                source "$current_dir/instance_helpers/basic.sh"
+                restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
+
+            ;;
+
+            "recreate") 
+
+                printf "Running recreate on ${parameterS} \n"
+                source "$current_dir/instance_helpers/basic.sh"
+                recreate_service "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
+            ;;
+
+        esac
     fi
 fi
 
