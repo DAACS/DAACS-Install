@@ -77,13 +77,13 @@ On_IWhite='\033[0;107m'   # White
 pretty_print(){
 
     text=$1
-    echo "$(echo -e ${text})"
+    echo "$(echo -e ${text} ${Color_Off}\\n)"
 }   
 
 
 pretty_read(){
     input_text="$1"
     output_variable=""
-    read -p "$(echo -e ${input_text}) " output_variable
+    read -p "$(echo -e ${input_text})" output_variable
     echo "$output_variable"
 }   

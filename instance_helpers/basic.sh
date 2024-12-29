@@ -311,7 +311,7 @@ run_fillout_program_for_update(){
 }
 
 
-#Clones repo into destination folder - todo need to check if dir is empty and ask to clear it if it isn't
+#Clones repo into destination folder
 clone_repo(){
     
     base_path_folder_destination=$1
@@ -694,4 +694,17 @@ recreate_service(){
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
     create_docker_services "${env_string}" "${webserver_docker_file_to}" "${force_recreate}" "${service_name}"
 
+}
+
+does_service_exsist(){
+    service_name="${1}"
+    ids=$(get_services_ids_by_service_name "$service_name")
+    IFS=" " read -ra ADDR <<< "$ids"
+    length=$(echo ${#ADDR[@]})
+
+    if [ $length -eq 0 ]; then
+            echo false
+        else
+            echo true
+    fi
 }

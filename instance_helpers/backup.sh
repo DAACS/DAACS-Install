@@ -10,7 +10,13 @@ backup_instance_helper(){
     printf "\nBackup instance....\n"
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    folder_instance=$(ask_read_question_or_try_again "Enter name of instance folder to backup (todo check to see if folder exsist): " true)
+    folder_instance=$(ask_read_question_or_try_again "Enter name of instance to backup: " true)
+
+    if [ $(does_service_exsist $folder_instance) = false ]; then
+        pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
+        return 
+    fi
+
     new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
     
     case "$new_or_update" in
@@ -52,7 +58,7 @@ create_backup_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
     
-    # # # Create env files for install but only if asked - todo
+    # # # Create env files for install
     run_fillout_program "$env_to_create"
 
     backup_env_file_path="$install_root/new-env-setups/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"

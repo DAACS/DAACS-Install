@@ -18,12 +18,11 @@ source "$current_dir/instance_helpers/basic.sh"
 
 2 - Type envirmoment type to create
 3 - Enter base path for install of DAACS
-
-
-
 '
 
 read -p "
+Pick instance type to create
+
     1 - DAACS-Website
     2 - DAACS-Qserver
     3 - DAACS-Nginx
