@@ -2449,56 +2449,6 @@
           ]
         }
       ]
-    },
-    {
-      "_id": "1ba9ad9b-9705-45fc-a31a-6965f71c972d",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "187a1598-dfd8-4f8a-920a-39670b0dbd13",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "806a61e2-6500-4106-afb9-44ff8e7845e4",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "96bb30a4-8dba-4c39-973f-bc94c6912cad",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "8e17bec8-8815-4b5e-b01b-8588ae66e369",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "b0612074-9080-4896-bb86-db5d3ffd8fd4",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "36160da3-a511-4683-9ed3-d404b8d32c20",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "87e99949-22fc-478b-888e-ff0c0d1ba7ab",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "09f70ddc-c3da-42e9-b30e-0f04c39cc77b",
-      "possibleItemAnswers": [],
-      "items": []
-    },
-    {
-      "_id": "1d1029cb-3ab1-4bd6-bfab-34e1161da7d0",
-      "possibleItemAnswers": [],
-      "items": []
     }
   ],
   "assessmentType": "LIKERT",
