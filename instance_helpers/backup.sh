@@ -10,9 +10,10 @@ backup_instance_helper(){
     printf "\nBackup instance....\n"
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    folder_instance=$(ask_read_question_or_try_again "Enter name of instance to backup: " true)
+    folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
+    instance_name=$(ask_read_question_or_try_again "Enter name of instance to backup: " true)
 
-    if [ $(does_service_exsist $folder_instance) = false ]; then
+    if [ $(does_service_exsist $instance_name) = false ]; then
         pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
         return 
     fi
@@ -62,7 +63,7 @@ create_backup_instance_helper(){
     run_fillout_program "$env_to_create"
 
     backup_env_file_path="$install_root/new-env-setups/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-    mongo_env_file_path="$install_root/new-env-setups/$folder_instance/$environment_type_defintion/$environment_type_defintion-"
+    mongo_env_file_path="$install_root/new-env-setups/$folder_name/$environment_type_defintion/$environment_type_defintion-"
 
     # get code from repo
     if [ "$environment_type" = "prod" ]; then
@@ -159,7 +160,7 @@ update_backup_instance_helper(){
     esac
 
     backup_env_file_path="$install_root/new-env-setups/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-    mongo_env_file_path="$install_root/new-env-setups/$folder_instance/$environment_type_defintion/$environment_type_defintion-"
+    mongo_env_file_path="$install_root/new-env-setups/$folder_name/$environment_type_defintion/$environment_type_defintion-"
 
     backup_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
 
