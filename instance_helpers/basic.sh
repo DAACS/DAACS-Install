@@ -708,3 +708,19 @@ does_service_exsist(){
             echo true
     fi
 }
+
+get_log_files_from_service(){
+
+    log_dir="logs"
+    mkdir -p "${current_dir}/${log_dir}"
+    service_name="${1}"
+    save_folder_dir="${current_dir}/${log_dir}"
+    
+    ids=$(get_services_ids_by_service_name "${service_name}")
+    IFS=" " read -ra ADDR <<< "$ids"
+    for i in "${ADDR[@]}"; do
+         cp "$(docker inspect --format='{{.LogPath}}' $i)" "${save_folder_dir}"
+    done
+
+}
+
