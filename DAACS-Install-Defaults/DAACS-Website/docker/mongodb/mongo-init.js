@@ -71,8 +71,10 @@ db.createCollection("event_containers");
 db.createCollection("message_stats");
 db.createCollection("messages");
 db.createCollection("users");
+
 db.users.createIndex({username: 1 }, {unique: true})
-db.users.createIndex({email: 1 }, {unique: true})
+db.users.createIndex({email: 1 }, {unique: true, sparse:true})
+db.users.createIndex({email: 1, username: 1 }, {unique: true})
 
 //Create default user
  

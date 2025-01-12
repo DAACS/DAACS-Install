@@ -29,6 +29,8 @@ function create_user(){
   region="$5"
   USERNAME="$6" 
   groups="$7"
+  
+  #todo - check to make sure all groups in the list actually exsit 
 
   myBaseDir="/home/$USERNAME"
   group_add=""
