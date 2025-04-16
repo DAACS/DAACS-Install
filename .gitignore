@@ -2,3 +2,4 @@ new-env-setups/*
 user-data/*
 DAACS-Install-Defaults/DAACS-Website/docker/mongodb/assessments/*
 DAACS-Install-Defaults/DAACS-Scripts/load-test/node_modules/*
+DAACS-Install-Defaults/DAACS-Scripts/load-test/data/input/*

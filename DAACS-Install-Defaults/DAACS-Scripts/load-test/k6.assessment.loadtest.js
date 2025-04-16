@@ -1,4 +1,16 @@
 // k6 run k6.assessment.loadtest.js 
+/**
+  k6 run k6.assessment.loadtest.js --env ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
+
+  k6 run k6.assessment.loadtest.js --env ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365"
+  
+  ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js 
+ 
+  k6 run k6.assessment.loadtest.js --env ASSESSMENT_ID="e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
+k6 run k6.assessment.loadtest.js --env ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f,46997151-21a3-4eef-b657-e7dcdd913481" k6 run k6.assessment.loadtest.js
+
+ *  */ 
 
 import { check, sleep } from 'k6';
 import http from 'k6/http';
@@ -6,95 +18,61 @@ import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 
-const host = "https://daacs.victor.com";
-
-// 79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f,46997151-21a3-4eef-b657-e7dcdd913481
-
-// let user_input_file1 = process.argv[2]; //assessments-media-self-hosted 
-
-
-  
-// return
-let input_assessmentId_MATH = "79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365";
-let input_assessmentId_READING = "795c8469-9bdd-439a-9251-34457bd04adc";
-let input_assessmentId_WRITING = "e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f";
-let input_assessmentId_COLLEGE = "46997151-21a3-4eef-b657-e7dcdd913481";
-let input_assessmentID = input_assessmentId_READING
-
-// let assessment_ids = [input_assessmentId_MATH, input_assessmentId_READING, input_assessmentId_WRITING, input_assessmentId_COLLEGE];
-// let assessment_ids = [input_assessmentId_MATH];
-
-const sharedData = new SharedArray("Shared Logins", function () {
-    let data = papaparse.parse(open('data/input/teststudents.csv'), { header: true }).data;
-    // let data = papaparse.parse(open('test-users.csv'), { header: true }).data;
-    return data;
-});
-
-
 
 export let options = {
-    assessment_id: __ENV.ASSESSMENT_ID,
-    insecureSkipTLSVerify: true,
-    // httpDebug: 'full',
-    thresholds: {
-      http_req_failed: ['rate<0.01'], // http errors should be less than 1%
-      http_req_duration: ['p(95)<500'], // 95% of requests should be below 200ms
-      
-    },
-    // stages: [
-    //   { duration: '2m', target: 20 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
-    //   { duration: '3m', target: 35 }, // stay at higher 200 users for 30 minutes
-    //   { duration: '2m', target: 50 }, // stay at higher 200 users for 30 minutes
-    //   { duration: '1m', target: 0 }, // ramp-down to 0 users
-    // ],
-    vus: 1,
-    iterations: 1,
-    // duration: '30s'
-  };
+  assessment_id: __ENV.ASSESSMENT_ID,
+  host: __ENV.HOST,
+  student_file: __ENV.STUDENT_FILE,
+  admin_credentials: __ENV.ADMIN_CREDENTIALS,
+  insecureSkipTLSVerify: true,
+  // httpDebug: 'full',
+  thresholds: {
+    http_req_failed: ['rate<0.01'], // http errors should be less than 1%
+    http_req_duration: ['p(95)<500'], // 95% of requests should be below 500ms
+    
+  },
+  // stages: [
+  //   { duration: '2m', target: 20 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
+  //   { duration: '3m', target: 35 }, // stay at higher 200 users for 30 minutes
+  //   { duration: '2m', target: 50 }, // stay at higher 200 users for 30 minutes
+  //   { duration: '1m', target: 0 }, // ramp-down to 0 users
+  // ],
+  vus: 2,
+  iterations: 2,
+  // duration: '30s'
+};
 
-
+  const sharedData = new SharedArray("Shared Logins", function () {
+    let data = papaparse.parse(open(`data/input/${options.student_file}`), { header: true }).data;
+    return data;
+  });
 
   export async function  setup() {
-  
-    let admin_username = "admin";
-    let admin_password = "password";
-  
-    //answer sheet  
+
+    let [admin_username, admin_password] = options.admin_credentials.split(",")
     let admin_user = await login(admin_username, admin_password);
-  
-    // console.log(admin_user);
-
-
-    
-    // console.log(assessment);
-    // options.assessment_id = [input_assessmentId_WRITING]
     options.assessment_id = options.assessment_id.split(",")
-
 
     if(options.assessment_id.length >  0){
  
-        let promises = [];
+        let promises1 = [];
+        let promises2 = [];
         
         options.assessment_id.forEach(async (e) => {
           if(e.length > 0){
-            promises.push(get_answers_for_assessment(admin_user, e));
+
+            //get answers
+            promises1.push(get_answers_for_assessment(admin_user, e));
+            // //get answer avgs
+            promises2.push(get_avg_for_assessment(admin_user, e));
+
           }
         });
-
-        let meow = await Promise.all(promises);
-
-        return {assessments: meow}
+        return {assessments: await Promise.all(promises1), avg: await Promise.all(promises2)}
 
     }
   }
   
-
-  /*
-    I want to get the test to run all assessments for each student, one at a time
-  
-  */
-
-
   export default async function (data) {
 
     let username = sharedData[exec.vu.idInTest - 1].username
@@ -104,46 +82,33 @@ export let options = {
     let student_user = await login(username, password);
  
     for (const ee of data.assessments) {
-    console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
-
-      // // console.log(ee) 
-      // if(ee.data.attributes.writingPrompt != undefined){
-      //   // console.log("starting test for :" +  ee) 
-      //   console.log("WRITING")
-      // }
-
-       await run_program(student_user, ee)
+      console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+       await run_program(student_user, ee, data.avg)
+      console.log(`finished test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
     }
-    console.log("thank you")
+
+    console.log(`test done for: ${username}`)
     return;
   
   }
-
-  //I need to get this to run one assessment at a time... and in the order that the assessment are in because of prerequesties 
-  async function run_program(student_user, data){
+  async function run_program(student_user, data, avg){
     
-    // await assessments.forEach(async (data)   => {
-
-    let assessmentId = data.data.attributes.assessmentId
+    let assessmentId = data.data.attributes.assessmentId;
 
     // //create assessment  
     let answersType = "RANDOM";
     let users_assessment = await create_assessment(student_user, assessmentId);
+
     // //get users assessment in progroess
-    let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, users_assessment.data.attributes.assessmentId);
-  
-    assessmentId = users_assessment_in_progress.data.attributes.assessmentId;
+    let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
+    // assessmentId = users_assessment_in_progress.data.attributes.assessmentId;
     let userAssessmentId =users_assessment_in_progress.data.attributes.assessment._id;
-  
-    let questionId = "";
     let question = await get_users_assessment_question(student_user, assessmentId);
-  
     let assessmentType = users_assessment_in_progress.data.attributes.assessmentType;
     
     let count = 0;
     var isAssessmentDone = undefined;
     do{
-  
   
         let questionId = question.data.attributes.questions._id;
         let answer_response = {};
@@ -151,37 +116,28 @@ export let options = {
         switch(assessmentType){
   
             case "WRITING_PROMPT":
-              let small = get_small_writing_sample();
-  
-                answer_response = {
-                  assessmentId: assessmentId,
-                  userAssessmentId: userAssessmentId,
-                  answers: small
-              }
-  
-              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
-            
-  
-              let whole = get_whole_writing_sample();
-  
+              let length = get_whole_writing_sample().length
+              let i = 0;
+              let output = "";
+
+              while(i < length ){
+                i += 120;
+             
+               output = [...Array(i).keys()].map(x=>get_whole_writing_sample()[x]).join("")
+
 
               answer_response = {
                 assessmentId: assessmentId,
                 userAssessmentId: userAssessmentId,
-                answers: whole
-            }
+                answers: output
+             }
+              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
+            
+               sleep(rando_sleep(2, 5));
 
-            question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
-          
-
-              answer_response = {
-                 assessmentId: assessmentId,
-                 userAssessmentId: userAssessmentId,
-                 answers: whole
-              }
-              
+             }
+             
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
-              // console.log(question)
               isAssessmentDone = question.data.attributes.isAssessmentDone;
             
   
@@ -199,10 +155,8 @@ export let options = {
                  question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                  isAssessmentDone = question.data.attributes.isAssessmentDone;
                  if(!isAssessmentDone){
-                  let rand = Math.random() * 3;
+                  sleep(rando_sleep(3, 5));
 
-                    console.log(`Going to sleep for ${rand} seconds`)
-                    sleep(rand);
                   } 
             break;
   
@@ -235,13 +189,8 @@ export let options = {
                 
                     if(count != i ){
                       
-                        let response = await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
-                        // sleep(Math.random() * 3);
-
-                        let rand = Math.random() * 3;
-
-                        console.log(`Going to sleep for ${rand} seconds`)
-                        sleep(rand);
+                        await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
+                        rando_sleep(2, 3)
 
                     } 
   
@@ -255,10 +204,6 @@ export let options = {
         }
         
     }while(isAssessmentDone === false)
-    // console.log("ending test for: " + username)
-
-// });
-
   }
   
   async function login(username, password){
@@ -286,7 +231,6 @@ export let options = {
     });
   }
   
-  
   async function get_answers_for_assessment(user, assessmentId){
       return new Promise(async (resolve, reject) => {
   
@@ -310,7 +254,6 @@ export let options = {
     
       });
   }
-  
   
   async function create_assessment(user, assessmentId){
     return new Promise(async (resolve, reject) => {
@@ -356,7 +299,6 @@ export let options = {
     });
   }
   
-  
   async function get_users_assessment_question(user, assessmentId){
     return new Promise(async (resolve, reject) => {
   
@@ -375,14 +317,10 @@ export let options = {
         'status is 200': (r) => r.status === 200
       });
     
-      // console.log(response.status)
       resolve(response.json());
   
     });
   }
-  
-  
-  
   
   async function send_users_writing_answers_for_assessment_question(user, assessmentId, answers){
   
@@ -431,6 +369,27 @@ export let options = {
     });
   }
   
+  async function get_avg_for_assessment(user, assessmentId,){
+    return new Promise(async (resolve, reject) => {
+  
+  
+      const params = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+ user.accessToken
+        },
+      };
+      
+      const response = await http.post(renderURL("/api/get_user_assessment_answer_avg"), JSON.stringify({id: assessmentId}), params);
+        
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+  
+      resolve(response.json());
+    });
+  }
+
   async function send_users_individual_answer_for_assessment_question(user, assessmentId, answers){
     return new Promise(async (resolve, reject) => {
   
@@ -442,8 +401,6 @@ export let options = {
         },
       };
       
-      
-  
       const response = await http.put(renderURL("/api/user-assessment-answer"), JSON.stringify(answers), params);
         
       check(response, {
@@ -455,7 +412,7 @@ export let options = {
   }
   
   function renderURL(path){
-    return host + path;
+    return options.host + path;
   }
   
   
@@ -463,46 +420,42 @@ export let options = {
     let return_data = [];
     let currentDate = undefined;
     switch(type){
-      case "WRITING":
-      
+
+      case "LIKERT":
+
+      data.questions.items.forEach((d) => {
+
+              let possibleItemAnswers = d.possibleItemAnswers;
+              let answerID = getAnswerChoice(possibleItemAnswers, "RANDOM");
+              currentDate = new Date();
+
+              let obj = {
+                  domainId: d.domainId,
+                  startDate:currentDate,
+                  completeDate: currentDate,
+                  chosenItemAnswerId: answerID,
+                  questionId: d._id
+              }
+              return_data.push(obj);
+          })
+
       break;
-  
-        case "LIKERT":
-  
-        data.questions.items.forEach((d) => {
-  
-                let possibleItemAnswers = d.possibleItemAnswers;
-                let answerID = getAnswerChoice(possibleItemAnswers, "RANDOM");
-                currentDate = new Date();
-  
-                let obj = {
-                    domainId: d.domainId,
-                    startDate:currentDate,
-                    completeDate: currentDate,
-                    chosenItemAnswerId: answerID,
-                    questionId: d._id
-                }
-                return_data.push(obj);
-            })
-  
-        break;
-  
-  
-        case "CAT":
-  
-                let possibleItemAnswers = data.possibleItemAnswers;
-                let answerID = getAnswerChoice(possibleItemAnswers, answerType, answers);
-                currentDate = new Date();
-  
-            let obj = {
-                domainId: data.domainId,
-                startDate:currentDate,
-                completeDate: currentDate,
-                chosenItemAnswerId: answerID,
-                questionId: data._id
-            }
-            return_data.push(obj);
-        break;
+
+      case "CAT":
+
+              let possibleItemAnswers = data.possibleItemAnswers;
+              let answerID = getAnswerChoice(possibleItemAnswers, answerType, answers);
+              currentDate = new Date();
+
+          let obj = {
+              domainId: data.domainId,
+              startDate:currentDate,
+              completeDate: currentDate,
+              chosenItemAnswerId: answerID,
+              questionId: data._id
+          }
+          return_data.push(obj);
+      break;
     }
   
     return return_data;
@@ -528,13 +481,6 @@ export let options = {
     return Math.floor(Math.random() * max);
   }
   
-  
-  
-
-function get_small_writing_sample(){
-  return `Lorem ipsum dolor sit amet,.`;
-}
-
 function get_whole_writing_sample(){
   return `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec justo nibh, viverra nec volutpat vitae, finibus ac mauris. Nulla posuere justo est, nec tristique elit pretium ac. Curabitur at odio id diam fringilla viverra. Sed cursus dolor sed pretium semper. Cras tempus condimentum massa eget vehicula. Donec sapien metus, eleifend sit amet ipsum eu, volutpat porttitor ipsum. Maecenas sed lacus lacinia, vestibulum justo et, consequat ex.
 
@@ -543,4 +489,10 @@ function get_whole_writing_sample(){
   Ut a lacus arcu. Sed at sem purus. Praesent eu quam turpis. Cras sollicitudin augue eget feugiat semper. Nullam orci neque, rhoncus id velit id, commodo facilisis dui. Praesent neque massa, semper nec nunc eget, facilisis blandit nisl. Aenean vitae suscipit diam. Suspendisse mauris tellus, congue vitae ultrices id, porta a massa. Maecenas tincidunt tortor sed facilisis sodales. Nullam iaculis maximus pretium. Curabitur cursus volutpat ante, id cursus felis sollicitudin a. Integer est arcu, pulvinar non fringilla suscipit, luctus eget metus.
   
   Ut luctus vehicula diam, eget tincidunt massa ultrices in. Pellentesque mollis pretium rutrum. Etiam massa dui, pharetra sit amet est ac, tempor euismod libero. Maecenas auctor nunc mauris, vel maximus dui tristique sit amet. Nunc sed interdum dolor. Vestibulum facilisis tincidunt dapibus. Integer vitae risus pretium, semper arcu et, efficitur ante. Integer rutrum volutpat elit non vehicula. Fusce ac auctor metus. Nam ac auctor felis. Cras bibendum in tortor id egestas. Nam.`;
+}
+
+function rando_sleep(min, max){
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
