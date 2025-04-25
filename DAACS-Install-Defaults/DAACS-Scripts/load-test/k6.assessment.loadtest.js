@@ -10,6 +10,28 @@
 k6 run k6.assessment.loadtest.js --env ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
 ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f,46997151-21a3-4eef-b657-e7dcdd913481" k6 run k6.assessment.loadtest.js
 
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" k6 run --out csv=test_results.csv k6.assessment.loadtest.js
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run --out csv=test_results.csv k6.assessment.loadtest.js
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365" k6 run k6.assessment.loadtest.js
+
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s k6 run k6.assessment.loadtest.js
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s k6 run k6.assessment.loadtest.js
+
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html k6 run k6.assessment.loadtest.js
+
+
+
+ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" k6 run k6.assessment.loadtest.js
+
+
  *  */ 
 
 import { check, sleep } from 'k6';
@@ -18,9 +40,11 @@ import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
 import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 
+import { Gauge, Counter, Rate } from 'k6/metrics';
 
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
+  logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
   student_file: __ENV.STUDENT_FILE,
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
@@ -28,26 +52,69 @@ export let options = {
   // httpDebug: 'full',
   thresholds: {
     http_req_failed: ['rate<0.01'], // http errors should be less than 1%
-    http_req_duration: ['p(95)<500'], // 95% of requests should be below 500ms
+    http_req_duration: ['p(95)<300'], // 95% of requests should be below 500ms
     
   },
-  // stages: [
-  //   { duration: '2m', target: 20 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
-  //   { duration: '3m', target: 35 }, // stay at higher 200 users for 30 minutes
-  //   { duration: '2m', target: 50 }, // stay at higher 200 users for 30 minutes
-  //   { duration: '1m', target: 0 }, // ramp-down to 0 users
-  // ],
-  vus: 2,
-  iterations: 2,
-  // duration: '30s'
-};
+  assessmentTypeOptions: {
 
-  const sharedData = new SharedArray("Shared Logins", function () {
+    "cat": {
+      answerType: "RANDOM",
+      min_sleep: 1,
+      max_sleep: 3,
+    },
+    "writing": {
+      min_sleep: 1,
+      max_sleep: 3,
+    },
+    "likert": {
+      answerType: "RANDOM",
+      min_sleep: 1,
+      max_sleep: 3,
+    }
+
+  },
+  // stages: [
+  //   { duration: '30s', target: 100 }, // traffic ramp-up from 1 to a higher 200 users over 10 minutes.
+  //   { duration: '30s', target: 200 }, // stay at higher 200 users for 30 minutes
+  //   { duration: '40s', target: 400 }, // stay at higher 200 users for 30 minutes
+  //   { duration: '20s', target: 500 }, // ramp-down to 0 users
+  //   { duration: '5m', target: 0 }, // ramp-down to 0 users
+  // ],
+  gracefulRampDown: "5m",
+  // vus: 300,
+  // iterations: 300,
+  vus: 1,
+  iterations: 1,
+  // duration: '30s'
+  tot: 0
+};
+let total_total = 0;
+
+  let sharedData = new SharedArray("Shared Logins", function () {
     let data = papaparse.parse(open(`data/input/${options.student_file}`), { header: true }).data;
+
+    data.map( e => {
+      e.used = false;
+    })
     return data;
   });
 
+
+
+// function getSlice(data, n) {
+//   let partSize = Math.floor(data.length / n);
+//   return data.slice(rando_sleep(0, users.length), 1);
+// }
+
+const woof = open(`data/input/${options.student_file}`);
+let users = [];
+
   export async function  setup() {
+
+
+    users = papaparse.parse(woof, { header: true }).data;
+
+
 
     let [admin_username, admin_password] = options.admin_credentials.split(",")
     let admin_user = await login(admin_username, admin_password);
@@ -64,44 +131,191 @@ export let options = {
             //get answers
             promises1.push(get_answers_for_assessment(admin_user, e));
             // //get answer avgs
-            promises2.push(get_avg_for_assessment(admin_user, e));
+            // promises2.push(get_avg_for_assessment(admin_user, e));
 
           }
         });
-        return {assessments: await Promise.all(promises1), avg: await Promise.all(promises2)}
+        return {assessments: await Promise.all(promises1), users:users}
 
     }
   }
   
+  function getSlice(data, n) {
+    let partSize = Math.floor(data.length / n);
+    return data.slice(partSize*__VU, partSize*__VU+partSize);
+}
+// const myTrend = new Gauge('total_byes');
+const myTrend = new Counter('total_byes');
+
   export default async function (data) {
 
-    let username = sharedData[exec.vu.idInTest - 1].username
-    let password = sharedData[exec.vu.idInTest - 1].password
+    // sleep(5);
+
+    // console.log(__VU, __ITER);
+
+  //   console.log(`
+  
+  // All info except abort.
+  
+  
+  // // Other variables
+  
+  // Instance info
+  // -------------
+  // Vus active: ${exec.instance.vusActive}
+  // Iterations completed: ${exec.instance.iterationsCompleted}
+  // Iterations interrupted:  ${exec.instance.iterationsInterrupted}
+  // Iterations completed:  ${exec.instance.iterationsCompleted}
+  // Iterations active:  ${exec.instance.vusActive}
+  // Initialized vus:  ${exec.instance.vusInitialized}
+  // Time passed from start of run(ms):  ${exec.instance.currentTestRunDuration}
+  
+  // Scenario info
+  // -------------
+  // Name of the running scenario: ${exec.scenario.name}
+  // Executor type: ${exec.scenario.executor}
+  // Scenario start timestamp: ${exec.scenario.startTime}
+  // Percenatage complete: ${exec.scenario.progress}
+  // Iteration in instance: ${exec.scenario.iterationInInstance}
+  // Iteration in test: ${exec.scenario.iterationInTest}
+  
+  // Test info
+  // ---------
+  // All test options: ${exec.test.options}
+  
+  // vu info
+  // -------
+  // Iteration id: ${exec.vu.iterationInInstance}
+  // Iteration in scenario: ${exec.vu.iterationInScenario}
+  // VU ID in instance: ${exec.vu.idInInstance}
+  // VU ID in test: ${exec.vu.idInTest}
+  // VU tags: ${exec.vu.tags}
+  
+  
+  // `);
+
     
+    // let slice = getSlice(data.users, 500);
+
+
+      // Pick a random username/password pair
+      // const randomUser = data(rando_sleep(0, sharedData.length))
+  // const randomUser = sharedData[Math.floor(Math.random() * sharedData.length)];
+
+  // console.log('Random user: ', JSON.stringify(randomUser));
+    // let username = randomUser.username;
+    // let password = randomUser.password;
+        
+  // if(options.logging_status >= 1){
+  //   console.log(`${randomUser.username} is sleeping for ${login_sleep}`)
+  // }
+  // sleep(login_sleep);
+  // console.log(`users.length: ${data.users.length}` )
+
+  //   const myNum = rando_sleep(0, data.users.length);
+  //   console.log(`myNum: ${myNum} users.length: ${data.users.length}` )
+    
+  //   const username = data.users[myNum].username;
+
+  //   data.users = data.users.slice(myNum, 1);
+  //   console.log(`$data:${data.users.length}`)
+    let username = sharedData[__VU - 1].username
+    let password = sharedData[__VU - 1].password
+    
+    const login_sleep = rando_sleep(1, 15);
+    
+    if(options.logging_status >= 1){
+      console.log(`${username} is sleeping for ${login_sleep}`)
+    }
+    sleep(login_sleep);
     //login  
     let student_user = await login(username, password);
+
+    student_user.user_assessment_total_kb_total = 0;
  
+    add_length_to_trend(get_JSON_request_length(student_user));
+
+    // return;
     for (const ee of data.assessments) {
-      console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
-       await run_program(student_user, ee, data.avg)
-      console.log(`finished test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      if(options.logging_status >= 1){
+        console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      }
+      await run_program(student_user, ee) 
+      if(options.logging_status >= 1){
+        console.log(`ending test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      }
+      await run_user_assessment_results_program(student_user, ee)
+      if(options.logging_status >= 1){
+        console.log(`got results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      }
+      total_total += student_user.total_kb;
+
+    }
+      //add downloading a PDF
+      // await run_get_pdf(student_user)
+      
+    if(options.logging_status >= 1){
+      console.log(`test done for: ${username}`)
+      console.log(`test done for: ${username}`)
+      console.log(`Total Bytes: ${total_total} `)
+      console.log(`Total KB: ${total_total / 1000} `)
+      console.log(`Total MB: ${total_total / 1000000} `)
+      console.log(`Total GB: ${total_total / 1000000000} `)
     }
 
-    console.log(`test done for: ${username}`)
     return;
   
   }
+
+  const range = (start, end, step = 1) => {
+    return Array.from({ length: Math.ceil((end - start) / step) }, (_, i) => start + i * step);
+  };
+
+  async function run_get_pdf(student_user){
+
+    return new Promise(async (resolve, reject) => {
+            
+       let response = await http.get(renderURL("/pdf_assessments/b8NPTg8ZNQugVNJVZlsx.pdf"));
+        
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+      
+      
+    });
+  
+  }
+
+  async function run_user_assessment_results_program(student_user, data){
+
+    let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, data.data.attributes.assessmentId);
+    let count = user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.map((d) => {
+          return d.subDomainScores
+      }).reduce(function(pre, cur) {
+          return pre.concat(cur);
+      }, [])
+
+      count = count.length + user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.length;
+      
+      let range_ = range(1, count)
+      for (const index of range_) {
+        await get_user_assessment_summaries_data(student_user, data.data.attributes.assessmentId);
+        sleep(rando_sleep(1, 3));
+      }
+
+      // student_user.user_assessment_total_kb_total += count * JSON.stringify(user_assessment_summaries_data).length; 
+      // student_user.total_kb +=student_user.user_assessment_total_kb_total
+  }
+
   async function run_program(student_user, data, avg){
     
     let assessmentId = data.data.attributes.assessmentId;
 
     // //create assessment  
-    let answersType = "RANDOM";
     let users_assessment = await create_assessment(student_user, assessmentId);
 
     // //get users assessment in progroess
     let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
-    // assessmentId = users_assessment_in_progress.data.attributes.assessmentId;
     let userAssessmentId =users_assessment_in_progress.data.attributes.assessment._id;
     let question = await get_users_assessment_question(student_user, assessmentId);
     let assessmentType = users_assessment_in_progress.data.attributes.assessmentType;
@@ -132,9 +346,7 @@ export let options = {
                 answers: output
              }
               question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
-            
-               sleep(rando_sleep(2, 5));
-
+                sleep(rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep));
              }
              
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
@@ -144,7 +356,7 @@ export let options = {
             break;
   
             case "LIKERT":
-                let answers = get_answers_by_assessment_type(assessmentType, question.data.attributes, "RANDOM");
+                let answers = get_answers_by_assessment_type(assessmentType, question.data.attributes, options.assessmentTypeOptions.likert.answerType);
                  answer_response = {
                     assessmentId: assessmentId,
                     userAssessmentId: userAssessmentId,
@@ -155,7 +367,8 @@ export let options = {
                  question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                  isAssessmentDone = question.data.attributes.isAssessmentDone;
                  if(!isAssessmentDone){
-                  sleep(rando_sleep(3, 5));
+                  
+                  sleep(rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep));
 
                   } 
             break;
@@ -175,7 +388,7 @@ export let options = {
                     
                     let answersForQuestion = answerGroup.items.find(d=> d._id ==  q._id);
   
-                    let answer = get_answers_by_assessment_type(assessmentType, q, answersType, answersForQuestion);
+                    let answer = get_answers_by_assessment_type(assessmentType, q, options.assessmentTypeOptions.cat.answerType, answersForQuestion);
                   
                     let indiviual_answer = {
                         assessmentId: assessmentId,
@@ -190,11 +403,9 @@ export let options = {
                     if(count != i ){
                       
                         await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
-                        rando_sleep(2, 3)
+                        sleep(rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep));
 
                     } 
-  
-                
                 });
                 question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                 isAssessmentDone = question.data.attributes.isAssessmentDone;
@@ -213,7 +424,9 @@ export let options = {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       };
-  
+  try{
+
+
           const response = await http.post(renderURL("/token"), {
             username: username,
             grant_type: "password",
@@ -222,11 +435,17 @@ export let options = {
           } , params);
           
         check(response, {
-          'status is 200': (r) => r.status === 200,
-          'accessToken': (r) => r.json().accessToken ,
+          'status is 200': (r) => r.status === 200
+          // 'accessToken': (r) => r.json().accessToken ,
         });
       
-          resolve(response.json());
+            const res_json = await response.json();     
+            const total_kb = get_JSON_request_length(res_json);     
+            res_json.total_kb = parseInt(total_kb); 
+          return resolve(res_json);
+        }catch(e){
+            console.log(e)
+        }
    
     });
   }
@@ -249,8 +468,10 @@ export let options = {
         check(response, {
           'status is 200': (r) => r.status === 200
         });
+
       
-        resolve(response.json());
+          const res_json = await response.json();        
+          return resolve(res_json);
     
       });
   }
@@ -273,7 +494,12 @@ export let options = {
           'status is 200': (r) => r.status === 200
         });
       
-        resolve(response.json());
+      
+          const res_json = await response.json();      
+          add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
       
     });
   }
@@ -294,8 +520,14 @@ export let options = {
       check(response, {
         'status is 200': (r) => r.status === 200
       });
+
+      
     
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
     });
   }
   
@@ -316,8 +548,13 @@ export let options = {
       check(response, {
         'status is 200': (r) => r.status === 200
       });
+      
     
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
   
     });
   }
@@ -340,8 +577,13 @@ export let options = {
       check(response, {
         'status is 200': (r) => r.status === 200
       });
+      
     
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
     });
   }
   
@@ -364,8 +606,13 @@ export let options = {
       check(response, {
         'status is 200': (r) => r.status === 200
       });
+      
     
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
     });
   }
   
@@ -386,8 +633,53 @@ export let options = {
         'status is 200': (r) => r.status === 200
       });
   
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
     });
+  }
+
+  async function get_user_assessment_summaries_data(user, assessmentId){
+    return new Promise(async (resolve, reject) => {
+  
+  
+      const params = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer '+ user.accessToken
+        },
+      };
+      try{
+        
+     
+      const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);
+          user.user_assessment_total_kb = get_JSON_request_length(res_json);
+
+          return resolve(res_json);
+
+        }catch(e){
+          console.log(e)
+          throw new Error("SDFSDF")
+        }
+  
+    });
+  }
+  function add_length_to_trend(l){
+    myTrend.add(l);
+  }
+
+  function get_JSON_request_length(data){
+    return JSON.stringify(data).length;
   }
 
   async function send_users_individual_answer_for_assessment_question(user, assessmentId, answers){
@@ -406,16 +698,21 @@ export let options = {
       check(response, {
         'status is 200': (r) => r.status === 200
       });
+      
   
-      resolve(response.json());
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
+      
     });
   }
   
   function renderURL(path){
     return options.host + path;
   }
-  
-  
+    
   function get_answers_by_assessment_type(type, data, answerType, answers){
     let return_data = [];
     let currentDate = undefined;
