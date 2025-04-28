@@ -2,6 +2,7 @@
 
 # ./DAACS-Install-Defaults - folder for default .env files
 source "$current_dir/instance_helpers/web.sh"
+source "$current_dir/instance_helpers/mongo.sh"
 source "$current_dir/instance_helpers/qserver.sh"
 source "$current_dir/instance_helpers/nginx.sh"
 source "$current_dir/instance_helpers/backup.sh"
@@ -28,6 +29,7 @@ Pick instance type to create
     3 - DAACS-Nginx
     4 - DAACS-Backup 
     5 - DAACS-Memcached
+    6 - DAACS-Mongo
 
 Select instance type to create: " instance_type
 environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
@@ -78,6 +80,11 @@ case "$instance_type" in
 "5") 
 
     create_memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+;;
+
+"6") 
+
+    mongo_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 ;;
 
 *)

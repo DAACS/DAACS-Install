@@ -65,6 +65,9 @@ get_instance_type_definition(){
         "5") 
             echo "DAACS-Memcached"
         ;;
+        "6") 
+            echo "DAACS-Mongo/Webserver"
+        ;;
         *)
             echo "Invalid instance option"
             exit -1
@@ -193,9 +196,11 @@ get_env_files_for_editing(){
     # 3 - DAACS-Nginx
     # 4 - DAACS-Backup 
     # 5 - DAACS-Memcached
+    # 6 - DAACS-Mongo
 
     instance_type=$(get_instance_type_definition "$1")
     e_type=$(get_env_type_definition "$3")
+
     search_dir="$2/$instance_type/$e_type"
 
     declare -a arr
