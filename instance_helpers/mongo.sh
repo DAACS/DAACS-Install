@@ -110,6 +110,11 @@ create_mongo_instance_helper(){
     cp "${qserver_files_from}" "${qserver_files_to}"
     
 
+    # qserver_files_from="$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev"
+    # qserver_files_to="${root_dest}/${mongo_service_name}/docker/Dockerfile-webserver-mongo-dev"
+    # cp "${qserver_files_from}" "${qserver_files_to}"
+    
+
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
