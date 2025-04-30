@@ -130,6 +130,24 @@ create_mongo_instance_helper(){
 
 }
 
+create_mongo_database_helper(){
+
+    printf "\nCreating database....\n"
+
+
+    #folder destination
+    #database name
+    #database username
+    #database password
+
+    instance_folder=$(ask_read_question_or_try_again "What db instance should we create this in?  " true)
+    database_name=$(ask_read_question_or_try_again "Database name?  " true)
+    database_username=$(ask_read_question_or_try_again "Database username?  " true)
+    database_password=$(ask_read_question_or_try_again "Database password?  " true)
+
+    
+
+}
 
 # update_qserver_instance_helper(){
 #     printf "\nUPDATING Q server instance....\n"
