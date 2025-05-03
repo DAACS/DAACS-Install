@@ -130,6 +130,7 @@ create_mongo_instance_helper(){
 
 }
 
+# Todo when I come back. I need ot change DAACS-Mongo/Webserver to DAACS-Mongo/instance
 create_mongo_database_helper(){
 
     printf "\nCreating database....\n"
@@ -139,13 +140,56 @@ create_mongo_database_helper(){
     #database name
     #database username
     #database password
+    instance_type="7"
 
-    instance_folder=$(ask_read_question_or_try_again "What db instance should we create this in?  " true)
-    database_name=$(ask_read_question_or_try_again "Database name?  " true)
-    database_username=$(ask_read_question_or_try_again "Database username?  " true)
-    database_password=$(ask_read_question_or_try_again "Database password?  " true)
 
-    
+    # instance_type="${1}"
+    install_env_path="${2}"
+    environment_type="${3}"
+    install_root="${4}"
+
+
+    # echo "$install_env_path"
+
+
+    printf "\nMongo server instance....\n"
+
+    # base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
+    install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
+
+    instance_folder="ng983n4g89"
+    instance_file_name=$(ask_read_question_or_try_again "What db should be name this db env file  " true)
+    db_mongo_instance=$(ask_read_question_or_try_again "What db instance should we create this in?  " true)
+    env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
+
+
+    # Create env files for install
+    run_fillout_program "$env_to_create"
+
+    filename=$(basename "$env_to_create")
+    olddestdir="$root_dest/$instance_folder/$environment_type_defintion/$filename"
+    destdir="$root_dest/$db_mongo_instance/dbs/"
+
+    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$db_mongo_instance/dbs"
+    if  ! $(test -d "$destdir") ;
+    then
+        mkdir -p "$destdir"
+    fi
+
+    # # move files to $newdestdir 
+    newdestdir="$root_dest/$db_mongo_instance/dbs/$instance_file_name"
+
+    $(mv "$olddestdir" "$newdestdir")
+    mongo_id=$(get_services_ids_by_service_name "$db_mongo_instance")
+    env_vars=$(cat "$newdestdir" | tr '\n' " ")
+
+    command="docker exec -it ${mongo_id} sh -c \"export ${env_vars} && mongosh < /docker-entrypoint-initdb.d/mongo-init1.js\""
+
+    eval "$command"
+
 
 }
 

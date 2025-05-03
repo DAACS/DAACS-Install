@@ -14,11 +14,11 @@ Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exi
 1 - Install system dependencies\n
 2 - Install daacs command in path\n
 3 - Create system users\n
-4 - Create/Update/Refresh instance\n
+4 - (Create, Update, Refresh instance) Create DB \n
 5 - Reset service\n
 6 - Reset all services in folder\n
 7 - Recreate service\n\n
-8 - Create mongo database\n\n
+# 8 - Create mongo database\n\n
 Select an option: ")
 
     if [ "$step1_option" = "" ]; then
@@ -134,14 +134,6 @@ Select instance type to create: " instance_type
 
         recreate_service "$service_name" "$base_path_folder_destination" "$install_folder_destination" "$instance_type" "$environment_type"
         
-    ;;
-
-
-    "8")
-
-
-        create_mongo_database_helper
-
     ;;
 
     *)

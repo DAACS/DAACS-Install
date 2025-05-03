@@ -2,12 +2,15 @@
 
   var fs = require('fs');
 
-  //I think we're going to keep this one 
+  //I think we're going to delete this 
 
-// db.auth(
-//   process.env["MONGO_INITDB_ROOT_USERNAME"],
-//   process.env["MONGO_INITDB_ROOT_PASSWORD"]
-// );
+  
+// file is included here:
+
+db.auth(
+  process.env["MONGO_INITDB_ROOT_USERNAME"],
+  process.env["MONGO_INITDB_ROOT_PASSWORD"]
+);
 
 db = db.getSiblingDB(process.env["MONGODB_DATABASE_NAME"]);
 
