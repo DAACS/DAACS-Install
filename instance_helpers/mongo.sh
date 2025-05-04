@@ -52,8 +52,10 @@ create_mongo_instance_helper(){
 
     printf "\nCREATING Mongo server instance....\n"
 
-    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    instance_type="6-1"
 
+
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
@@ -149,7 +151,7 @@ create_mongo_database_helper(){
 
     printf "\nCreating database....\n"
 
-    instance_type="7"
+    instance_type="6-2"
     install_env_path="${2}"
     environment_type="${3}"
     install_root="${4}"

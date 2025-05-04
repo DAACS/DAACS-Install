@@ -65,11 +65,14 @@ get_instance_type_definition(){
         "5") 
             echo "DAACS-Memcached"
         ;;
-        "6") 
+        "6-1") 
             echo "DAACS-Mongo/Instance"
         ;;
-        "7") 
+        "6-2") 
             echo "DAACS-Mongo/NewDB"
+        ;;
+        "7") 
+            echo "DAACS-Webserver"
         ;;
         *)
             echo "Invalid instance option"
@@ -401,16 +404,22 @@ run_docker_with_envs(){
     should_recreate="${3}"
     service_name=""
     sould_recreate_command_args=""
-    
+    envs_for_docker_processed=""
+
     if [ "$should_recreate" = true ]; then
         sould_recreate_command_args=" --force-recreate"
         service_name=" ${4}"
+    fi    
+
+    STRLENGTH=$(echo -n $envs_for_docker_process | wc -m)
+
+    if [ $STRLENGTH > 0 ]; then
+        envs_for_docker_processed="${envs_for_docker_process} "
     fi
 
     # # run docker file
-    catted="${envs_for_docker_process}"
-    catted+=" docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name}"   
-    # echo "$catted"   
+    catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
+    echo "$catted"   
     output=$(eval "$catted")
 
 }

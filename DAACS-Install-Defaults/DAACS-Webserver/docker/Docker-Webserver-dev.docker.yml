@@ -1,0 +1,30 @@
+services:
+  #webserver_service_name:
+    command: >
+        /bin/sh -c "cd /usr/src/app && npm run-script start-dev --prefix=./DAACS-Webserver"
+    expose:
+      - ${PORT}
+      - 443
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    env_file: 
+      - ${ENV_DIR}webserver
+      - ${ENV_DIR}memcached
+      - ${ENV_DIR}email
+    environment:
+       - "MONGO_USERNAME=${MONGO_USERNAME}"
+       - "MONGO_PASSWORD=${MONGO_PASSWORD}"
+       - "MONGODB_CONTAINER_NAME=${MONGODB_CONTAINER_NAME}"
+       - "MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME}"
+       - "MONGO_PASSWORD=${MONGO_PASSWORD}"
+    volumes:
+      - "${FOLDER_START}:/usr/src/app"
+    image: node
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS}
+
+networks:
+  myNetwork:
+    external: true

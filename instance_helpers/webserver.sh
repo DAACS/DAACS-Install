@@ -53,13 +53,14 @@ create_webserver_instance_helper(){
     printf "\nCREATING Webserver instance....\n"
 
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
-
+    mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " true)
+    mongo_folder_filename=$(ask_read_question_or_try_again "Enter mongo login file (in dbs): " true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
 
-    # Create env files for install
+    # # Create env files for install
     run_fillout_program "$env_to_create"
 
     # # # # get code from repo
@@ -77,7 +78,7 @@ create_webserver_instance_helper(){
     # # # # # install node modules for frontend
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 
-    # # build frontend
+    # # # build frontend
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
@@ -86,13 +87,24 @@ create_webserver_instance_helper(){
         mkdir -p "$root_dest/$install_folder_destination/docker/"
     fi
 
+    destdir="$root_dest/$mongo_folder"
+    destdirdbs="$destdir/dbs/$mongo_folder_filename"
+
+    files=($destdir/$environment_type_defintion/*)
+    destdirenvlogin="${files[0]}"
+
     # filename - enviroment variables for webserver
     env_webserver_file="${absolute_dir}webserver"
     # # filename - enviroment variables for webserver mongo
     env_webserver_mongo_file="${absolute_dir}webserver-mongo"
 
-    mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
-    mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
+    mongo_container_name=$(get_environment_value_from_file_by_env_name "${destdirenvlogin}" "MONGODB_CONTAINER_NAME")
+    mongo_port=$(get_environment_value_from_file_by_env_name "${destdirenvlogin}" "MONGODB_MAPPED_PORT")
+
+    mongo_username=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_USERNAME")
+    mongo_password=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_PASSWORD")
+    mongo_database_name=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGODB_DATABASE_NAME")
+
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
 
@@ -112,12 +124,10 @@ create_webserver_instance_helper(){
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
     # Build frontend
-    env_oauth_file="${absolute_dir}oauth"
-    api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
+    api_client_id=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "API_CLIENT_ID")
 
     if [ "$environment_type" = "prod" ]; then
         catted="export ${api_client_id} && npx ember build --prod"
-
     fi
 
     if [ "$environment_type" = "dev" ]; then
@@ -146,17 +156,12 @@ create_webserver_instance_helper(){
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
-
-    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port}"
+    env_string="${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port} ${mongo_username} ${mongo_password} ${mongo_database_name}"
 
-    run_docker_with_envs "$webserver_docker_file_to" "$env_string"
-
+    run_docker_with_envs "$webserver_docker_file_to" "$env_string" true
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
     add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
