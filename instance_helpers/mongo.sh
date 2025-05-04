@@ -135,29 +135,14 @@ create_mongo_database_helper(){
 
     printf "\nCreating database....\n"
 
-
-    #folder destination
-    #database name
-    #database username
-    #database password
     instance_type="7"
-
-
-    # instance_type="${1}"
     install_env_path="${2}"
     environment_type="${3}"
     install_root="${4}"
 
-
-    # echo "$install_env_path"
-
-
     printf "\nMongo server instance....\n"
 
-    # base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
-    install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-
-    instance_folder="ng983n4g89"
+    install_folder_destination="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)"
     instance_file_name=$(ask_read_question_or_try_again "What db should be name this db env file  " true)
     db_mongo_instance=$(ask_read_question_or_try_again "What db instance should we create this in?  " true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
@@ -165,12 +150,11 @@ create_mongo_database_helper(){
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
 
-
     # Create env files for install
     run_fillout_program "$env_to_create"
 
     filename=$(basename "$env_to_create")
-    olddestdir="$root_dest/$instance_folder/$environment_type_defintion/$filename"
+    olddestdir="$root_dest/$install_folder_destination/$environment_type_defintion/$filename"
     destdir="$root_dest/$db_mongo_instance/dbs/"
 
     # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$db_mongo_instance/dbs"
@@ -187,9 +171,8 @@ create_mongo_database_helper(){
     env_vars=$(cat "$newdestdir" | tr '\n' " ")
 
     command="docker exec -it ${mongo_id} sh -c \"export ${env_vars} && mongosh < /docker-entrypoint-initdb.d/mongo-init1.js\""
-
     eval "$command"
-
+    rm -r "$root_dest/$install_folder_destination/"
 
 }
 
