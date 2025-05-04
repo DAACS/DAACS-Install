@@ -66,10 +66,10 @@ get_instance_type_definition(){
             echo "DAACS-Memcached"
         ;;
         "6") 
-            echo "DAACS-Mongo/Webserver"
+            echo "DAACS-Mongo/Instance"
         ;;
         "7") 
-            echo "DAACS-Webserver"
+            echo "DAACS-Mongo/NewDB"
         ;;
         *)
             echo "Invalid instance option"
