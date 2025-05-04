@@ -128,6 +128,20 @@ create_mongo_instance_helper(){
 
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
+    destdirssl="$root_dest/$mongo_service_name/ssl/"
+
+    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl"
+    if  ! $(test -d "$destdirssl") ;
+    then
+        mkdir -p "$destdirssl"
+    fi
+
+    mongo_id=$(get_services_ids_by_service_name "$mongo_service_name")
+    mongo_id=$(echo "$mongo_id" | tr -d " " )
+    command="docker cp ${mongo_id}:/home/mongossl.pem ${destdirssl}mongossl.pem"
+
+    eval "$command"
+
 }
 
 # Todo when I come back. I need ot change DAACS-Mongo/Webserver to DAACS-Mongo/instance
