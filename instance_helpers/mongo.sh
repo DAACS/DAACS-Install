@@ -54,7 +54,6 @@ create_mongo_instance_helper(){
 
     instance_type="6-1"
 
-
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")

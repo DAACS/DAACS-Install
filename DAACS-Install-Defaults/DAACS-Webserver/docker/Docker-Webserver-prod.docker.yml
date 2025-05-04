@@ -1,20 +1,4 @@
 services:
-  #mongo_service_name:
-    image: mongo
-    restart: unless-stopped
-    env_file: 
-      - ${ENV_DIR}webserver-mongo-init
-      - ${ENV_DIR}webserver-mongo
-      - ${ENV_DIR}oauth
-    networks:
-      - myNetwork
-    ports:
-      - ${MONGODB_MAPPED_PORT}:27017
-    volumes:
-      - ${LOCAL_PATH_TO_MONGODB_DIR}/assessments:/docker-entrypoint-initdb.d/assessments/
-      - ${LOCAL_PATH_TO_MONGODB_DIR}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    container_name: ${MONGODB_CONTAINER_NAME}
-
   #webserver_service_name:
     command: >
         /bin/sh -c "cd /usr/src/app && npm run-script start-production --prefix=./DAACS-Webserver"
@@ -27,10 +11,14 @@ services:
       - myNetwork
     env_file: 
       - ${ENV_DIR}webserver
-      - ${ENV_DIR}webserver-mongo
-      - ${ENV_DIR}oauth
       - ${ENV_DIR}memcached
       - ${ENV_DIR}email
+    environment:
+       - "MONGO_USERNAME=${MONGO_USERNAME}"
+       - "MONGO_PASSWORD=${MONGO_PASSWORD}"
+       - "MONGODB_CONTAINER_NAME=${MONGODB_CONTAINER_NAME}"
+       - "MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME}"
+       - "MONGO_PASSWORD=${MONGO_PASSWORD}"
     volumes:
       - "${FOLDER_START}:/usr/src/app"
     image: node
