@@ -184,7 +184,7 @@ create_mongo_database_helper(){
     mongo_id=$(get_services_ids_by_service_name "$db_mongo_instance")
     env_vars=$(cat "$newdestdir" | tr '\n' " ")
 
-    command="docker exec -it ${mongo_id} sh -c \"export ${env_vars} && mongosh < /docker-entrypoint-initdb.d/mongo-init1.js\""
+    command="docker exec -it ${mongo_id} sh -c \"export ${env_vars} && mongosh < /docker-entrypoint-initdb.d/mongo-init.js\""
     eval "$command"
     rm -r "$root_dest/$install_folder_destination/"
 
