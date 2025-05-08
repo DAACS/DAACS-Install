@@ -18,7 +18,6 @@ Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exi
 5 - Reset service\n
 6 - Reset all services in folder\n
 7 - Recreate service\n\n
-# 8 - Create mongo database\n\n
 Select an option: ")
 
     if [ "$step1_option" = "" ]; then

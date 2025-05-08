@@ -19,7 +19,7 @@ services:
     image: daacs-qserver
     build: 
       context: .
-      dockerfile: ./Dockerfile-queue-dev.debian
+      dockerfile: ${BUILD_FILE}
     env_file: 
       - ${ENV_DIR}queueserver
       - ${ENV_DIR}queuemongo

@@ -51,6 +51,7 @@ qserver_instance_helper(){
 create_qserver_instance_helper(){
 
     printf "\nCREATING Q server instance....\n"
+    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     qserver_service_name=$(ask_for_docker_service_and_check "Enter name for Q server service : " )
@@ -114,14 +115,31 @@ create_qserver_instance_helper(){
 
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
     full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
-
+    
     local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
+    echo "${ARCHITECTURE}"
 
-    qserver_files_from="$install_env_path/${instance_type_defintion}/docker/Dockerfile-queue-dev.debian"
-    qserver_files_to="${root_dest}/${qserver_service_name}/docker/Dockerfile-queue-dev.debian"
+    build_file=""
+
+        case "${ARCHITECTURE}" in
+        "aarch64") 
+            build_file="Dockerfile-queue-dev-aarch64.debian"
+        ;;
+        "x_86") 
+            build_file="Dockerfile-queue-dev-x_86.debian"
+        ;;
+        *)
+            echo "Invalid architecture option"
+            exit -1
+        ;;
+    esac
+
+
+    qserver_files_from="$full_daacs_install_defaults_path/docker/${build_file}"
+    qserver_files_to="${root_dest}/${install_folder_destination}/docker/${build_file}"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
 
@@ -140,6 +158,7 @@ create_qserver_instance_helper(){
 
 update_qserver_instance_helper(){
     printf "\nUPDATING Q server instance....\n"
+    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
 
     should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
@@ -187,7 +206,24 @@ update_qserver_instance_helper(){
         ;;
     esac
 
-    
+    build_file=""
+
+        case "${ARCHITECTURE}" in
+        "aarch64") 
+            build_file="Dockerfile-queue-dev-aarch64.debian"
+        ;;
+        "x_86") 
+            build_file="Dockerfile-queue-dev-x_86.debian"
+        ;;
+        *)
+            echo "Invalid architecture option"
+            exit -1
+        ;;
+    esac
+
+
+    qserver_files_to="${root_dest}/${install_folder_destination}/docker/${build_file}"
+
     qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
@@ -198,8 +234,9 @@ update_qserver_instance_helper(){
     local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
+    build_file_dir="BUILD_FILE=$qserver_files_to"
 
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name} ${build_file_dir}"
     
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
 

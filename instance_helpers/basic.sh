@@ -411,7 +411,7 @@ run_docker_with_envs(){
         service_name=" ${4}"
     fi    
 
-    STRLENGTH=$(echo -n $envs_for_docker_process | wc -m)
+    STRLENGTH=$($envs_for_docker_process | wc -m)
 
     if [ $STRLENGTH > 0 ]; then
         envs_for_docker_processed="${envs_for_docker_process} "
@@ -419,9 +419,7 @@ run_docker_with_envs(){
 
     # # run docker file
     catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
-    echo "$catted"   
-    output=$(eval "$catted")
-
+    $(eval "$catted")
 }
 
 get_services_ids_by_service_name(){
