@@ -120,7 +120,7 @@ create_qserver_instance_helper(){
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
-    echo "${ARCHITECTURE}"
+    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
 
     build_file=""
 
@@ -137,14 +137,14 @@ create_qserver_instance_helper(){
         ;;
     esac
 
-
     qserver_files_from="$full_daacs_install_defaults_path/docker/${build_file}"
     qserver_files_to="${root_dest}/${install_folder_destination}/docker/${build_file}"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
+    build_file_dir="BUILD_FILE=$qserver_files_to"
 
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
-    
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name} ${build_file_dir}"
+
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
 
     services_file_dir="$root_dest/$install_folder_destination/services"
