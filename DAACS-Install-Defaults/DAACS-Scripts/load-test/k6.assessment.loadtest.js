@@ -61,6 +61,8 @@ ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE=
 
 
  ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="slow" LOAD_TEST_TYPE_SCENRIO="stages-ramping-vus" STAGES="30s:100,30s:200,30s:500,30s:200,30s:0" GRACEFUL_STOP="300s" GRACEFUL_RAMP_DOWN="300s" RUN_GET_PDF=false RUN_GET_ASSESSMENT_RESULTS=true MAX_LOGIN_SLEEP=30 INSECURE_SKIP_TLS="true" k6 run k6.assessment.loadtest.js --out json=k6.json
+
+
  *  */ 
 
 import { check, sleep } from 'k6';
@@ -76,6 +78,7 @@ const myTrend = new Counter('total_byes');
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
   max_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
+  max_pdf_check_sleep: __ENV.MAX_PDF_CHECK_SLEEP == undefined ? 5 : __ENV.MAX_PDF_CHECK_SLEEP,
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
   student_file: __ENV.STUDENT_FILE,
@@ -359,29 +362,47 @@ export default async function (data) {
   add_length_to_trend(get_JSON_request_length(student_user));
 
   for (const ee of data.assessments) {
-    // if(options.logging_status >= 1){
-    //   console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
-    // }
-    // await run_program(student_user, ee) 
-    // if(options.logging_status >= 1){
-    //   console.log(`ending test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
-    // }
+    if(options.logging_status >= 1){
+      console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+    }
+    await run_program(student_user, ee) 
+    if(options.logging_status >= 1){
+      console.log(`ending test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+    }
 
-    // if(options.run_get_assessment_results == true){
+    if(options.run_get_assessment_results == true){
 
-    //   await run_user_assessment_results_program(student_user, ee)
-    //   if(options.logging_status >= 1){
-    //     console.log(`got results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
-    //   }
-    // }
+      await run_user_assessment_results_program(student_user, ee)
+      if(options.logging_status >= 1){
+        console.log(`got results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      }
+    }
 
-    // total_total += student_user.total_kb;
+    total_total += student_user.total_kb;
 
   }
 
     //add downloading a PDF
     if(options.run_get_PDF == true){
       await run_get_pdf(student_user)
+
+        var is_pdf_ready = false;
+        let pdf_url = "";
+        do{
+
+          //check to see if PDF is ready
+          pdf_url = await get_pdf_url(student_user)
+          
+          console.log(pdf_url.data.attributes.pdfFileURL)
+          if(pdf_url.data.attributes.pdfFileURL != undefined && pdf_url.data.attributes.pdfFileURL.length > 0 ){
+            is_pdf_ready = true;
+          }
+          sleep(options.max_pdf_check_sleep)
+
+        }while(is_pdf_ready === false)
+          
+        await get_real_pdf(pdf_url)
+  
     }
 
   return;
@@ -393,23 +414,20 @@ const range = (start, end, step = 1) => {
 };
 
 
-//todo - make dynamic. Make it do a PDF request... then check back every 5 seconds, then download
-async function run_get_pdf(student_user){
 
+async function get_real_pdf(pdf_url){
   return new Promise(async (resolve, reject) => {
-          
-    let response = await http.get(renderURL("/pdf_assessments/b8NPTg8ZNQugVNJVZlsx.pdf"));
-      
+
+    const response = await http.file(renderURL(`https:${pdf_url}`));        
     check(response, {
       'status is 200': (r) => r.status === 200
-    }); 
-
-    student_user.total_kb += response.body.length;
-    add_length_to_trend(response.body.length);
+    });
+                
+    return resolve(true);
 
   });
-
 }
+
 
 async function run_user_assessment_results_program(student_user, data){
 
@@ -595,6 +613,66 @@ async function get_answers_for_assessment(user, assessmentId){
 
   });
 }
+
+
+async function get_pdf_url(user){
+
+  return new Promise(async (resolve, reject) => {
+          
+      const params = {
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': 'Bearer '+ user.accessToken
+        },
+      };
+
+      const response = await http.get(renderURL("/api/get-assessment-report-url"), params);        
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+    
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+      user.total_kb += get_JSON_request_length(res_json);      
+      return resolve(res_json);
+
+
+  });
+
+}
+
+
+
+async function run_get_pdf(user){
+
+  return new Promise(async (resolve, reject) => {
+          
+      const params = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Bearer '+ user.accessToken
+        },
+      };
+
+      const response = await http.get(renderURL("/api/download-assessment-report") , params);
+        
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+    
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+      user.total_kb += get_JSON_request_length(res_json);      
+      return resolve(res_json);
+
+
+  });
+
+}
+
+
 
 async function create_assessment(user, assessmentId){
   return new Promise(async (resolve, reject) => {
