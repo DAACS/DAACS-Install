@@ -71,6 +71,9 @@ get_instance_type_definition(){
         "6-2") 
             echo "DAACS-Mongo/NewDB"
         ;;
+        "6-3") 
+            echo "DAACS-Mongo/Replica"
+        ;;
         "7") 
             echo "DAACS-Webserver"
         ;;
@@ -239,41 +242,6 @@ get_env_files_for_updating(){
 
 }
 
-#Helper function to write env files to it's instance directory name in 
-write_env_to_file(){
-    
-    if [ "$1" = "" ]; then
-        echo "Missing write data"
-        exit -1
-    fi
-
-    if [ "$2" = "" ]; then
-        echo "Missing environment type"
-        exit -1
-    fi
-    
-    if [ "$3" = "" ]; then
-        echo "Missing folder name"
-        exit -1
-    fi
-
-    e_type=$2
-
-    if  ! $(test -d "$root_dest/$3/$e_type") ;
-    then
-        mkdir -p "$root_dest/$3/$e_type"
-    fi
-
-    destdir="$root_dest/$3/$e_type/$filename"
-    touch "$destdir"
-
-    if [ -f "$destdir" ]
-    then 
-        printf "$1" > "$destdir"
-    fi
-
-}
-
 
 refresh_all_services_in_service_helper(){
 
@@ -292,19 +260,166 @@ get_environment_value_from_file_by_env_name(){
     echo $(cat ${1} | grep "${2}")
 }
 
+
+
+# # new
+write_service_subsititions_to_docker_file(){
+
+    instance_type_defintion="${1}"
+    install_folder_destination="${2}"
+    install_env_path="${3}"
+    environment_type_defintion="${4}"
+    docker_changes_format="${5}"
+    docker_file="${6}"
+    
+
+    create_director_if_it_does_exsist "$install_folder_destination/docker"
+
+    # # copy docker file to new location to save for later use
+    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    webserver_docker_file_to="${install_folder_destination}/docker/${docker_file}"
+
+    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    
+    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+    echo "$webserver_docker_file_to"
+}
+
+create_director_if_it_does_exsist(){
+
+    new_dir_to_create="${1}"
+    # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$folder_destination"
+    if  ! $(test -d "${new_dir_to_create}") ;
+    then
+        mkdir -p "${new_dir_to_create}"
+    fi
+}
+
 #Runs fill out env program for all env's
 run_fillout_program(){
 
+    env_list="${1}"    
+    write_to_directory="${2}"    
+
     # Create env files for install
-    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    IFS=' ' read -ra ADDR <<< "$env_list"
     for i in "${ADDR[@]}"; do
         filename=$(basename "$i")
         retval=$( fill_out_env_file "$i")
-        write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
+        write_env_to_file $retval $environment_type_defintion $write_to_directory $filename
     done
 
 }
 
+
+#Helper function to write env files to it's instance directory name in 
+write_env_to_file(){
+    
+    if [ "$1" = "" ]; then
+        echo "Missing write data"
+        exit -1
+    fi
+
+    if [ "$2" = "" ]; then
+        echo "Missing environment type"
+        exit -1
+    fi
+    
+    if [ "$3" = "" ]; then
+        echo "Missing folder name"
+        exit -1
+    fi
+
+    if [ "$4" = "" ]; then
+        echo "Missing file name"
+        exit -1
+    fi
+
+    if  ! $(test -d "$3/$2") ;
+    then
+        mkdir -p "$3/$2"
+    fi
+
+    destdir="$3/$2/$filename"
+
+    touch "$destdir"
+
+    if [ -f "$destdir" ]
+    then 
+        printf "$1" > "$destdir"
+    fi
+
+}
+
+# # Original
+# #Runs fill out env program for all env's
+# run_fillout_program(){
+
+
+
+#     # Create env files for install
+#     IFS=' ' read -ra ADDR <<< "$env_to_create"
+#     for i in "${ADDR[@]}"; do
+#         filename=$(basename "$i")
+#         retval=$( fill_out_env_file "$i")
+#         write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
+#     done
+
+# }
+
+# write_service_subsititions_to_docker_file(){
+
+#     instance_type_defintion="${1}"
+#     install_folder_destination="${2}"
+#     install_env_path="${3}"
+#     environment_type_defintion="${4}"
+#     docker_changes_format="${5}"
+#     docker_file="${6}"
+    
+#     # # copy docker file to new location to save for later use
+#     webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+#     webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
+
+#     cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    
+#     sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+#     echo "$webserver_docker_file_to"
+# }
+
+# #Helper function to write env files to it's instance directory name in 
+# write_env_to_file(){
+    
+#     if [ "$1" = "" ]; then
+#         echo "Missing write data"
+#         exit -1
+#     fi
+
+#     if [ "$2" = "" ]; then
+#         echo "Missing environment type"
+#         exit -1
+#     fi
+    
+#     if [ "$3" = "" ]; then
+#         echo "Missing folder name"
+#         exit -1
+#     fi
+
+#     e_type=$2
+
+#     if  ! $(test -d "$root_dest/$3/$e_type") ;
+#     then
+#         mkdir -p "$root_dest/$3/$e_type"
+#     fi
+
+#     destdir="$root_dest/$3/$e_type/$filename"
+#     touch "$destdir"
+
+#     if [ -f "$destdir" ]
+#     then 
+#         printf "$1" > "$destdir"
+#     fi
+
+# }
 
 #Runs fill out env program for all env's
 run_fillout_program_for_update(){
@@ -374,26 +489,6 @@ generate_docker_file_path(){
     fi
 
     echo "$return_string"
-}
-
-
-write_service_subsititions_to_docker_file(){
-
-    instance_type_defintion="${1}"
-    install_folder_destination="${2}"
-    install_env_path="${3}"
-    environment_type_defintion="${4}"
-    docker_changes_format="${5}"
-    docker_file="${6}"
-    
-    # # copy docker file to new location to save for later use
-    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
-    webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
-
-    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
-    
-    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
-    echo "$webserver_docker_file_to"
 }
 
 

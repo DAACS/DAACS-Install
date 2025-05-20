@@ -1,0 +1,20 @@
+services:
+  #mongo_service_name:
+    image: mysuperimage
+    restart: unless-stopped
+    env_file: 
+      - ${ENV_DIR}webserver-mongo
+    environment:
+      COMPOSE_PROJECT_NAME: "mongoreplica"
+    networks:
+      - myNetwork
+    ports:
+      - ${MONGODB_MAPPED_PORT}:27017
+    # volumes:
+    #   - ${LOCAL_PATH_TO_MONGODB_DIR}/assessments:/docker-entrypoint-initdb.d/assessments/
+    #   - ${LOCAL_PATH_TO_MONGODB_DIR}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    # container_name: ${MONGODB_CONTAINER_NAME}
+    
+networks:
+  myNetwork:
+    external: true

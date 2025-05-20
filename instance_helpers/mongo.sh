@@ -21,9 +21,14 @@ mongo_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate (r)eplica: " true)
     
     case "$new_or_update" in
+    "r") 
+        
+        create_replica_mongo_instance_helper
+    ;;
+
     "n") 
         
         create_mongo_instance_helper
@@ -147,6 +152,101 @@ create_mongo_instance_helper(){
     eval "$command"
 
 }
+
+#Need to build image first then use it 
+create_replica_mongo_instance_helper(){
+
+    printf "\nCREATING Replica mongo server instance....\n"
+
+    instance_type="6-3"
+
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
+
+    instance_home_folder="$root_dest/$install_folder_destination/docker/${mongo_service_name}"
+    create_director_if_it_does_exsist "$instance_home_folder"
+    
+    # Create env files for install --- fix  run_fillout_program  to send root dir
+    run_fillout_program "$env_to_create" "$instance_home_folder"
+
+    env_dir="$instance_home_folder/$environment_type_defintion/$environment_type_defintion-"
+
+    # # filename - enviroment variables for webserver mongo
+    env_webserver_mongo_file="${env_dir}webserver-mongo"
+
+    mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
+    mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
+
+    docker_file=""
+ 
+    case "$environment_type_defintion" in
+        "env-dev") 
+            docker_file="Docker-Webserver-Mongo-dev.docker.yml"
+        ;;
+        "env-prod") 
+            docker_file="Docker-Webserver-Mongo-prod.docker.yml"
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
+    qserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$instance_home_folder" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ;" $docker_file)
+
+
+    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+
+    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
+    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+
+    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
+    folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+    env_dir="ENV_DIR=$env_dir"
+
+    #build file
+    qserver_files_from="$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev"
+    qserver_files_to="${instance_home_folder}/docker/Dockerfile-webserver-mongo-dev"
+    cp "${qserver_files_from}" "${qserver_files_to}"
+    
+    #mongo conf file
+    qserver_files_from="$install_env_path/${instance_type_defintion}/docker/mongod.conf"
+    qserver_files_to="${instance_home_folder}/docker/mongod.conf"
+    cp "${qserver_files_from}" "${qserver_files_to}"
+    
+    #run script
+    qserver_files_from="$install_env_path/${instance_type_defintion}/docker/run.sh"
+    qserver_files_to="${instance_home_folder}/docker/run.sh"
+    cp "${qserver_files_from}" "${qserver_files_to}"
+    
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
+
+    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    mkdir -p "$services_file_dir"
+
+    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+
+    # destdirssl="$root_dest/$mongo_service_name/ssl/"
+
+    # # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl"
+    # if  ! $(test -d "$destdirssl") ;
+    # then
+    #     mkdir -p "$destdirssl"
+    # fi
+
+    # mongo_id=$(get_services_ids_by_service_name "$mongo_service_name")
+    # mongo_id=$(echo "$mongo_id" | tr -d " " )
+    # command="docker cp ${mongo_id}:/home/mongossl.pem ${destdirssl}mongossl.pem"
+
+    # eval "$command"
+
+}
+
 
 # Todo when I come back. I need ot change DAACS-Mongo/Webserver to DAACS-Mongo/instance
 create_mongo_database_helper(){
