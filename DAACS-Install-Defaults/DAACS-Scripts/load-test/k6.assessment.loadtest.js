@@ -191,7 +191,7 @@ let total_total = 0;
           executor: 'constant-vus',
           vus:vus,
           duration: duration,
-
+          
         }
       } 
 
@@ -384,22 +384,24 @@ export default async function (data) {
 
     //add downloading a PDF
     if(options.run_get_PDF == true){
+      console.log("Requesting new PDF generation")
       await run_get_pdf(student_user)
 
         var is_pdf_ready = false;
         let pdf_url = "";
+
         do{
 
           //check to see if PDF is ready
           pdf_url = await get_pdf_url(student_user)
           
-          console.log(pdf_url.data.attributes.pdfFileURL)
           if(pdf_url.data.attributes.pdfFileURL != undefined && pdf_url.data.attributes.pdfFileURL.length > 0 ){
             is_pdf_ready = true;
           }
           sleep(options.max_pdf_check_sleep)
 
         }while(is_pdf_ready === false)
+        console.log("Got PDF URL... now requesting")
           
         await get_real_pdf(pdf_url)
   
