@@ -9,6 +9,7 @@ Instructions:
     # Pick install env path if differs from base env
 '
 
+MONGO_REPLICA_IMAGE_NAME="mongo-replica"
 
 mongo_instance_helper(){
 
@@ -156,21 +157,22 @@ create_mongo_instance_helper(){
 #Need to build image first then use it 
 create_replica_mongo_instance_helper(){
 
-    printf "\nCREATING Replica mongo server instance....\n"
-
     instance_type="6-3"
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    create_mongo_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "file_dir=$install_env_path/${instance_type_defintion}/docker/" "$install_env_path/${instance_type_defintion}/docker/"
+
+    printf "\nCREATING Replica mongo server instance....\n"
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
 
     instance_home_folder="$root_dest/$install_folder_destination/docker/${mongo_service_name}"
     create_director_if_it_does_exsist "$instance_home_folder"
     
     # Create env files for install --- fix  run_fillout_program  to send root dir
-    run_fillout_program "$env_to_create" "$instance_home_folder"
+    run_fillout_program_new "$env_to_create" "$instance_home_folder"
 
     env_dir="$instance_home_folder/$environment_type_defintion/$environment_type_defintion-"
 
@@ -195,7 +197,7 @@ create_replica_mongo_instance_helper(){
         ;;
     esac
 
-    qserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$instance_home_folder" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ;" $docker_file)
+    qserver_docker_file_to=$(write_service_subsititions_to_docker_file_new "$instance_type_defintion" "$instance_home_folder" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ;" $docker_file)
 
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
@@ -359,4 +361,22 @@ update_mongo_instance_helper(){
         update_services_ids_in_service_file "$entry"
     done
 
+}
+
+create_mongo_image(){
+
+    if [ $(does_docker_image_exsist "${1}") == false ]; then
+        printf "\nCreating mongo replica image exsist....\n"
+
+        build_args=$(echo "${3}" | wc -m)
+
+        if [ $(echo "${3}" | wc -m) -gt 0 ]; then
+            build_args="--build-arg ${3}"
+        fi
+        
+        command="cd ${4} && docker build ${build_args} -t ${2} -f ${1} ."
+        eval "$command"
+    fi
+
+    exit
 }

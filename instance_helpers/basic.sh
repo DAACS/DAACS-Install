@@ -263,7 +263,7 @@ get_environment_value_from_file_by_env_name(){
 
 
 # # new
-write_service_subsititions_to_docker_file(){
+write_service_subsititions_to_docker_file_new(){
 
     instance_type_defintion="${1}"
     install_folder_destination="${2}"
@@ -296,7 +296,7 @@ create_director_if_it_does_exsist(){
 }
 
 #Runs fill out env program for all env's
-run_fillout_program(){
+run_fillout_program_new(){
 
     env_list="${1}"    
     write_to_directory="${2}"    
@@ -306,14 +306,14 @@ run_fillout_program(){
     for i in "${ADDR[@]}"; do
         filename=$(basename "$i")
         retval=$( fill_out_env_file "$i")
-        write_env_to_file $retval $environment_type_defintion $write_to_directory $filename
+        write_env_to_file_new $retval $environment_type_defintion $write_to_directory $filename
     done
 
 }
 
 
 #Helper function to write env files to it's instance directory name in 
-write_env_to_file(){
+write_env_to_file_new(){
     
     if [ "$1" = "" ]; then
         echo "Missing write data"
@@ -352,74 +352,74 @@ write_env_to_file(){
 }
 
 # # Original
-# #Runs fill out env program for all env's
-# run_fillout_program(){
+#Runs fill out env program for all env's
+run_fillout_program(){
 
 
 
-#     # Create env files for install
-#     IFS=' ' read -ra ADDR <<< "$env_to_create"
-#     for i in "${ADDR[@]}"; do
-#         filename=$(basename "$i")
-#         retval=$( fill_out_env_file "$i")
-#         write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
-#     done
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        retval=$( fill_out_env_file "$i")
+        write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
+    done
 
-# }
+}
 
-# write_service_subsititions_to_docker_file(){
+write_service_subsititions_to_docker_file(){
 
-#     instance_type_defintion="${1}"
-#     install_folder_destination="${2}"
-#     install_env_path="${3}"
-#     environment_type_defintion="${4}"
-#     docker_changes_format="${5}"
-#     docker_file="${6}"
+    instance_type_defintion="${1}"
+    install_folder_destination="${2}"
+    install_env_path="${3}"
+    environment_type_defintion="${4}"
+    docker_changes_format="${5}"
+    docker_file="${6}"
     
-#     # # copy docker file to new location to save for later use
-#     webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
-#     webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
+    # # copy docker file to new location to save for later use
+    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
 
-#     cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
     
-#     sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
-#     echo "$webserver_docker_file_to"
-# }
+    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+    echo "$webserver_docker_file_to"
+}
 
-# #Helper function to write env files to it's instance directory name in 
-# write_env_to_file(){
+#Helper function to write env files to it's instance directory name in 
+write_env_to_file(){
     
-#     if [ "$1" = "" ]; then
-#         echo "Missing write data"
-#         exit -1
-#     fi
+    if [ "$1" = "" ]; then
+        echo "Missing write data"
+        exit -1
+    fi
 
-#     if [ "$2" = "" ]; then
-#         echo "Missing environment type"
-#         exit -1
-#     fi
+    if [ "$2" = "" ]; then
+        echo "Missing environment type"
+        exit -1
+    fi
     
-#     if [ "$3" = "" ]; then
-#         echo "Missing folder name"
-#         exit -1
-#     fi
+    if [ "$3" = "" ]; then
+        echo "Missing folder name"
+        exit -1
+    fi
 
-#     e_type=$2
+    e_type=$2
 
-#     if  ! $(test -d "$root_dest/$3/$e_type") ;
-#     then
-#         mkdir -p "$root_dest/$3/$e_type"
-#     fi
+    if  ! $(test -d "$root_dest/$3/$e_type") ;
+    then
+        mkdir -p "$root_dest/$3/$e_type"
+    fi
 
-#     destdir="$root_dest/$3/$e_type/$filename"
-#     touch "$destdir"
+    destdir="$root_dest/$3/$e_type/$filename"
+    touch "$destdir"
 
-#     if [ -f "$destdir" ]
-#     then 
-#         printf "$1" > "$destdir"
-#     fi
+    if [ -f "$destdir" ]
+    then 
+        printf "$1" > "$destdir"
+    fi
 
-# }
+}
 
 #Runs fill out env program for all env's
 run_fillout_program_for_update(){
@@ -817,5 +817,23 @@ does_service_exsist(){
             echo false
         else
             echo true
+    fi
+}
+
+
+does_docker_image_exsist(){
+
+    
+    if [ "$1" = "" ]; then
+        echo "Missing docker image name."
+        exit -1
+    fi
+
+    image_name="${1}"
+
+    if [ -z "$(docker images -q ${image_name} 2> /dev/null)" ]; then
+        echo false
+    else
+        echo true
     fi
 }

@@ -1,9 +1,6 @@
 services:
   #mongo_service_name:
-    # image: mongo
-    build: 
-      context: .
-      dockerfile: ./Dockerfile-webserver-mongo-dev
+    image: mongo-replica
     restart: unless-stopped
     env_file: 
       - ${ENV_DIR}webserver-mongo
