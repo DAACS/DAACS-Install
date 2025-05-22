@@ -160,7 +160,6 @@ create_mongo_instance_helper(){
 
 }
 
-# Todo check if network exsist does_docker_network_exsist
 create_replica_mongo_instance_helper(){
 
 
@@ -259,8 +258,6 @@ create_replica_mongo_instance_helper(){
 
 }
 
-
-# Todo check if network exsist does_docker_network_exsist
 create_mongo_database_helper(){
 
     printf "\nCreating database....\n"
