@@ -842,15 +842,16 @@ does_docker_image_exsist(){
 create_image(){
 
     if [ $(does_docker_image_exsist "${2}") == false ]; then
-        printf "\nCreating ${4} image....\n"
+        printf "\nCreating ${2} image....\n"
 
-        build_args=$(echo "${3}" | wc -m)
+        build_args=""
+        length=$(echo "${4}" | xargs | wc -m) 
 
-        if [ $(echo "${3}" | wc -m) -gt 0 ]; then
-            build_args="--build-arg ${3}"
+        if [ $(( $length - 1)) -gt 0 ]; then
+            build_args="--build-arg ${4}"
         fi
         
-        command="cd ${4} && docker build ${build_args} -t ${2} -f ${1} ."
+        command="cd ${3} && docker build ${build_args} -t ${2} -f ${1} ."
         eval "$command"
     fi
 
