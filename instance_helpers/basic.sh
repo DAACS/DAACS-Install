@@ -838,6 +838,24 @@ does_docker_image_exsist(){
     fi
 }
 
+#install_file=1, image_name=2, envs=3, build_directory=4
+create_image(){
+
+    if [ $(does_docker_image_exsist "${2}") == false ]; then
+        printf "\nCreating ${4} image....\n"
+
+        build_args=$(echo "${3}" | wc -m)
+
+        if [ $(echo "${3}" | wc -m) -gt 0 ]; then
+            build_args="--build-arg ${3}"
+        fi
+        
+        command="cd ${4} && docker build ${build_args} -t ${2} -f ${1} ."
+        eval "$command"
+    fi
+
+}
+
 get_system_archtechture(){
 
     echo $(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')

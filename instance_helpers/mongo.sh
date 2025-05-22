@@ -165,7 +165,8 @@ create_replica_mongo_instance_helper(){
 
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
-    create_mongo_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "file_dir=$install_env_path/${instance_type_defintion}/docker/" "$install_env_path/${instance_type_defintion}/docker/"
+    
+    create_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "file_dir=$install_env_path/${instance_type_defintion}/docker/" "$install_env_path/${instance_type_defintion}/docker/"
 
     printf "\nCREATING Replica mongo server instance....\n"
 
