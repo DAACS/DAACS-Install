@@ -837,3 +837,8 @@ does_docker_image_exsist(){
         echo true
     fi
 }
+
+get_system_archtechture(){
+
+    echo $(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')
+}

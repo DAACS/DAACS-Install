@@ -51,7 +51,7 @@ qserver_instance_helper(){
 create_qserver_instance_helper(){
 
     printf "\nCREATING Q server instance....\n"
-    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
+    ARCHITECTURE=$(get_system_archtechture)
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     qserver_service_name=$(ask_for_docker_service_and_check "Enter name for Q server service : " )
@@ -120,15 +120,13 @@ create_qserver_instance_helper(){
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
-    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
-
     build_file=""
 
         case "${ARCHITECTURE}" in
         "aarch64") 
             build_file="Dockerfile-queue-dev-aarch64.debian"
         ;;
-        "x_86") 
+        "x86_64") 
             build_file="Dockerfile-queue-dev-x_86.debian"
         ;;
         *)
@@ -158,7 +156,8 @@ create_qserver_instance_helper(){
 
 update_qserver_instance_helper(){
     printf "\nUPDATING Q server instance....\n"
-    ARCHITECTURE="$(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')"
+    
+    ARCHITECTURE=$(get_system_archtechture)
 
     should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
@@ -212,7 +211,7 @@ update_qserver_instance_helper(){
         "aarch64") 
             build_file="Dockerfile-queue-dev-aarch64.debian"
         ;;
-        "x_86") 
+        "x86_64") 
             build_file="Dockerfile-queue-dev-x_86.debian"
         ;;
         *)
