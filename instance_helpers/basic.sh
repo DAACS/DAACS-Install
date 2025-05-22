@@ -842,3 +842,24 @@ get_system_archtechture(){
 
     echo $(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')
 }
+
+does_docker_network_exsist(){
+
+    network="${1}"
+    does_network_exsist=$(docker network ls|grep ${network} > /dev/null || echo false)
+
+    if [ -z $does_network_exsist  ]; then
+        echo true
+    else
+        echo false
+    fi
+
+}
+
+
+create_docker_network(){
+
+    network="${1}"
+    does_network_exsist=$(docker network create ${network})
+
+}

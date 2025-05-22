@@ -10,6 +10,7 @@ Instructions:
 '
 
 MONGO_REPLICA_IMAGE_NAME="mongo-replica"
+MONGO_NETWORK_NAME="myNetwork"
 
 mongo_instance_helper(){
 
@@ -56,6 +57,7 @@ mongo_instance_helper(){
     ;;
     esac
 }
+
 
 create_mongo_instance_helper(){
 
@@ -129,6 +131,10 @@ create_mongo_instance_helper(){
     qserver_files_to="${root_dest}/${mongo_service_name}/docker/run.sh"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
+    if [ $(does_docker_network_exsist "$MONGO_NETWORK_NAME") = false ]; then
+        create_docker_network "$MONGO_NETWORK_NAME"
+    fi
+
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
     
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
@@ -154,8 +160,9 @@ create_mongo_instance_helper(){
 
 }
 
-#Need to build image first then use it 
+# Todo check if network exsist does_docker_network_exsist
 create_replica_mongo_instance_helper(){
+
 
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
@@ -171,7 +178,7 @@ create_replica_mongo_instance_helper(){
     instance_home_folder="$root_dest/$install_folder_destination/docker/${mongo_service_name}"
     create_director_if_it_does_exsist "$instance_home_folder"
     
-    # Create env files for install --- fix  run_fillout_program  to send root dir
+    # Create env files for install
     run_fillout_program_new "$env_to_create" "$instance_home_folder"
 
     env_dir="$instance_home_folder/$environment_type_defintion/$environment_type_defintion-"
@@ -199,7 +206,6 @@ create_replica_mongo_instance_helper(){
 
     qserver_docker_file_to=$(write_service_subsititions_to_docker_file_new "$instance_type_defintion" "$instance_home_folder" "$install_env_path" "$environment_type_defintion" "s/#mongo_service_name/$mongo_service_name/g ;" $docker_file)
 
-
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
@@ -224,6 +230,10 @@ create_replica_mongo_instance_helper(){
     qserver_files_to="${instance_home_folder}/docker/run.sh"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
+    if [ $(does_docker_network_exsist "$MONGO_NETWORK_NAME") = false ]; then
+        create_docker_network "$MONGO_NETWORK_NAME"
+    fi
+
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
 
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
@@ -250,7 +260,7 @@ create_replica_mongo_instance_helper(){
 }
 
 
-# Todo when I come back. I need ot change DAACS-Mongo/Webserver to DAACS-Mongo/instance
+# Todo check if network exsist does_docker_network_exsist
 create_mongo_database_helper(){
 
     printf "\nCreating database....\n"
@@ -365,7 +375,7 @@ update_mongo_instance_helper(){
 
 create_mongo_image(){
 
-    if [ $(does_docker_image_exsist "${1}") == false ]; then
+    if [ $(does_docker_image_exsist "${2}") == false ]; then
         printf "\nCreating mongo replica image exsist....\n"
 
         build_args=$(echo "${3}" | wc -m)
@@ -378,5 +388,61 @@ create_mongo_image(){
         eval "$command"
     fi
 
-    exit
+}
+
+#todo
+initiate_mongo_process_to_replica_set(){
+
+    primary_mongo_service_name="${1}"
+    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.initiate()\""
+    eval "$command"
+
+}
+
+#todo
+add_mongo_process_to_replica_set(){
+
+    primary_mongo_service_name="${1}"
+    new_mongo_service_name="${2}"
+    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.add({host: \"${new_mongo_service_name}\" })\""
+    eval "$command"
+}
+
+#todo
+add_my_own_admin_account_to_docker_mongo(){
+
+    primary_mongo_service_name="${1}"
+    username="${2}"
+    password="${3}"
+
+    command=" docker exec -it ${primary_mongo_service_name} mongosh  --eval \"use admin; db.createUser({ user: \"${username}\", pwd: \"${password}\", roles:[\"root\"]})\""
+    eval "$command"
+   
+#    docker exec -it loadmongo mongosh bash
+#     use admin
+#     db.createUser(
+#     {
+#         user: "tom", 
+#         pwd: "jerry", 
+#         roles:["root"]
+#     })
+
+    
+
+}
+
+#todo 
+get_mongo_replica_status(){
+
+    primary_mongo_service_name="${1}"
+    status=$(docker exec -it ${primary_mongo_service_name} mongosh --eval "rs.status()")
+
+    echo "$status"
+}
+
+#todo - to replace create_mongo_database_helper function, or we could ask for files and if wasn't supplied then manual fill in envs
+add_mongo_database_to_instance(){
+
+    command="docker exec -it 8f1fc42bda42 sh -c \"export MONGODB_DATABASE_NAME=loadtest1 MONGO_USERNAME=userloadtest1 MONGO_PASSWORD=passwordloadtest1 API_CLIENT_ID=application WEB_SERVER_COMMUNICATION_PASSWORD=woof WEB_SERVER_COMMUNICATION_USERNAME=meow WEB_SERVER_COMMUNICATION_EMAIL=moomoodevelopment@gmail.com WEB_SERVER_ADMIN_PASSWORD=tyleon WEB_SERVER_ADMIN_USERNAME=planters WEB_SERVER_ADMIN_EMAIL=djcoderedpro@gmail.com && mongosh < /docker-entrypoint-initdb.d/mongo-init.js \""
+
 }
