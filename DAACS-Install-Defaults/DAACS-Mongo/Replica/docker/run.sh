@@ -14,4 +14,4 @@
 # cat /home/mongossl.key /home/mongossl.cert > /home/mongossl.pem
 # mongod --config /home/mongod.conf --replSet myReplicaSet --setParameter tlsUseSystemCA=true 
 # mongod --replSet myReplicaSet --setParameter tlsUseSystemCA=true 
-mongod
+mongod --config /home/mongod.conf
