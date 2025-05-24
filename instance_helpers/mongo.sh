@@ -165,6 +165,9 @@ create_replica_mongo_instance_helper(){
 
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process)" true)
+    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server?" true)
+    replica_set_id=$(ask_read_question_or_try_again "Replica set ID" true)
     
     create_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" "file_dir=$install_env_path/${instance_type_defintion}/docker/"
 
@@ -193,7 +196,8 @@ create_replica_mongo_instance_helper(){
  
     case "$environment_type_defintion" in
         "env-dev") 
-            docker_file="Docker-Webserver-Mongo-dev.docker.yml"
+            docker_file="Docker-Replica-Mongo-dev.docker.yml"
+            # docker_file="Docker-Webserver-Mongo-dev.docker.yml"
         ;;
         "env-prod") 
             docker_file="Docker-Webserver-Mongo-prod.docker.yml"
@@ -243,6 +247,28 @@ create_replica_mongo_instance_helper(){
 
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
+    if [ -z "$is_this_init_process" ]; then
+
+        hostname="${3}"
+        port="${4}"
+        priority="${5}"
+
+        #add database to primary on creation
+        if [ -z "$do_create_database" ]; then
+            add_mongo_database_to_instance
+        fi
+
+        initiate_mongo_process_to_replica_set "$mongo_service_name" "$replica_set_id" "$hostname" "$port" "$priority"
+
+    else
+
+        primary_mongo_service_name="${1}"
+        new_mongo_service_name="${2}"
+
+        add_mongo_process_to_replica_set "$primary_mongo_service_name" "$new_mongo_service_name"
+
+    fi 
+
     # destdirssl="$root_dest/$mongo_service_name/ssl/"
 
     # # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl"
@@ -258,6 +284,28 @@ create_replica_mongo_instance_helper(){
     # eval "$command"
 
 }
+
+
+#todo - to replace create_mongo_database_helper function, or we could ask for files and if wasn't supplied then manual fill in envs
+add_mongo_database_to_instance(){
+
+    mongo_service=$(ask_read_question_or_try_again "What mongo service name?: " true)
+    MONGODB_DATABASE_NAME=$(ask_read_question_or_try_again "Database name: " true)
+    MONGO_USERNAME=$(ask_read_question_or_try_again "Username: " true)
+    MONGO_PASSWORD=$(ask_read_question_or_try_again "Password: " true)
+    API_CLIENT_ID=$(ask_read_question_or_try_again "API Client ID: " true)
+    WEB_SERVER_COMMUNICATION_USERNAME=$(ask_read_question_or_try_again "Web server communication username: " true)
+    WEB_SERVER_COMMUNICATION_PASSWORD=$(ask_read_question_or_try_again "Web server communication password: " true)
+    WEB_SERVER_COMMUNICATION_EMAIL=$(ask_read_question_or_try_again "Web server communication email: " true)
+    WEB_SERVER_ADMIN_USERNAME=$(ask_read_question_or_try_again "Web server admin username: " true)
+    WEB_SERVER_ADMIN_PASSWORD=$(ask_read_question_or_try_again "Web server admin password: " true)
+    WEB_SERVER_ADMIN_EMAIL=$(ask_read_question_or_try_again "Web server admin email: " true)
+
+    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh < /docker-entrypoint-initdb.d/mongo-init.js \""
+
+    eval "$command"
+}
+
 
 create_mongo_database_helper(){
 
@@ -388,11 +436,26 @@ create_mongo_image(){
 
 }
 
-#todo
+#todo - test that this works all the way from the beginning 
 initiate_mongo_process_to_replica_set(){
 
     primary_mongo_service_name="${1}"
-    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.initiate()\""
+    replica_set_id="${2}"
+    hostname="${3}"
+    port="${4}"
+    priority="${5}"
+
+    if [ $( $hostname | wc -m ) eq 0 ]; then
+        hostname=$(get_current_server_ip)
+    fi 
+
+    if [ $( $priority | wc -m ) eq 0 ]; then
+        priority=1
+    fi 
+
+    config="rs.initate(); config= { '_id' : '${replica_set_id}', 'members':[ { '_id' : 0, 'host' : '${IP}:${port}', priority: ${priority} } ] }; rs.reconfig(config);"
+
+    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"${config}\""
     eval "$command"
 
 }
@@ -402,18 +465,20 @@ add_mongo_process_to_replica_set(){
 
     primary_mongo_service_name="${1}"
     new_mongo_service_name="${2}"
-    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.add({host: \"${new_mongo_service_name}\" })\""
+    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.add({host: '${new_mongo_service_name}' })\" "
     eval "$command"
 }
 
-#todo
+#todo - it works but I need to add this to command so I can add after replica init
 add_my_own_admin_account_to_docker_mongo(){
 
     primary_mongo_service_name="${1}"
     username="${2}"
     password="${3}"
 
-    command=" docker exec -it ${primary_mongo_service_name} mongosh  --eval \"use admin; db.createUser({ user: \"${username}\", pwd: \"${password}\", roles:[\"root\"]})\""
+    command=" docker exec -it ${primary_mongo_service_name} mongosh  --eval \"db.getSiblingDB('admin').createUser({ user: '${username}', pwd: '${password}', roles:['root']})\"; " 
+
+# echo "$command"
     eval "$command"
    
 #    docker exec -it loadmongo mongosh bash
@@ -438,9 +503,11 @@ get_mongo_replica_status(){
     echo "$status"
 }
 
-#todo - to replace create_mongo_database_helper function, or we could ask for files and if wasn't supplied then manual fill in envs
-add_mongo_database_to_instance(){
 
-    command="docker exec -it 8f1fc42bda42 sh -c \"export MONGODB_DATABASE_NAME=loadtest1 MONGO_USERNAME=userloadtest1 MONGO_PASSWORD=passwordloadtest1 API_CLIENT_ID=application WEB_SERVER_COMMUNICATION_PASSWORD=woof WEB_SERVER_COMMUNICATION_USERNAME=meow WEB_SERVER_COMMUNICATION_EMAIL=moomoodevelopment@gmail.com WEB_SERVER_ADMIN_PASSWORD=tyleon WEB_SERVER_ADMIN_USERNAME=planters WEB_SERVER_ADMIN_EMAIL=djcoderedpro@gmail.com && mongosh < /docker-entrypoint-initdb.d/mongo-init.js \""
-
+copy_file_into_container(){
+    container_id="${1}"
+    file="${2}"
+    location="${3}"
+    command="docker cp ${file} ${container_id}:${location}"
+    eval "$command"
 }

@@ -882,3 +882,27 @@ create_docker_network(){
     does_network_exsist=$(docker network create ${network})
 
 }
+
+
+check_to_see_if_we_have_the_tools(){
+
+
+    if [ $(which route | wc -m ) -gt 0 ]; then 
+        echo true 
+    else 
+        echo false 
+    fi 
+}
+
+get_current_server_ip(){
+
+    if [ -z $(check_to_see_if_we_have_the_tools) ]; then
+        command="apt-get update && apt-get install net-tools"
+        eval "$command"
+    fi
+
+    network_card=$(route -n | awk '$1 == "0.0.0.0" {print $8}')
+    IP=$(ifconfig "$network_card" | sed -nre '/^[^ ]+/{N;s/^([^ ]+).*inet *([^ ]+).*/\2/p}')
+    echo "$IP"
+
+}
