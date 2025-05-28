@@ -5,3 +5,6 @@ DAACS-Install-Defaults/DAACS-Scripts/load-test/node_modules/*
 DAACS-Install-Defaults/DAACS-Scripts/load-test/data/input/*
 DAACS-Install-Defaults/DAACS-Scripts/load-test/*.html
 DAACS-Install-Defaults/DAACS-Scripts/load-test/k6.json
+
+*.html
+*.json

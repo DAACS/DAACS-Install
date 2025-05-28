@@ -200,7 +200,7 @@ let total_total = 0;
 
     case "stages-ramping-vus":
       // START_VUS=0 STAGES="30s:5,30s:10,40s:5,20s:20,30s:0" GRACEFUL_STOP="120s" GRACEFUL_RAMP_DOWN="120s" 
-      // ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="slow" LOAD_TEST_TYPE_SCENRIO="stages-ramping-vus" STAGES="30s:100,30s:200,30s:500,30s:1000,30s:0" GRACEFUL_STOP="120s" GRACEFUL_RAMP_DOWN="120s" RUN_GET_PDF=false RUN_GET_ASSESSMENT_RESULTS=true MAX_LOGIN_SLEEP=30 INSECURE_SKIP_TLS="true" k6 run k6.assessment.loadtest.js --out json=k6.json
+      // ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="slow" LOAD_TEST_TYPE_SCENRIO="stages-ramping-vus" STAGES="30s:100,1m:200,5m:500,30s:0" GRACEFUL_STOP="120s" GRACEFUL_RAMP_DOWN="120s" RUN_GET_PDF=false RUN_GET_ASSESSMENT_RESULTS=true MAX_LOGIN_SLEEP=30 INSECURE_SKIP_TLS="true" k6 run k6.assessment.loadtest.js --out json=k6.json
       
       let start_vus = __ENV.START_VUS == undefined ? 0 :  __ENV.START_VUS;
       stages = map_stages(__ENV.STAGES);
@@ -361,7 +361,12 @@ export default async function (data) {
   let student_user = await login(username, password);
   add_length_to_trend(get_JSON_request_length(student_user));
 
+
+
   for (const ee of data.assessments) {
+
+    log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${ee.data.attributes.assessmentId}`)
+
     if(options.logging_status >= 1){
       console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
     }
@@ -433,7 +438,11 @@ async function get_real_pdf(pdf_url){
 
 async function run_user_assessment_results_program(student_user, data){
 
-  let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, data.data.attributes.assessmentId);
+  let assessment_id = data.data.attributes.assessmentId;
+
+  let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id);
+    log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
+
   let count = user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.map((d) => {
         return d.subDomainScores
     }).reduce(function(pre, cur) {
@@ -444,7 +453,10 @@ async function run_user_assessment_results_program(student_user, data){
     
     let range_ = range(1, count)
     for (const index of range_) {
-      await get_user_assessment_summaries_data(student_user, data.data.attributes.assessmentId);
+
+    log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
+
+      await get_user_assessment_summaries_data(student_user, assessment_id);
       sleep(rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep));
     }
 }
@@ -452,6 +464,9 @@ async function run_user_assessment_results_program(student_user, data){
 async function run_program(student_user, data, avg){
   
   let assessmentId = data.data.attributes.assessmentId;
+
+  log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
+
 
   // //create assessment  
   await create_assessment(student_user, assessmentId);
@@ -464,6 +479,9 @@ async function run_program(student_user, data, avg){
   
   let count = 0;
   var isAssessmentDone = undefined;
+
+  log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${assessmentId}`)
+
   do{
 
       let questionId = question.data.attributes.questions._id;
@@ -674,7 +692,34 @@ async function run_get_pdf(user){
 
 }
 
+async function log_user_events(user, url, time, title){
+  return new Promise(async (resolve, reject) => {
 
+      const params = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Bearer '+ user.accessToken
+        },
+      };
+
+      const response = await http.post(renderURL("/api/user-events"), {"log_type":"PAGE_VIEW","url":url,  "title":title, "userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36", "timestamp": time} , params);
+        
+
+      // {"log_type":"PAGE_VIEW","title":"Assessment - Reading","url":"https://loadtest2.moomoodev.com/assessments/795c8469-9bdd-439a-9251-34457bd04adc/take","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36","timestamp":"2025-05-28T15:06:20.156Z"}
+
+      check(response, {
+        'status is 200': (r) => r.status === 200
+      });
+    
+    
+        const res_json = await response.json();      
+        add_length_to_trend(get_JSON_request_length(res_json));
+
+        user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(res_json);
+    
+  });
+}
 
 async function create_assessment(user, assessmentId){
   return new Promise(async (resolve, reject) => {
