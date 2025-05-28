@@ -158,8 +158,6 @@ create_qserver_instance_helper(){
 
 update_qserver_instance_helper(){
     printf "\nUPDATING Q server instance....\n"
-    
-    ARCHITECTURE=$(get_system_archtechture)
 
     should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
@@ -209,7 +207,9 @@ update_qserver_instance_helper(){
 
     build_file=""
 
-        case "${ARCHITECTURE}" in
+    ARCHITECTURE=$(get_system_archtechture)
+
+    case "${ARCHITECTURE}" in
         "aarch64") 
             build_file="Dockerfile-queue-dev-aarch64.debian"
         ;;

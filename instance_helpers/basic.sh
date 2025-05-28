@@ -340,7 +340,7 @@ write_env_to_file_new(){
         mkdir -p "$3/$2"
     fi
 
-    destdir="$3/$2/$filename"
+    destdir="$3/$2/$4"
 
     touch "$destdir"
 
@@ -423,12 +423,11 @@ write_env_to_file(){
 
 #Runs fill out env program for all env's
 run_fillout_program_for_update(){
-
+    run_these=${1}
     # Create env files for install
-    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    IFS=' ' read -ra ADDR <<< "$run_these"
     for i in "${ADDR[@]}"; do
         filename=$(basename "$i")
-        echo "$filename"
         read -p "Do we want to update ${filename} ? (y)es or (n)o : " should_update_file
 
         if [ "$should_update_file" == "y" ]; then
@@ -905,4 +904,15 @@ get_current_server_ip(){
     IP=$(ifconfig "$network_card" | sed -nre '/^[^ ]+/{N;s/^([^ ]+).*inet *([^ ]+).*/\2/p}')
     echo "$IP"
 
+}
+
+is_string_length_greater_than_specified(){
+
+    if [ $(( $(echo ${1} | wc -m ) - 1)) -gt "$((${2}))" ]; then
+        echo true
+        else
+        echo false
+
+    fi
+    
 }
