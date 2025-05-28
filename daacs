@@ -17,7 +17,8 @@ Type ${Color_Off}${Red}ctrl+c${Color_Off}  or type ${Red}quit${Color_Off} to exi
 4 - Create/Update/Refresh instance\n
 5 - Reset service\n
 6 - Reset all services in folder\n
-7 - Recreate service\n\n
+7 - Recreate service\n
+8 - K6 (not working)\n\n
 Select an option: ")
 
     if [ "$step1_option" = "" ]; then
