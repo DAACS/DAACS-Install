@@ -110,17 +110,9 @@ create_webserver_instance_helper(){
             mongo_port=$(ask_read_question_or_try_again "MONGODB_MAPPED_PORT" true)
             mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
 
-            # mongo_username="MONGO_USERNAME=tong"
-            # mongo_password="MONGO_PASSWORD=wong"
-            # mongo_database_name="MONGODB_DATABASE_NAME=tong"
-            # api_client_id="API_CLIENT_ID=application"
-            # mongo_replica_id='MONGO_REPLICA_ID="my-mongo-set"'
-            # mongo_replica_host_list='MONGO_REPLICA_HOST_LIST="134.209.167.63:27018,134.209.167.63:27019,134.209.167.63:27020"'
-            # mongo_port="MONGODB_MAPPED_PORT=27018"
-
             #create env file
             write_file="${mongo_port}\n${mongo_username}\n${mongo_password}\n${mongo_database_name}\n${mongo_replica_set_mongo}\n${mongo_replica_id}\n${mongo_replica_host_list}\n"
-            write_env_to_file_new "$write_file" "$environment_type_defintion" "$absolute_dir" "${environment_type_defintion}-mongo"
+            write_env_to_file_new "$write_file" "$environment_type_defintion" "$absolute_dir" "${environment_type_defintion}-webserver-mongo"
         ;;
         esac
 
