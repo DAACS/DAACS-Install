@@ -89,8 +89,8 @@ export let options = {
   insecureSkipTLSVerify:  __ENV.INSECURE_SKIP_TLS == "true" ? true : false,
   // httpDebug: 'full',
   thresholds: {
-    http_req_failed: ['rate<0.01'], // http errors should be less than 1%
-    http_req_duration: ['p(95)<300'], // 95% of requests should be below 500ms
+    http_req_failed: ['rate<0'], // http errors should be less than 0%
+    http_req_duration: ['p(99)<500'], // 100% of requests should be below 500ms
     
   },
   assessmentTypeOptions: {
@@ -163,8 +163,8 @@ let total_total = 0;
     break;
 
     case "slow":
-      options.userAssessmentOptions.user_results.min_sleep = 1;
-      options.userAssessmentOptions.user_results.max_sleep = 10;
+      options.userAssessmentOptions.user_results.min_sleep = 15;
+      options.userAssessmentOptions.user_results.max_sleep = 30;
 
       options.assessmentTypeOptions.cat.min_sleep = 1;
       options.assessmentTypeOptions.cat.max_sleep =  10;
@@ -174,6 +174,28 @@ let total_total = 0;
       options.assessmentTypeOptions.likert.max_sleep =  10;
     break;
 
+    case "human":
+      options.userAssessmentOptions.user_results.min_sleep = 20;
+      options.userAssessmentOptions.user_results.max_sleep = 35;
+      options.assessmentTypeOptions.cat.min_sleep = 20;
+      options.assessmentTypeOptions.cat.max_sleep =  45;
+      options.assessmentTypeOptions.writing.min_sleep = 5; 
+      options.assessmentTypeOptions.writing.max_sleep =  15;
+      options.assessmentTypeOptions.likert.min_sleep = 30;
+      options.assessmentTypeOptions.likert.max_sleep =  45;
+    break;
+
+
+    case "human-human":
+      options.userAssessmentOptions.user_results.min_sleep = 30;
+      options.userAssessmentOptions.user_results.max_sleep = 60;
+      options.assessmentTypeOptions.cat.min_sleep = 30;
+      options.assessmentTypeOptions.cat.max_sleep =  120;
+      options.assessmentTypeOptions.writing.min_sleep = 10; 
+      options.assessmentTypeOptions.writing.max_sleep =  20;
+      options.assessmentTypeOptions.likert.min_sleep = 30;
+      options.assessmentTypeOptions.likert.max_sleep =  60;
+    break;
   }
 
   let stages, vus, duration, preAllocatedVUs, timeUnit, iterations = undefined;
@@ -376,7 +398,7 @@ export default async function (data) {
     }
 
     if(options.run_get_assessment_results == true){
-
+        console.log(`getting results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
       await run_user_assessment_results_program(student_user, ee)
       if(options.logging_status >= 1){
         console.log(`got results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
