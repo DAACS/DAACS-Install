@@ -72,7 +72,9 @@ create_mongo_instance_helper(){
 
     instance_type="6-1"
 
-    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
+    mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " true)
+    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
+    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server?" true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
@@ -151,28 +153,24 @@ create_mongo_instance_helper(){
 
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
-    destdirssl="$root_dest/$mongo_service_name/ssl/"
-
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl"
-    if  ! $(test -d "$destdirssl") ;
-    then
-        mkdir -p "$destdirssl"
+    if [ "$copy_ssl_cert_from_container" = "true" ]; then
+        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
+    fi
+    
+    #add database to primary on creation
+    if [ -z "$do_create_database" ]; then
+        add_mongo_database_to_instance
     fi
 
-    mongo_id=$(get_services_ids_by_service_name "$mongo_service_name")
-    mongo_id=$(echo "$mongo_id" | tr -d " " )
-    command="docker cp ${mongo_id}:/home/mongossl.pem ${destdirssl}mongossl.pem"
-
-    eval "$command"
 
 }
 
 create_replica_mongo_instance_helper(){
 
-
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process)" true)
+    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
     do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server?" true)
     replica_set_id=$(ask_read_question_or_try_again "Replica set ID" true)
     
@@ -204,10 +202,9 @@ create_replica_mongo_instance_helper(){
     case "$environment_type_defintion" in
         "env-dev") 
             docker_file="Docker-Replica-Mongo-dev.docker.yml"
-            # docker_file="Docker-Webserver-Mongo-dev.docker.yml"
         ;;
         "env-prod") 
-            docker_file="Docker-Webserver-Mongo-prod.docker.yml"
+            docker_file="Docker-Replica-Mongo-prod.docker.yml"
         ;;
         *)
             echo "Invalid instance option"
@@ -271,28 +268,33 @@ create_replica_mongo_instance_helper(){
 
         primary_mongo_service_name="${1}"
         new_mongo_service_name="${2}"
-
         add_mongo_process_to_replica_set "$primary_mongo_service_name" "$new_mongo_service_name"
 
     fi 
 
-    # destdirssl="$root_dest/$mongo_service_name/ssl/"
-
-    # # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl"
-    # if  ! $(test -d "$destdirssl") ;
-    # then
-    #     mkdir -p "$destdirssl"
-    # fi
-
-    # mongo_id=$(get_services_ids_by_service_name "$mongo_service_name")
-    # mongo_id=$(echo "$mongo_id" | tr -d " " )
-    # command="docker cp ${mongo_id}:/home/mongossl.pem ${destdirssl}mongossl.pem"
-
-    # eval "$command"
-
+    if [ "$copy_ssl_cert_from_container" = "true" ]; then
+        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
+    fi
+    
 }
 
+copy_ssl_from_container(){
+    
+    input_1="${1}"
+    input_2="${2}"
+    input_3="${3}"
 
+    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl" - but it should already exsist
+    if  ! $(test -d "$input_1") ;
+    then
+        mkdir -p "$input_1"
+    fi
+    
+    input_3=$(get_services_ids_by_service_name "$input_2")
+    input_3=$(echo "$input_3" | tr -d " " )
+    command="docker cp ${input_3}:/home/mongossl.pem ${input_1}mongossl.pem"
+    eval "$command"
+}
 #todo - to replace create_mongo_database_helper function, or we could ask for files and if wasn't supplied then manual fill in envs
 add_mongo_database_to_instance(){
 
@@ -308,6 +310,7 @@ add_mongo_database_to_instance(){
     WEB_SERVER_ADMIN_PASSWORD=$(ask_read_question_or_try_again "Web server admin password: " true)
     WEB_SERVER_ADMIN_EMAIL=$(ask_read_question_or_try_again "Web server admin email: " true)
 
+    #create /dbs/$mongo_folder_filename
     command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh < /docker-entrypoint-initdb.d/mongo-init.js \""
 
     eval "$command"
