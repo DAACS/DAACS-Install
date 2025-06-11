@@ -148,6 +148,7 @@ create_webserver_instance_helper(){
 
     # # filename - enviroment variables for webserver
     env_webserver_file="${absolute_dir}webserver"
+    env_webserver_replicas_file="${absolute_dir}webserver-replicas"
 
     # todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
@@ -200,7 +201,7 @@ create_webserver_instance_helper(){
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
-    webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
+    webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_replicas_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
     
     env_string="${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port} ${mongo_username} ${mongo_password} ${mongo_database_name}"
@@ -300,8 +301,10 @@ update_webserver_instance_helper(){
 
     # filename - enviroment variables for webserver
     env_webserver_file="${env_absolute_dir}$environment_type_defintion-webserver"
+    webserver_replicas_file="${env_absolute_dir}$environment_type_defintion-webserver-replicas"
 
-    webserver_replicas=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "REPLICAS")
+    webserver_replicas=$(get_environment_value_from_file_by_env_name "${webserver_replicas_file}" "REPLICAS")
+
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
     
     if [ "$should_rebuild_frontend" = "y" ]; then
