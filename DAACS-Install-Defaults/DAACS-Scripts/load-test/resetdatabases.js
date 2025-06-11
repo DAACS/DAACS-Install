@@ -51,7 +51,6 @@ for (const db of dbInfo.databases) {
     }
         for await (collect of  client.db(db.name).listCollections()  ){
                 const database = client.db(db.name);
-
                 if(collect.name == "user_assessments") {
                     const collection = database.collection(collect.name);
                     console.log(await collection.deleteMany({}))

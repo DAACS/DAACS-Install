@@ -564,9 +564,10 @@ async function run_program(student_user, data, avg){
                   questionId:questionId, 
                   answers: []
               }
+            
               let count = question.data.attributes.questions.items.length - 1;
-
-              question.data.attributes.questions.items.forEach(async (q,i) =>{
+              let index = 0;
+              for(const q of question.data.attributes.questions.items){
                   
                   let answersForQuestion = answerGroup.items.find(d=> d._id ==  q._id);
 
@@ -582,13 +583,20 @@ async function run_program(student_user, data, avg){
       
                   answer_response.answers.push(answer[0]);
               
-                  if(count != i ){
+                  if(count != index ){
                     
                       await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
-                      sleep(rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep));
+                      const sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
+
+                      if(options.logging_status >= 2){
+                        console.log(`Sleep for ${sl} seconds.`)
+                      }
+                      sleep(sl);
 
                   } 
-              });
+
+                  index++;
+              }
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
