@@ -1,5 +1,21 @@
 #!/bin/bash 
 
+: '
+
+Instance types
+
+    Backup job
+    
+Actions
+    Create Backup job instance
+    Update Backup job instance
+
+Instructions:
+    Pick install destination
+    Pick Nginx server destination relative from install destination
+    # Pick install env path if differs from base env
+'
+
 backup_instance_helper(){
 
     instance_type="${1}"

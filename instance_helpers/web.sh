@@ -2,6 +2,19 @@
 source "$current_dir/instance_helpers/basic.sh"
 
 : '
+Comments
+    Move "webserver.sh" to this file and make it readable
+
+
+Instance types
+
+    Webserver/Mongo
+    
+
+Actions
+    Create Webserver/Mongo instance
+    Update Webserver/Mongo instance
+
 Instructions:
     Pick install destination
     Pick web server destination relative from install destination

@@ -1,4 +1,20 @@
 
+: '
+Comments
+    Move this file to web.sh and then rename it to webserver.sh
+
+
+Instance types
+
+    Webserver
+    
+
+Actions
+    Create Webserver instance
+    Update Webserver instance
+
+'
+
 
 webserver_instance_helper(){
 
@@ -71,7 +87,7 @@ create_webserver_instance_helper(){
     webserver_port=""
 
     case "$database_instance_type_defintion" in
-        #todo -test
+        #todo - test this create web server instance and connects to a mongo already created not in replica mode
         "S") 
             mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
             mongo_folder_filename=$(ask_read_question_or_try_again "Enter mongo login file (in dbs): " true)

@@ -1,7 +1,16 @@
 #!/bin/bash
 source "$current_dir/instance_helpers/basic.sh"
 
+
+#
 : '
+Instance types
+
+    Mongo Single 
+        (with or without SSL)
+    Mongo Replica
+        (with or without SSL)
+
 Instructions:
     Pick install destination
     Pick web server destination relative from install destination

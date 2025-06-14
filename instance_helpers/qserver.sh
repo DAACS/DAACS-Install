@@ -2,6 +2,15 @@
 source "$current_dir/instance_helpers/basic.sh"
 
 : '
+
+Instance types
+
+    Q server with MongoDB
+    
+Actions
+    Create Q server instance
+    Update Q server instance
+
 Instructions:
     Pick install destination
     Pick web server destination relative from install destination

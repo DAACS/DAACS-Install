@@ -1,5 +1,21 @@
 #!/bin/bash 
 
+: '
+
+Instance types
+
+    Nginx server
+    
+Actions
+    Create Nginx server instance
+    Update Nginx server instance
+
+Instructions:
+    Pick install destination
+    Pick Nginx server destination relative from install destination
+    # Pick install env path if differs from base env
+'
+
 create_nginx_instance_helper(){
 
     instance_type=$1
