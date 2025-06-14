@@ -11,7 +11,6 @@ Instance types
 
     Webserver/Mongo
     
-
 Actions
     Create Webserver/Mongo instance
     Update Webserver/Mongo instance
@@ -22,56 +21,6 @@ Instructions:
     Pick frontend folder relative from install destination 
     # Pick install env path if differs from base env
 '
-
-# web_instance_helper(){
-
-#     instance_type="${1}"
-#     install_env_path="${2}"
-#     environment_type="${3}"
-#     install_root="${4}"
-
-#     printf "\nWeb instance....\n"
-
-#     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
-#     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-#     web_server_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS web server (Relative to install path): " false)
-#     frontend_path=$(ask_read_question_or_try_again "Enter folder name for install of DAACS frontend (Relative to install path): " false)
-#     new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
-  
-  
-#     if [ "$web_server_path" = "" ]; 
-#     then
-#         web_server_path="DAACS-Webserver"
-#     fi
-
-#     if [ "$frontend_path" = "" ]; then
-#         frontend_path="DAACS-Frontend"
-#     fi
-
-#     case "$new_or_update" in
-#     "n") 
-        
-#         create_web_instance_helper 
-#     ;;
-
-#     "u") 
-#         does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
-#         does_dir_env=$(does_dir_exsist "$install_root/new-env-setups/$install_folder_destination")
-
-#         if [[ $does_dir_exist == true && $does_dir_env == true ]]; then
-#             update_web_instance_helper
-#         else
-#             echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
-#         fi
-#     ;;
-
-#     *)
-#         echo "Invalid option"
-#     ;;
-#     esac
-# }
-
-
 
 web_instance_helper(){
 
