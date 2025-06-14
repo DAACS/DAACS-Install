@@ -1,3 +1,4 @@
+source "$current_dir/instance_helpers/webserver-helpers.sh"
 
 : '
 Comments
@@ -137,14 +138,7 @@ create_webserver_instance_helper(){
     # # Create env files for install
     run_fillout_program "$env_to_create"
 
-    # # # # get code from repo
-    if [ "$environment_type" = "prod" ]; then
-        clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Website.git"
-    fi
-
-    if [ "$environment_type" = "dev" ]; then
-        clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:DAACS/DAACS-Website.git"
-    fi
+    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
 
     # # # # # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -152,21 +146,15 @@ create_webserver_instance_helper(){
     # # # # # install node modules for frontend
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
+
     # # # build frontend
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
-    if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
-    then
-        mkdir -p "$root_dest/$install_folder_destination/docker/"
-    fi
 
 
     # # filename - enviroment variables for webserver
     env_webserver_file="${absolute_dir}webserver"
     env_webserver_replicas_file="${absolute_dir}webserver-replicas"
-
-    # todo check to see if port is being used for mongo only - if being used need to get a new port $mongo_port
 
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"
@@ -182,33 +170,9 @@ create_webserver_instance_helper(){
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
     # Build frontend
+    run_build_frontend "$environment_type" "$api_client_id" "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 
-    if [ "$environment_type" = "prod" ]; then
-        catted="export ${api_client_id} && npx ember build --prod"
-    fi
-
-    if [ "$environment_type" = "dev" ]; then
-        catted="export ${api_client_id} && npx ember build" 
-    fi
-
-    cd "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
-    eval "$catted"  
-
-
-    docker_file=""
-
-        case "$environment_type_defintion" in
-        "env-dev") 
-            docker_file="Docker-Webserver-dev.docker.yml"
-        ;;
-        "env-prod") 
-            docker_file="Docker-Webserver-prod.docker.yml"
-        ;;
-        *)
-            echo "Invalid instance option"
-            exit -1
-        ;;
-    esac
+    docker_file=$(get_webserver_docker_filename "$environment_type_defintion")
 
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#webserver_service_name/$webserver_service_name/g" $docker_file)
 
@@ -286,6 +250,12 @@ update_webserver_instance_helper(){
             files=($destdir/$environment_type_defintion/*)
             destdirenvlogin="${files[0]}"
 
+
+             #todo  - test this to make sure oauth actually reads
+
+            env_oauth_file="${env_absolute_dir}$environment_type_defintion-oauth"
+
+            
             mongo_username=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGODB_DATABASE_NAME")
@@ -295,20 +265,25 @@ update_webserver_instance_helper(){
 
         ;;
         
-        "R") 
+        "R")  
            
             env_webserver_mongo_file="${env_absolute_dir}$environment_type_defintion-webserver-mongo"
+            #todo  - test this to make sure oauth actually reads
+
+            env_oauth_file="${env_absolute_dir}$environment_type_defintion-oauth"
 
             #create env file
             mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
-            api_client_id=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "API_CLIENT_ID")
             mongo_replica_set_mongo=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_SET_MODE")
             mongo_replica_id=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_ID")
             mongo_replica_host_list=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_HOST_LIST")
             mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
             
+
+            api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
+
         ;;
     esac
 
@@ -324,37 +299,13 @@ update_webserver_instance_helper(){
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
     
     if [ "$should_rebuild_frontend" = "y" ]; then
-
-        if [ "$environment_type" = "prod" ]; then
-            catted="export ${api_client_id} && npx ember build --prod"
-
-        fi
-
-        if [ "$environment_type" = "dev" ]; then
-            catted="export ${api_client_id} && npx ember build" 
-        fi
-
-        cd "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
-        eval "$catted"  
+        run_build_frontend "$environment_type" "$api_client_id" "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
     fi
 
-    docker_file="" 
-
-    case "$environment_type_defintion" in
-        "env-dev") 
-            docker_file="Docker-Webserver-dev.docker.yml"
-        ;;
-        "env-prod") 
-            docker_file="Docker-Webserver-prod.docker.yml"
-        ;;
-        *)
-            echo "Invalid instance option"
-            exit -1
-        ;;
-    esac
-
+    docker_file=$(get_webserver_docker_filename "$environment_type_defintion")
     
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"

@@ -104,18 +104,13 @@ create_qserver_instance_helper(){
 
     # # # install node modules for q server
     get_node_modules "$base_path_folder_destination/$install_folder_destination" 
-
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
-    if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
-    then
-        mkdir -p "$root_dest/$install_folder_destination/docker/"
-    fi
+    
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
     # # filename - enviroment variables for webserver
     env_queueserver_file="${absolute_dir}queueserver"
-    # # filename - enviroment variables for webserver mongo
     env_queue_mongo_file="${absolute_dir}queuemongo"
 
     mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_queue_mongo_file}" "MONGODB_CONTAINER_NAME")

@@ -42,11 +42,7 @@ create_nginx_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$1")
     root_dest="$install_root/new-env-setups"
 
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
-    if  ! $(test -d "$root_dest/$nginx_service_name/docker/") ;
-    then
-        mkdir -p "$root_dest/$nginx_service_name/docker/"
-    fi
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 

@@ -109,11 +109,7 @@ create_backup_instance_helper(){
         ;;
     esac
 
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
-    if  ! $(test -d "$root_dest/$install_folder_destination/docker/") ;
-    then
-        mkdir -p "$root_dest/$install_folder_destination/docker/"
-    fi
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#backup_service_name/$backup_service_name/g " $docker_file)
 

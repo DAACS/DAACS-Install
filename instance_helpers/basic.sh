@@ -136,12 +136,7 @@ fill_out_env_file_for_updating(){
         user_input=""
 
         read -p "Enter value for $i: " user_input
-        unescape_backslash_new_env_equal=$(get_env_and_equal "$i")
-        value1=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$i")
-        value2=$(get_reconfigure_env "$unescape_backslash_new_env_equal" "$user_input")
-        string_reaplce_in_file_expression="s/${value1}/${value2}/g"
-        sed -i -E -e "$string_reaplce_in_file_expression" $input_file
-
+        replace_env_variable_in_file "$i" "$user_input" "$input_file"
 
     done
 }
@@ -273,7 +268,7 @@ write_service_subsititions_to_docker_file_new(){
     docker_file="${6}"
     
 
-    create_director_if_it_does_exsist "$install_folder_destination/docker"
+    create_directory_if_it_does_exsist "$install_folder_destination/docker"
 
     # # copy docker file to new location to save for later use
     webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
@@ -285,10 +280,9 @@ write_service_subsititions_to_docker_file_new(){
     echo "$webserver_docker_file_to"
 }
 
-create_director_if_it_does_exsist(){
+create_directory_if_it_does_exsist(){
 
     new_dir_to_create="${1}"
-    # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$folder_destination"
     if  ! $(test -d "${new_dir_to_create}") ;
     then
         mkdir -p "${new_dir_to_create}"
@@ -915,4 +909,44 @@ is_string_length_greater_than_specified(){
 
     fi
     
+}
+
+
+get_processes_using_port(){
+    echo "$(sudo lsof -i:${1}| wc -l)"
+}
+
+is_port_being_used(){
+    count="$(get_processes_using_port ${1})"
+
+    if [ "$count" -gt 0 ];then
+        echo true
+    else
+        echo false
+    fi
+} 
+
+
+
+check_if_port_is_being_used(){
+
+    mongo_port_env="${1}"
+    input_file="${2}"
+    service_name="${3}"
+    mongo_port_value=$(get_env_value "$mongo_port_env" )
+    mongo_port_env_front=$(get_env_and_equal $mongo_port_env)
+
+
+    if [ $(is_port_being_used "$mongo_port_value") == true ]; then
+            printf "\nThere is a $service_name service with that port. Choose another port....\n"
+            read -p "Enter value for $mongo_port_env: " user_input
+
+            if [  $(is_port_being_used "$user_input") == false ]; then
+                replace_env_variable_in_file "$mongo_port_env" "$user_input" "$input_file" 
+            else
+                check_if_port_is_being_used "$mongo_port_env_front$user_input" "$input_file" "$service_name"
+
+            fi
+    fi
+            
 }
