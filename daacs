@@ -6,11 +6,13 @@ if [ "$current_dir" = "." ]; then
 fi
 
 source "$current_dir/utils/colors.sh"
-
+source "$current_dir/instance_helpers/basic.sh"
+source "$current_dir/instance_helpers/mongo.sh"
 MONGO_REPLICA_IMAGE_NAME="mongo-replica"
 MY_DOCKER_NETWORK_NAME="myNetwork"
 NGINX_PROD_NETWORK_NAME="nginx-proxy"
-
+MONGO_IMAGE_NAME="daacs-mongo"
+      
 main(){
         
 step1_option=$(pretty_read "

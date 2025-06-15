@@ -98,9 +98,8 @@ case "$instance_type" in
 
 
 "8")
-    # echo "$install_env_path"
-
-    create_mongo_database_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    
+    add_mongo_database_to_instance 
 
 ;;
 

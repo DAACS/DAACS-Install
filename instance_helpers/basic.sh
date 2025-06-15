@@ -68,9 +68,9 @@ get_instance_type_definition(){
         "6-1") 
             echo "DAACS-Mongo/Instance"
         ;;
-        "6-2") 
-            echo "DAACS-Mongo/NewDB"
-        ;;
+        # "6-2") 
+        #     echo "DAACS-Mongo/NewDB"
+        # ;;
         "6-3") 
             echo "DAACS-Mongo/Replica"
         ;;
