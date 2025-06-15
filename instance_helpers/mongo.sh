@@ -8,6 +8,9 @@ Instance types
         (with or without SSL)
     Mongo Replica
         (with or without SSL)
+        Init Replica set
+        Add Replica
+        Remove Replica
 
 Instructions:
     Pick install destination
@@ -482,14 +485,14 @@ get_mongo_replica_status(){
     echo "$status"
 }
 
-
-copy_file_into_container(){
-    container_id="${1}"
-    file="${2}"
-    location="${3}"
-    command="docker cp ${file} ${container_id}:${location}"
-    eval "$command"
-}
+#not used but keep it 
+# copy_file_into_container(){
+#     container_id="${1}"
+#     file="${2}"
+#     location="${3}"
+#     command="docker cp ${file} ${container_id}:${location}"
+#     eval "$command"
+# }
 
 
 get_mongo_docker_filename(){
