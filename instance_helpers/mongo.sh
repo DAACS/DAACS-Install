@@ -1,8 +1,6 @@
 #!/bin/bash
 source "$current_dir/instance_helpers/basic.sh"
 
-
-#
 : '
 Instance types
 
@@ -17,9 +15,6 @@ Instructions:
     Pick frontend folder relative from install destination 
     # Pick install env path if differs from base env
 '
-
-MONGO_REPLICA_IMAGE_NAME="mongo-replica"
-MONGO_NETWORK_NAME="myNetwork"
 
 mongo_instance_helper(){
 
@@ -149,8 +144,8 @@ create_mongo_instance_helper(){
     qserver_files_to="${root_dest}/${mongo_service_name}/docker/run.sh"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
-    if [ $(does_docker_network_exsist "$MONGO_NETWORK_NAME") = false ]; then
-        create_docker_network "$MONGO_NETWORK_NAME"
+    if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
+        create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
@@ -247,8 +242,8 @@ create_replica_mongo_instance_helper(){
     qserver_files_to="${instance_home_folder}/docker/run.sh"
     cp "${qserver_files_from}" "${qserver_files_to}"
     
-    if [ $(does_docker_network_exsist "$MONGO_NETWORK_NAME") = false ]; then
-        create_docker_network "$MONGO_NETWORK_NAME"
+    if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
+        create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"

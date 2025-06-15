@@ -7,6 +7,10 @@ fi
 
 source "$current_dir/utils/colors.sh"
 
+MONGO_REPLICA_IMAGE_NAME="mongo-replica"
+MY_DOCKER_NETWORK_NAME="myNetwork"
+NGINX_PROD_NETWORK_NAME="nginx-proxy"
+
 main(){
         
 step1_option=$(pretty_read "

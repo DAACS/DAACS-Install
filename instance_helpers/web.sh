@@ -127,6 +127,10 @@ create_web_instance_helper(){
     # Checks to see if port is being used by something else and ask for a different port
     check_if_port_is_being_used "$mongo_port" "$env_webserver_mongo_file" "mongo"
 
+    if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
+        create_docker_network "$MY_DOCKER_NETWORK_NAME"
+    fi
+
     # # # Create directories needed for DAACS-Server-Folders/ 
     daacs_server_folder_dir="$base_path_folder_destination/$install_folder_destination/DAACS-Server-Folders"
     mkdir -p "${daacs_server_folder_dir}"
@@ -188,6 +192,12 @@ update_web_instance_helper(){
     if [ "$should_update_envs" = "y" ]; then
         # Update env files for updating service
         run_fillout_program_for_update "$env_to_create"
+
+        #check to see if port update is new and if it is we need to check to see if port is being used 
+    fi
+
+    if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
+        create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
 
     # # # # get code from repo

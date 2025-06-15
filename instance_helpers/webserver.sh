@@ -16,7 +16,6 @@ Actions
 
 '
 
-
 webserver_instance_helper(){
 
     instance_type="${1}"
