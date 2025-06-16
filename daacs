@@ -12,7 +12,7 @@ MONGO_REPLICA_IMAGE_NAME="mongo-replica"
 MY_DOCKER_NETWORK_NAME="myNetwork"
 NGINX_PROD_NETWORK_NAME="nginx-proxy"
 MONGO_IMAGE_NAME="daacs-mongo"
-      
+
 main(){
         
 step1_option=$(pretty_read "
@@ -45,7 +45,6 @@ Select an option: ")
     ;;
 
     "2")
-        source "$current_dir/instance_helpers/basic.sh"
 
         home_directory=""
         if [ -z "${HOME}" ];
@@ -82,7 +81,6 @@ Select an option: ")
 
     "5") 
         clear
-        source "$current_dir/instance_helpers/basic.sh"
     
         service_name=$(ask_read_question_or_try_again "Service name?: " true)
         stagger_amount=$(ask_read_question_or_try_again "How many services to restart at once?: " true)
@@ -97,9 +95,7 @@ Select an option: ")
 
     "6")
 
-        install_root=""
-        source "$current_dir/instance_helpers/basic.sh"
-        
+        install_root=""        
         install_env_path=$(ask_read_question_or_try_again "Enter base path for install of DAACS env files (Leave blank to use default path): " false)
 
         if [ "$install_env_path" = "" ]; then
@@ -116,8 +112,6 @@ Select an option: ")
     ;;
 
     "7")
-
-        source "$current_dir/instance_helpers/basic.sh"
 
         # 1 - DAACS-Website
         # 2 - DAACS-Qserver
@@ -211,7 +205,6 @@ else
             
             "refresh") 
                 printf "Running refresh on ${parameterS} \n"
-                source "$current_dir/instance_helpers/basic.sh"
                 restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
 
             ;;
@@ -219,7 +212,6 @@ else
             "recreate") 
 
                 printf "Running recreate on ${parameterS} \n"
-                source "$current_dir/instance_helpers/basic.sh"
                 recreate_service "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
             ;;
 

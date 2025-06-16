@@ -641,6 +641,7 @@ ask_for_docker_service_and_check(){
     service_count=$(get_docker_service_count "$service_name")
     
     if [ "$service_count" -gt 0  ]; then
+        printf "Service name $service_name is already taken. Please try again.\n"
         service_name=$(ask_for_docker_service_and_check "$1")
     fi 
     echo $service_name
@@ -889,7 +890,7 @@ check_to_see_if_we_have_the_tools(){
 
 get_current_server_ip(){
 
-    if [ -z $(check_to_see_if_we_have_the_tools) ]; then
+    if [ $(check_to_see_if_we_have_the_tools) = false ]; then
         command="apt-get update && apt-get install net-tools"
         eval "$command"
     fi
