@@ -280,6 +280,31 @@ write_service_subsititions_to_docker_file_new(){
     echo "$webserver_docker_file_to"
 }
 
+does_directory_exsist(){
+
+    new_dir_to_create="${1}"
+    if  ! $(test -d "${new_dir_to_create}") ;
+    then
+       echo false
+
+       else
+       echo true
+    fi
+}
+
+
+does_file_exsist(){
+
+    new_dir_to_create="${1}"
+    if  ! $(test -a "${new_dir_to_create}") ;
+    then
+       echo false
+
+       else
+       echo true
+    fi
+}
+
 create_directory_if_it_does_exsist(){
 
     new_dir_to_create="${1}"
