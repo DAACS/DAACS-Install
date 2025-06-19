@@ -300,7 +300,7 @@ create_webserver_instance_helper(){
         "R") 
            
 
-           
+
             mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
             mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
             hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
@@ -326,13 +326,14 @@ create_webserver_instance_helper(){
 
 
 
-
+            #TODO - add ability to write database stuff manually
             # mongo_username=$(ask_read_question_or_try_again  "MONGO_USERNAME" true)
             # mongo_password=$(ask_read_question_or_try_again  "MONGO_PASSWORD" true)
             # mongo_database_name=$(ask_read_question_or_try_again  "MONGODB_DATABASE_NAME" true)
             # api_client_id=$(ask_read_question_or_try_again "API_CLIENT_ID" true)
             # mongodb_replica_set_id=$(ask_read_question_or_try_again "MONGODB_REPLICA_SET_ID" true)
             # mongo_replica_host_list=$(ask_read_question_or_try_again "MONGO_REPLICA_HOST_LIST" true)
+
             # #create env file
             # write_file="${mongo_port}\n${mongo_username}\n${mongo_password}\n${mongo_database_name}\n${mongo_replica_set_mongo}\n${mongodb_replica_set_id}\n${mongo_replica_host_list}\n"
             # write_env_to_file_new "$write_file" "$environment_type_defintion" "$absolute_dir" "${environment_type_defintion}-webserver-mongo"
