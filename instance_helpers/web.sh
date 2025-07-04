@@ -366,23 +366,24 @@ create_webserver_instance_helper(){
 
             mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
             mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-            hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
+            # hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? (current <- gets current server IP) : ")
             root_dest="$install_root/new-env-setups"
             mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
             absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
-            env_oauth_file="${absolute_datadir}oauth"
+            env_oauth_file="${absolute_database_dir}oauth"
             env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
             mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
             api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
             
-            if [ -z $hostname ]; then
-                hostname=$(get_current_server_ip)
-            fi 
+
+            # if [ "$hostname" = "current" ]; then
+            #     hostname=$(get_current_server_ip)
+            # fi 
 
             replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
-            mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "$hostname" "$replicas_env_directory")
+            mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "" "$replicas_env_directory")
             IFS=' ' read -ra locarr <<< "$mongo_replica_data"
             mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
             mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
@@ -638,7 +639,7 @@ update_webserver_instance_helper(){
 generate_webserver_replica_mongo_connection_string(){
 
     env="${1}" #enviroment
-    host_or_ip="${2}" #enviroment
+    host_or_ip="" #enviroment
     env_dirr="${3}" #enviroment
 
 
@@ -671,6 +672,10 @@ generate_webserver_replica_mongo_connection_string(){
 
         mongo_port=$(get_environment_value_from_file_by_env_name "${arr[$i]}" "MONGODB_MAPPED_PORT")
         mongo_port_value=$(get_env_value "$mongo_port" )
+
+
+        host_or_ip_data=$(get_environment_value_from_file_by_env_name "${arr[$i]}" "MONGODB_HOST_OR_IP")
+        host_or_ip=$(get_env_value "$host_or_ip_data" )
 
         if [ -z "$return_replica_set_id" ]; then
 
