@@ -17,11 +17,11 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 #docker-compose
-apt-get install -y docker-compose
+sudo apt-get install -y docker-compose
 
 
 #uninstall npm that came with ubutun
-apt-get remove npm nodejs -y
+sudo apt-get remove npm nodejs -y
 
 sudo dpkg --remove --force-remove-reinstreq libnode-dev
 sudo dpkg --remove --force-remove-reinstreq libnode72:amd64
@@ -33,4 +33,4 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
 sudo apt-get install -y nodejs
 
 # Vim & Zip
-sudo apt-get update && apt-get install vim -y && apt-get install -y zip
+sudo apt-get update && sudo apt-get install vim -y && sudo apt-get install -y zip
