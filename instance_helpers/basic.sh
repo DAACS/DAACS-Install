@@ -916,7 +916,7 @@ check_to_see_if_we_have_the_tools(){
 get_current_server_ip(){
 
     if [ $(check_to_see_if_we_have_the_tools) = false ]; then
-        command="apt-get update && apt-get install net-tools"
+        command="sudo apt-get update && sudo apt-get install net-tools"
         eval "$command"
     fi
 

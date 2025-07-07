@@ -19,6 +19,11 @@ Instructions:
     # Pick install env path if differs from base env
 '
 
+
+MONGO_REPLICA_IMAGE_NAME="mongo-replica"
+MONGO_IMAGE_NAME="daacs-mongo"
+MY_DOCKER_NETWORK_NAME="myNetwork"
+
 mongo_instance_helper(){
 
     instance_type="${1}"
@@ -182,8 +187,6 @@ create_replica_mongo_instance_helper(){
     is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process) : " true)
     copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
     do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
-    replica_set_id=$(ask_read_question_or_try_again "Replica set ID : " true)
-    # hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
     
     create_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" "file_dir=$install_env_path/${instance_type_defintion}/docker/"
 
@@ -194,11 +197,18 @@ create_replica_mongo_instance_helper(){
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     root_dest="$install_root/new-env-setups"
 
+
     instance_home_folder="$root_dest/$install_folder_destination/docker/${mongo_service_name}"
     create_directory_if_it_does_exsist "$instance_home_folder"
     
     # Create env files for install
     run_fillout_program_new "$env_to_create" "$instance_home_folder"
+
+    primary_mongo_service_name=""
+    if [ "$is_this_init_process" = "true" ]; then
+        primary_mongo_service_name=$(ask_read_question_or_try_again "Primary host : " true)
+        
+    fi
 
     env_dir="$instance_home_folder/$environment_type_defintion/$environment_type_defintion-"
 
@@ -207,8 +217,11 @@ create_replica_mongo_instance_helper(){
 
     check_if_port_is_being_used $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT") "$env_webserver_mongo_file" "mongo"
 
+
     mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
     mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
+    host_or_ip=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_HOST_OR_IP")
+    replica_set_id=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_REPLICA_SET_ID")
 
     docker_file=""
  
@@ -255,8 +268,7 @@ create_replica_mongo_instance_helper(){
         create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
 
-
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name} ${replica_set_id}"
 
     run_docker_with_envs "$qserver_docker_file_to" "$env_string"
 
@@ -266,21 +278,20 @@ create_replica_mongo_instance_helper(){
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
     mongo_container_val=$(get_env_value "${mongo_container_name}")  
     mongo_port_val=$(get_env_value "${mongo_port}")  
+    replica_set_id_val=$(get_env_value "${replica_set_id}")
+    host_or_ip_val=$(get_env_value "${host_or_ip}")  
 
     if [ "$is_this_init_process" = "true" ]; then
         
-
         #add database to primary on creation
         if [ "$do_create_database" = "true" ]; then
             add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
         fi
 
-        # mongo_port_val=$(get_env_value "${mongo_port}")  
-        # initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id" "1" "$mongo_port_val" "$hostname" 
+        initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id_val" "1" "$mongo_port_val" "$host_or_ip_val" 
 
     else
-        primary_mongo_service_name=$(ask_read_question_or_try_again "Primary host : " true)
-        add_mongo_process_to_replica_set "$primary_mongo_service_name" "$mongo_container_val:$mongo_port_val"
+        add_mongo_process_to_replica_set "$primary_mongo_service_name" "$host_or_ip_val:$mongo_port_val"
 
     fi 
 
@@ -289,7 +300,6 @@ create_replica_mongo_instance_helper(){
     fi
     
 }
-
 
 #Be nice to initaliza replica all in one function but i need to figure out how to wait and see if mongo process is ready
 add_replica_mongo_instance_helper(){
@@ -335,9 +345,7 @@ init_replica_mongo_instance_helper(){
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     is_this_init_process="true"
-    replica_set_id=$(ask_read_question_or_try_again "Replica set ID : " true)
-    hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
-    
+
     printf "\nINIT Replica mongo server instance....\n"
 
     mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
@@ -351,8 +359,8 @@ init_replica_mongo_instance_helper(){
     # # filename - enviroment variables for webserver mongo
     env_webserver_mongo_file="${env_dir}webserver-mongo"
 
-    check_if_port_is_being_used $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT") "$env_webserver_mongo_file" "mongo"
-
+    host_or_ip=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_HOST_OR_IP")
+    replica_set_id=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_REPLICA_SET_ID")
     mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
     mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
 
@@ -360,7 +368,10 @@ init_replica_mongo_instance_helper(){
         
         mongo_container_val=$(get_env_value "${mongo_container_name}")  
         mongo_port_val=$(get_env_value "${mongo_port}")  
-        initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id" "1" "$mongo_port_val" "$hostname" 
+        replica_set_id_val=$(get_env_value "${replica_set_id}"
+        host_or_ip_val=$(get_env_value "${host_or_ip}")  
+        )  
+        initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id_val" "1" "$mongo_port_val" "$host_or_ip_val" 
 
     fi 
     
@@ -524,6 +535,7 @@ initiate_mongo_process_to_replica_set(){
     fi 
 
     config="rs.initiate({ '_id' : '${replica_set_id}', 'members':[ { '_id' : 0, 'host' : '${hostname}:${port}', priority: ${priority} } ] });"
+    
     command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"${config}\""
     eval "$command"
 

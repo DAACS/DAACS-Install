@@ -3,7 +3,7 @@ services:
     image: mongo-replica 
     restart: unless-stopped
     environment:
-      COMPOSE_PROJECT_NAME: "mongoreplica"
+      MONGODB_REPLICA_SET_ID: "${MONGODB_REPLICA_SET_ID}"
     networks:
       - myNetwork
     ports:

@@ -14,4 +14,6 @@
 # cat /home/mongossl.key /home/mongossl.cert > /home/mongossl.pem
 # mongod --config /home/mongod.conf --replSet myReplicaSet --setParameter tlsUseSystemCA=true 
 # mongod --replSet myReplicaSet --setParameter tlsUseSystemCA=true 
-mongod --config /home/mongod.conf --replSet myReplicaSet --bind_ip 0.0.0.0
+#echo "mongod --config /home/mongod.conf --replSet ${MONGODB_REPLICA_SET_ID} --bind_ip 0.0.0.0"
+
+mongod --config /home/mongod.conf --replSet ${MONGODB_REPLICA_SET_ID} --bind_ip 0.0.0.0
