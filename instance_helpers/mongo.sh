@@ -72,8 +72,20 @@ mongo_instance_helper(){
     "a")
         add_replica_mongo_instance_helper
     ;;
-    
+    "crf")
+        #create replica files
+        #  mongo_folder=$(ask_read_question_or_try_again "Enter folder to save mongo replica services for install of DAACS: " true)
+        #   create_mongo_replica_connection_files "$environment_type" "$mongo_folder"
 
+    ;;
+
+    "crf")
+        #create replica files
+        #  mongo_folder=$(ask_read_question_or_try_again "Enter folder to save mongo replica services for install of DAACS: " true)
+        # create_database_files "$mongo_database_directory" "$mongo_folder"
+
+
+    ;;
     "u") 
 
         does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
@@ -202,7 +214,7 @@ create_replica_mongo_instance_helper(){
     create_directory_if_it_does_exsist "$instance_home_folder"
     
     # Create env files for install
-    run_fillout_program_new "$env_to_create" "$instance_home_folder"
+    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
     primary_mongo_service_name=""
     if [ "$is_this_init_process" = "true" ]; then
@@ -618,3 +630,5 @@ get_mongo_docker_filename(){
     esac
     echo "$return_file"
 }
+
+

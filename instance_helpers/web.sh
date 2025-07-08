@@ -98,9 +98,9 @@ create_web_instance_helper(){
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
 
-
     # Create env files for install
-    run_fillout_program "$env_to_create"
+    instance_home_folder="$root_dest/$install_folder_destination"
+    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
     run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
 
@@ -278,6 +278,7 @@ create_webserver_instance_helper(){
     mongo_manual_set_mongo=""
 
     manual_or_on_site_env=$(ask_read_question_or_try_again "(m)anual or  (a)utomatic?: " false)
+    root_dest="$install_root/new-env-setups"
 
     case "$database_instance_type_defintion" in
         "S") 
@@ -294,7 +295,6 @@ create_webserver_instance_helper(){
                 mongo_database_name=$mongo_database_directory
                 api_client_id=$(ask_read_question_or_try_again "Enter mongo api client id: " false)
 
-                root_dest="$install_root/new-env-setups"
                 mong_env_file_dir1="$root_dest/$mongo_folder/databases/$mongo_database_directory"
                 create_directory_if_it_does_exsist "$mong_env_file_dir1"
 
@@ -323,7 +323,6 @@ create_webserver_instance_helper(){
                 env_webserver_mongo_file="${mong_env_file_dir1}/webserver-mongo"
                 env_mongo_file_db="${mong_env_file_dir2}/${environment_type_defintion}/${environment_type_defintion}-webserver-mongo"
 
-                # mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_CONTAINER_NAME")
                 mongo_port=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_MAPPED_PORT")
 
                 mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
@@ -338,7 +337,6 @@ create_webserver_instance_helper(){
 
                 mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
                 mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-                root_dest="$install_root/new-env-setups"
                 absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
                 absolute_env_dir="$root_dest/$mongo_folder/$environment_type_defintion/$environment_type_defintion-"
 
@@ -361,53 +359,44 @@ create_webserver_instance_helper(){
         ;;
         
         "R") 
+            
+            mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
            
-
-
             mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
             mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-            # hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? (current <- gets current server IP) : ")
-            root_dest="$install_root/new-env-setups"
-            mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
+
             absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
             env_oauth_file="${absolute_database_dir}oauth"
             env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
+
+            if [ "$manual_or_on_site_env" = "m" ]; then
+
+                create_mongo_files=$(ask_read_question_or_try_again "Create Mongo Replica files? : " true)
+                create_mongo_database_files=$(ask_read_question_or_try_again "Create Mongo Replica database files? : " true)
+
+                if [ "$create_mongo_files" = "true" ]; then
+                    create_mongo_replica_connection_files "$environment_type" "$mongo_folder"
+                fi
+
+                if [ "$create_mongo_database_files" = "true" ]; then
+                    create_database_files "$mongo_database_directory" "$mongo_folder"
+                fi
+
+            fi
+
             mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
             api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
             
-
-            # if [ "$hostname" = "current" ]; then
-            #     hostname=$(get_current_server_ip)
-            # fi 
-
             replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
             mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "" "$replicas_env_directory")
             IFS=' ' read -ra locarr <<< "$mongo_replica_data"
             mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
             mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
-
-            # env_webserver_mongo_file="${absolute_database_dir}webserver-mongo" i need to writie these t0 file mongo_replica_set_mongo  mongo_replica_host_list
-
-
-            #TODO - add ability to write database stuff manually
-            # mongo_username=$(ask_read_question_or_try_again  "MONGO_USERNAME" true)
-            # mongo_password=$(ask_read_question_or_try_again  "MONGO_PASSWORD" true)
-            # mongo_database_name=$(ask_read_question_or_try_again  "MONGODB_DATABASE_NAME" true)
-            # api_client_id=$(ask_read_question_or_try_again "API_CLIENT_ID" true)
-            # mongodb_replica_set_id=$(ask_read_question_or_try_again "MONGODB_REPLICA_SET_ID" true)
-            # mongo_replica_host_list=$(ask_read_question_or_try_again "MONGO_REPLICA_HOST_LIST" true)
-
-            # #create env file
-            # write_file="${mongo_port}\n${mongo_username}\n${mongo_password}\n${mongo_database_name}\n${mongo_replica_set_mongo}\n${mongodb_replica_set_id}\n${mongo_replica_host_list}\n"
-            # write_env_to_file_new "$write_file" "$environment_type_defintion" "$absolute_dir" "${environment_type_defintion}-webserver-mongo"
-            # env_string="${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port} ${mongo_username} ${mongo_password} ${mongo_database_name} ${mongo_replica_host_list}"
-
+       
         ;;
     esac
-
-    root_dest="$install_root/new-env-setups"
 
     # Create env files for install
     run_fillout_program "$env_to_create"
@@ -555,56 +544,53 @@ update_webserver_instance_helper(){
 
             mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
             mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-            hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
-            root_dest="$install_root/new-env-setups"
-            mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
-            absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
-            env_oauth_file="${absolute_database_dir}oauth"
-            env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
             mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
             api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
             
-            if [ -z $hostname ]; then
-                hostname=$(get_current_server_ip)
-            fi 
-
             replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
-            mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "$hostname" "$replicas_env_directory")
+            mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "" "$replicas_env_directory")
             IFS=' ' read -ra locarr <<< "$mongo_replica_data"
             mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
             mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
 
-            # env_webserver_mongo_file="${env_absolute_dir}$environment_type_defintion-webserver-mongo"
-            # #todo  - test this to make sure oauth actually reads
 
-            # env_oauth_file="${env_absolute_dir}$environment_type_defintion-oauth"
 
-            # #create env file
+            # mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
+            # mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
+            # hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
+            # root_dest="$install_root/new-env-setups"
+            # mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
+            # absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
+            # env_oauth_file="${absolute_database_dir}oauth"
+            # env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
             # mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             # mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             # mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
-            # mongo_replica_set_mongo=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_SET_MODE")
-            # mongo_replica_id=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_ID")
-            # mongo_replica_host_list=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_HOST_LIST")
-            # mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
-            
-
             # api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
+            
+            # if [ -z $hostname ]; then
+            #     hostname=$(get_current_server_ip)
+            # fi 
+
+            # replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
+            # mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "$hostname" "$replicas_env_directory")
+            # IFS=' ' read -ra locarr <<< "$mongo_replica_data"
+            # mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
+            # mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
+
 
         ;;
     esac
 
     mongo_envs=" ${mongo_port} ${mongo_username} ${api_client_id} ${mongo_password} ${mongo_database_name} ${mongo_replica_set_mongo} ${mongodb_replica_set_id} ${mongo_replica_host_list} ${mongo_container_name} "
 
-
     # filename - enviroment variables for webserver
     env_webserver_file="${env_absolute_dir}$environment_type_defintion-webserver"
     webserver_replicas_file="${env_absolute_dir}$environment_type_defintion-webserver-replicas"
 
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${webserver_replicas_file}" "REPLICAS")
-
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
     
     if [ "$should_rebuild_frontend" = "y" ]; then
@@ -697,3 +683,58 @@ generate_webserver_replica_mongo_connection_string(){
     return_data[1]=$return_replica_set_id
     echo "${return_data[@]}"
 }
+
+
+
+
+    create_mongo_replica_connection_files(){
+
+        instance_type="6-3"    
+        env_type=$(get_env_type_definition "${1}" )
+        mongo_install_folder_destination="${2}"
+        env_to_run=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
+        root_dest="$install_root/new-env-setups"
+    
+        save_home_folder="$root_dest/$mongo_install_folder_destination/docker"
+        replica_connections=$(ask_read_question_or_try_again "How many replicas are you connecting to? : " true)
+
+        START=1
+        END=$replica_connections
+        for ((index = 1; index <= $replica_connections ; index++)); do
+            mongo_service_name=$(ask_read_question_or_try_again "Mongo service name? : " true)
+            run_fillout_program_new "$env_to_run" "$save_home_folder/${mongo_service_name}" "$env_type"
+        done
+        
+    }
+
+
+    create_database_files(){
+
+        mongo_database_directory="${1}"
+        mongo_folder="${2}"
+        
+        mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
+        
+        # mongo_port=$(ask_read_question_or_try_again "Enter mongo port: " false)
+        mongo_username=$(ask_read_question_or_try_again "Enter mongo username: " false)
+        mongo_password=$(ask_read_question_or_try_again "Enter mongo mongo_password: " false)
+        mongo_database_name=$mongo_database_directory
+
+        api_client_id=$(ask_read_question_or_try_again "Enter mongo api client id: " false)
+
+        mong_env_file_dir1="$root_dest/$mongo_folder/databases/$mongo_database_directory"
+        create_directory_if_it_does_exsist "$mong_env_file_dir1"
+
+        write_file2="MONGO_USERNAME=${mongo_username}\nMONGO_PASSWORD=${mongo_password}\nMONGODB_DATABASE_NAME=${mongo_database_name}\n${mongo_replica_set_mongo}\n${mongo_manual_set_mongo}\n"
+
+        webserver_mongo1="$mong_env_file_dir1/webserver-mongo"
+        touch "$webserver_mongo1"
+        printf "$write_file2" > "$webserver_mongo1"
+
+
+        write_file3="API_CLIENT_ID=${api_client_id}\n"
+        webserver_mongo2="$mong_env_file_dir1/oauth"
+        touch "$webserver_mongo2"
+        printf "$write_file3" > "$webserver_mongo2"
+
+    }

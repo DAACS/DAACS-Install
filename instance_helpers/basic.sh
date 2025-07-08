@@ -314,21 +314,6 @@ create_directory_if_it_does_exsist(){
     fi
 }
 
-#Runs fill out env program for all env's
-run_fillout_program_new(){
-
-    env_list="${1}"    
-    write_to_directory="${2}"    
-
-    # Create env files for install
-    IFS=' ' read -ra ADDR <<< "$env_list"
-    for i in "${ADDR[@]}"; do
-        filename=$(basename "$i")
-        retval=$( fill_out_env_file "$i")
-        write_env_to_file_new $retval $environment_type_defintion $write_to_directory $filename
-    done
-
-}
 
 
 #Helper function to write env files to it's instance directory name in 
@@ -367,6 +352,25 @@ write_env_to_file_new(){
     then 
         printf "$1" > "$destdir"
     fi
+
+}
+
+
+
+#Runs fill out env program for all env's
+run_fillout_program_new(){
+
+    env_list="${1}"    
+    write_to_directory="${2}"    
+    env_type="${3}"    
+
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_list"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        retval=$( fill_out_env_file "$i")
+        write_env_to_file_new $retval $env_type $write_to_directory $filename
+    done
 
 }
 

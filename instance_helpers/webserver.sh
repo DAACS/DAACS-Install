@@ -1,5 +1,6 @@
 source "$current_dir/instance_helpers/webserver-helpers.sh"
 
+#DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE DELETE 
 : '
 Comments
     Move this file to web.sh and then rename it to webserver.sh
