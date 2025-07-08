@@ -25,14 +25,13 @@ source "$current_dir/instance_helpers/basic.sh"
 read -p "
 Pick instance type to create
 
-    1 - DAACS-Website(Webserver/Mongo)
+    1 - DAACS-Website
     2 - DAACS-Qserver
     3 - DAACS-Nginx
     4 - DAACS-Backup 
     5 - DAACS-Memcached
     6 - DAACS-Mongo
-    7 - DAACS-Webserver
-    8 - Create MongoDB 
+    7 - Create MongoDB 
 
 Select instance type to create: " instance_type
 environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
@@ -90,14 +89,7 @@ case "$instance_type" in
     mongo_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 ;;
 
-"7") 
-
-    webserver_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
-
-;;
-
-
-"8")
+"7")
     
     add_mongo_database_to_instance 
 

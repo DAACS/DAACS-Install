@@ -486,15 +486,17 @@ update_webserver_instance_helper(){
     should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o: " true)
     should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
- 
     database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
-
+    mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " true)
+    mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
+    
+    
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
         get_repo_latest "$base_path_folder_destination" "$install_folder_destination" 
     fi
 
-    # # build frontend
+    # # # build frontend
     env_to_create=$(get_env_files_for_updating "$root_dest/$install_folder_destination" $environment_type)
 
     if [ "$should_update_envs" = "y" ]; then
@@ -502,19 +504,26 @@ update_webserver_instance_helper(){
         run_fillout_program_for_update "$env_to_create"
     fi
 
+
+    absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
+    absolute_env_dir="$root_dest/$mongo_folder/$environment_type_defintion/$environment_type_defintion-"
+    env_oauth_file="${absolute_database_dir}oauth"
+    env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
+
     case "$database_instance_type_defintion" in
         #todo -test
         "S") 
 
-            mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
-            mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-            root_dest="$install_root/new-env-setups"
-            absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
-            absolute_env_dir="$root_dest/$mongo_folder/$environment_type_defintion/$environment_type_defintion-"
-
-            env_oauth_file="${absolute_database_dir}oauth"
-            env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
             env_mongo_file_db="${absolute_env_dir}webserver-mongo"
+
+          if [ "$should_update_envs" = "y" ]; then
+                # Update env files for updating service
+                run_fillout_program_for_update "$env_webserver_mongo_file"
+                run_fillout_program_for_update "$env_oauth_file"
+                run_fillout_program_for_update "$env_mongo_file_db"
+
+            fi
+
 
             mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_CONTAINER_NAME")
             mongo_port=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_MAPPED_PORT")
@@ -524,32 +533,31 @@ update_webserver_instance_helper(){
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
             api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
     
-    
-            # mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
-            # mongo_folder_filename=$(ask_read_question_or_try_again "Enter mongo login file (in dbs): " true)
-            # destdir="$root_dest/$mongo_folder"
-            # destdirdbs="$destdir/dbs/$mongo_folder_filename"
-            # files=($destdir/$environment_type_defintion/*)
-            # destdirenvlogin="${files[0]}"
-            #  #todo  - test this to make sure oauth actually reads
-            # env_oauth_file="${env_absolute_dir}$environment_type_defintion-oauth"
-            # mongo_username=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_USERNAME")
-            # mongo_password=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGO_PASSWORD")
-            # mongo_database_name=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "MONGODB_DATABASE_NAME")
-            # api_client_id=$(get_environment_value_from_file_by_env_name "${destdirdbs}" "API_CLIENT_ID")
-            # mongo_container_name=$(get_environment_value_from_file_by_env_name "${destdirenvlogin}" "MONGODB_CONTAINER_NAME")
-            # mongo_port=$(get_environment_value_from_file_by_env_name "${destdirenvlogin}" "MONGODB_MAPPED_PORT")
-
         ;;
         
         "R")  
-           
 
-            mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
-            mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
+
+            if [ "$should_update_envs" = "y" ]; then
+                # Update env files for updating service
+                run_fillout_program_for_update "$env_webserver_mongo_file"
+                run_fillout_program_for_update "$env_oauth_file"
+
+                # for mongo replica updates
+                replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
+                for entry in "$replicas_env_directory"/*
+                    do
+                    if [ $(does_file_exsist "$entry/env-$environment_type/env-$environment_type-webserver-mongo") = true ]; then
+                        run_fillout_program_for_update "$entry/env-$environment_type/env-$environment_type-webserver-mongo"
+
+                    fi
+                done
+            fi
+           
             mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
             mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
             mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
+            mongo_replica_set_mongo=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_REPLICA_SET_MODE")
             api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
             
             replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
@@ -557,31 +565,6 @@ update_webserver_instance_helper(){
             IFS=' ' read -ra locarr <<< "$mongo_replica_data"
             mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
             mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
-
-
-
-            # mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " false)
-            # mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-            # hostname=$(ask_read_question_or_try_again "Mongo DNS hostname? : ")
-            # root_dest="$install_root/new-env-setups"
-            # mongo_replica_set_mongo="MONGO_REPLICA_SET_MODE=true"
-            # absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
-            # env_oauth_file="${absolute_database_dir}oauth"
-            # env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
-            # mongo_username=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_USERNAME")
-            # mongo_password=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_PASSWORD")
-            # mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
-            # api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
-            
-            # if [ -z $hostname ]; then
-            #     hostname=$(get_current_server_ip)
-            # fi 
-
-            # replicas_env_directory="$install_root/new-env-setups/$mongo_folder/docker"
-            # mongo_replica_data=$(generate_webserver_replica_mongo_connection_string  "$environment_type" "$hostname" "$replicas_env_directory")
-            # IFS=' ' read -ra locarr <<< "$mongo_replica_data"
-            # mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
-            # mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
 
 
         ;;
@@ -601,9 +584,7 @@ update_webserver_instance_helper(){
     fi
 
     docker_file=$(get_webserver_docker_filename "$environment_type_defintion")
-    
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
-    
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
