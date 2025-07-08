@@ -401,6 +401,9 @@ create_webserver_instance_helper(){
     # Create env files for install
     run_fillout_program "$env_to_create"
 
+    # instance_home_folder="$root_dest/$install_folder_destination"
+    # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
+
     run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
 
     # install node modules for web server

@@ -129,6 +129,9 @@ create_mongo_instance_helper(){
     run_fillout_program "$env_to_create"
     create_directory_if_it_does_exsist "$mongo_docker_directory"
 
+    # instance_home_folder="$root_dest/$install_folder_destination"
+    # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
+
     env_webserver_mongo_file="${absolute_dir}webserver-mongo"
     docker_file=$(get_mongo_docker_filename "$environment_type_defintion")
 
