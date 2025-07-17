@@ -280,6 +280,14 @@ create_webserver_instance_helper(){
     manual_or_on_site_env=$(ask_read_question_or_try_again "(m)anual or  (a)utomatic?: " false)
     root_dest="$install_root/new-env-setups"
 
+
+    memcached_on_or_off=$(ask_for_docker_service_and_check "(t)rue : " true)
+
+    if [ "$memcached_on_or_off" = "true" ]; then
+        memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " false)
+        create_memcached_replica_connection_files "$environment_type" "$memcached_folder"
+    fi
+    
     case "$database_instance_type_defintion" in
         "S") 
         
@@ -473,6 +481,10 @@ update_webserver_instance_helper(){
     mongodb_replica_set_id=""
     mongo_replica_host_list=""
     mongo_envs="" 
+    mongo_envs="" 
+    mongo_envs="" 
+    memcached_container_name="" 
+    memcached_port_name=""
 
     printf "\nUpdating Webserver instance....\n"
 
@@ -489,6 +501,7 @@ update_webserver_instance_helper(){
     database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
     mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " true)
     mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
+    memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " true)
     
     
     # # # # get code from repo
@@ -504,6 +517,23 @@ update_webserver_instance_helper(){
         run_fillout_program_for_update "$env_to_create"
     fi
 
+
+    webserver_memcached_file="${env_absolute_dir}$environment_type_defintion-memcached"
+    memcached_on=$(get_environment_value_from_file_by_env_name "${webserver_memcached_file}" "MEMCACHE_ON")
+
+    if [ $(is_string_length_greater_than_specified "${memcached_folder}" 0) = true ] && [ $(get_env_value "$memcached_on" ) = "true" ] ; then
+
+        absolute_memcached_env_dir="$root_dest/$memcached_folder/$environment_type_defintion/$environment_type_defintion-"
+        env_memcached_file="${absolute_memcached_env_dir}memcached"
+
+        if [ "$should_update_envs" = "y" ]; then
+            run_fillout_program_for_update "${env_memcached_file}"
+        fi
+
+        memcached_container_name=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_CONTAINER_NAME")
+        memcached_port_name=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_MAPPED_PORT")
+
+    fi 
 
     absolute_database_dir="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
     absolute_env_dir="$root_dest/$mongo_folder/$environment_type_defintion/$environment_type_defintion-"
@@ -570,11 +600,12 @@ update_webserver_instance_helper(){
         ;;
     esac
 
-    mongo_envs=" ${mongo_port} ${mongo_username} ${api_client_id} ${mongo_password} ${mongo_database_name} ${mongo_replica_set_mongo} ${mongodb_replica_set_id} ${mongo_replica_host_list} ${mongo_container_name} "
+    mongo_envs=" ${mongo_port} ${mongo_username} ${api_client_id} ${mongo_password} ${mongo_database_name} ${mongo_replica_set_mongo} ${mongodb_replica_set_id} ${mongo_replica_host_list} ${mongo_container_name} ${env_memcached_dir}"
 
     # filename - enviroment variables for webserver
     env_webserver_file="${env_absolute_dir}$environment_type_defintion-webserver"
     webserver_replicas_file="${env_absolute_dir}$environment_type_defintion-webserver-replicas"
+
 
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${webserver_replicas_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
@@ -691,6 +722,22 @@ generate_webserver_replica_mongo_connection_string(){
         
     }
 
+
+
+    create_memcached_replica_connection_files(){
+
+        instance_type="5"    
+        env_type=$(get_env_type_definition "${1}" )
+        mongo_install_folder_destination="${2}"
+        env_to_run=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
+        root_dest="$install_root/new-env-setups"
+    
+        save_home_folder="$root_dest/$mongo_install_folder_destination/docker"
+        mongo_service_name=$(ask_read_question_or_try_again "Memcached service name? : " true)
+        run_fillout_program_new "$env_to_run" "$save_home_folder/${mongo_service_name}" "$env_type"
+        
+        
+    }
 
     create_database_files(){
 

@@ -7,6 +7,7 @@ source "$current_dir/instance_helpers/mongo.sh"
 source "$current_dir/instance_helpers/qserver.sh"
 source "$current_dir/instance_helpers/nginx.sh"
 source "$current_dir/instance_helpers/backup.sh"
+source "$current_dir/instance_helpers/memcache.sh"
 source "$current_dir/instance_helpers/basic.sh"
 
 : '
@@ -81,7 +82,7 @@ case "$instance_type" in
 
 "5") 
 
-    create_memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 ;;
 
 "6") 
