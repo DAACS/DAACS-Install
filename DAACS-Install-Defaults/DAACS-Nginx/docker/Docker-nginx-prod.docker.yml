@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: ./Dockerfile-ngnix
     restart: unless-stopped
-    container_name: nginx-proxy-cache
+    container_name: nginx-proxy-cache-prod
     ports:
       - "80:80"
       - "443:443"
@@ -14,7 +14,6 @@ services:
       - letsencrypt-vhost-d:/etc/nginx/vhost.d
       - letsencrypt-html:/usr/share/nginx/html
 
-#need to check if nginx/vhost.d works in prod
   letsencrypt-proxy:
     restart: unless-stopped
     image: nginxproxy/acme-companion
@@ -27,7 +26,7 @@ services:
       - letsencrypt-acme:/etc/acme.sh 
     environment:
       - DEFAULT_EMAIL=${DEFAULT_EMAIL}
-      - NGINX_PROXY_CONTAINER=nginx-proxy-cache
+      - NGINX_PROXY_CONTAINER=nginx-proxy-cache-prod
 
 networks:
   default:

@@ -1,5 +1,21 @@
 #!/bin/bash 
 
+: '
+
+Instance types
+
+    Nginx server
+    
+Actions
+    Create Nginx server instance
+    Update Nginx server instance
+
+Instructions:
+    Pick install destination
+    Pick Nginx server destination relative from install destination
+    # Pick install env path if differs from base env
+'
+
 create_nginx_instance_helper(){
 
     instance_type=$1
@@ -9,7 +25,7 @@ create_nginx_instance_helper(){
 
     printf "\nCREATING nginx instance....\n"
     nginx_service_name=$(ask_for_docker_service_and_check "Enter name for nginx service: " )
-
+    install_folder_destination=$nginx_service_name
     default_email_input=""
 
     if [ "$environment_type" != "dev" ]; then
@@ -26,11 +42,7 @@ create_nginx_instance_helper(){
     instance_type_defintion=$(get_instance_type_definition "$1")
     root_dest="$install_root/new-env-setups"
 
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$foldername"
-    if  ! $(test -d "$root_dest/$nginx_service_name/docker/") ;
-    then
-        mkdir -p "$root_dest/$nginx_service_name/docker/"
-    fi
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
@@ -48,6 +60,7 @@ create_nginx_instance_helper(){
             exit -1
         ;;
     esac
+    
     # # copy docker file to new location to save for later use
     nginx_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
     nginx_docker_file_to="${root_dest}/${nginx_service_name}/docker/${docker_file}"
@@ -56,28 +69,19 @@ create_nginx_instance_helper(){
     nginx_files_to="${root_dest}/${nginx_service_name}/docker/nginx"
     cp -r "${nginx_files_from}" "${nginx_files_to}"
 
-     
     nginx_files_from="$install_env_path/${instance_type_defintion}/docker/Dockerfile-ngnix"
     nginx_files_to="${root_dest}/${nginx_service_name}/docker/Dockerfile-ngnix"
     cp "${nginx_files_from}" "${nginx_files_to}"
     
-
     cp "${nginx_docker_file_from}" "${nginx_docker_file_to}"
     sed  -i -e "s/#nginx_service_name/$nginx_service_name/g" "$nginx_docker_file_to"
 
     default_email="DEFAULT_EMAIL=$default_email_input"
     env_string="${default_email} "
     
-    if [ "$environment_type" = "prod" ]; then
-
-        eval "docker network inspect nginx-proxy >/dev/null 2>&1 || \
-        docker network create nginx-proxy"
-
+    if [ "$environment_type" = "prod" ]  && [ $(does_docker_network_exsist "$NGINX_PROD_NETWORK_NAME") = false ]; then
+        create_docker_network "$NGINX_PROD_NETWORK_NAME"
     fi 
-
-    eval "network inspect myNetwork >/dev/null 2>&1 || \
-    docker network create myNetwork"
-
 
     run_docker_with_envs "$nginx_docker_file_to" "$env_string"
 }

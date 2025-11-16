@@ -1,12 +1,10 @@
-version: "3.3"
-
 services:
-  memcached3F:
+  #memcached_service_name:
     image: memcached
     entrypoint:
       - memcached
     env_file: 
-      - ../env-dev/.env-dev-memcached
+      - ${ENV_DIR}memcached
     networks:
       - myNetwork
     command: ["-m", "512m", "-I", "2m"]
