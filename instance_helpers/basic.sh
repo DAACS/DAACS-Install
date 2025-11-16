@@ -65,6 +65,18 @@ get_instance_type_definition(){
         "5") 
             echo "DAACS-Memcached"
         ;;
+        "6-1") 
+            echo "DAACS-Mongo/Instance"
+        ;;
+        "6-2") 
+            echo "DAACS-Mongo/NewDB"
+        ;;
+        "6-3") 
+            echo "DAACS-Mongo/Replica"
+        ;;
+        "7") 
+            echo "DAACS-Webserver"
+        ;;
         *)
             echo "Invalid instance option"
             exit -1
@@ -193,9 +205,12 @@ get_env_files_for_editing(){
     # 3 - DAACS-Nginx
     # 4 - DAACS-Backup 
     # 5 - DAACS-Memcached
+    # 6 - DAACS-Mongo
+    # 7 - DAACS-Webserver
 
     instance_type=$(get_instance_type_definition "$1")
     e_type=$(get_env_type_definition "$3")
+
     search_dir="$2/$instance_type/$e_type"
 
     declare -a arr
@@ -225,6 +240,150 @@ get_env_files_for_updating(){
 
     echo "${arr[@]}"
 
+}
+
+
+refresh_all_services_in_service_helper(){
+
+    root_dest="$1/new-env-setups"
+    services_file_dir="$root_dest/$2/services"
+    service_name="$3"
+    count="$4"
+    q_mode="$5"
+
+    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
+
+}
+
+#Get environment variable and value from env file
+get_environment_value_from_file_by_env_name(){
+    echo $(cat ${1} | grep "${2}")
+}
+
+
+
+# # new
+write_service_subsititions_to_docker_file_new(){
+
+    instance_type_defintion="${1}"
+    install_folder_destination="${2}"
+    install_env_path="${3}"
+    environment_type_defintion="${4}"
+    docker_changes_format="${5}"
+    docker_file="${6}"
+    
+
+    create_director_if_it_does_exsist "$install_folder_destination/docker"
+
+    # # copy docker file to new location to save for later use
+    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    webserver_docker_file_to="${install_folder_destination}/docker/${docker_file}"
+
+    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    
+    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+    echo "$webserver_docker_file_to"
+}
+
+create_director_if_it_does_exsist(){
+
+    new_dir_to_create="${1}"
+    # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$folder_destination"
+    if  ! $(test -d "${new_dir_to_create}") ;
+    then
+        mkdir -p "${new_dir_to_create}"
+    fi
+}
+
+#Runs fill out env program for all env's
+run_fillout_program_new(){
+
+    env_list="${1}"    
+    write_to_directory="${2}"    
+
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_list"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        retval=$( fill_out_env_file "$i")
+        write_env_to_file_new $retval $environment_type_defintion $write_to_directory $filename
+    done
+
+}
+
+
+#Helper function to write env files to it's instance directory name in 
+write_env_to_file_new(){
+    
+    if [ "$1" = "" ]; then
+        echo "Missing write data"
+        exit -1
+    fi
+
+    if [ "$2" = "" ]; then
+        echo "Missing environment type"
+        exit -1
+    fi
+    
+    if [ "$3" = "" ]; then
+        echo "Missing folder name"
+        exit -1
+    fi
+
+    if [ "$4" = "" ]; then
+        echo "Missing file name"
+        exit -1
+    fi
+
+    if  ! $(test -d "$3/$2") ;
+    then
+        mkdir -p "$3/$2"
+    fi
+
+    destdir="$3/$2/$4"
+
+    touch "$destdir"
+
+    if [ -f "$destdir" ]
+    then 
+        printf "$1" > "$destdir"
+    fi
+
+}
+
+# # Original
+#Runs fill out env program for all env's
+run_fillout_program(){
+
+
+
+    # Create env files for install
+    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    for i in "${ADDR[@]}"; do
+        filename=$(basename "$i")
+        retval=$( fill_out_env_file "$i")
+        write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
+    done
+
+}
+
+write_service_subsititions_to_docker_file(){
+
+    instance_type_defintion="${1}"
+    install_folder_destination="${2}"
+    install_env_path="${3}"
+    environment_type_defintion="${4}"
+    docker_changes_format="${5}"
+    docker_file="${6}"
+    
+    # # copy docker file to new location to save for later use
+    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
+    webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
+
+    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
+    
+    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
+    echo "$webserver_docker_file_to"
 }
 
 #Helper function to write env files to it's instance directory name in 
@@ -262,46 +421,13 @@ write_env_to_file(){
 
 }
 
-
-refresh_all_services_in_service_helper(){
-
-    root_dest="$1/new-env-setups"
-    services_file_dir="$root_dest/$2/services"
-    service_name="$3"
-    count="$4"
-    q_mode="$5"
-
-    refresh_instance_helper "$root_dest" "$services_file_dir" "$service_name" "$count" "$q_mode"
-
-}
-
-#Get environment variable and value from env file
-get_environment_value_from_file_by_env_name(){
-    echo $(cat ${1} | grep "${2}")
-}
-
-#Runs fill out env program for all env's
-run_fillout_program(){
-
-    # Create env files for install
-    IFS=' ' read -ra ADDR <<< "$env_to_create"
-    for i in "${ADDR[@]}"; do
-        filename=$(basename "$i")
-        retval=$( fill_out_env_file "$i")
-        write_env_to_file $retval $environment_type_defintion $install_folder_destination $filename
-    done
-
-}
-
-
 #Runs fill out env program for all env's
 run_fillout_program_for_update(){
-
+    run_these=${1}
     # Create env files for install
-    IFS=' ' read -ra ADDR <<< "$env_to_create"
+    IFS=' ' read -ra ADDR <<< "$run_these"
     for i in "${ADDR[@]}"; do
         filename=$(basename "$i")
-        echo "$filename"
         read -p "Do we want to update ${filename} ? (y)es or (n)o : " should_update_file
 
         if [ "$should_update_file" == "y" ]; then
@@ -365,26 +491,6 @@ generate_docker_file_path(){
 }
 
 
-write_service_subsititions_to_docker_file(){
-
-    instance_type_defintion="${1}"
-    install_folder_destination="${2}"
-    install_env_path="${3}"
-    environment_type_defintion="${4}"
-    docker_changes_format="${5}"
-    docker_file="${6}"
-    
-    # # copy docker file to new location to save for later use
-    webserver_docker_file_from="$install_env_path/${instance_type_defintion}/docker/$docker_file"
-    webserver_docker_file_to="${root_dest}/${install_folder_destination}/docker/${docker_file}"
-
-    cp "${webserver_docker_file_from}" "${webserver_docker_file_to}"
-    
-    sed  -i -e "${docker_changes_format}" "$webserver_docker_file_to"
-    echo "$webserver_docker_file_to"
-}
-
-
 run_docker_with_envs(){
 
     webserver_docker_file_to="${1}"
@@ -392,18 +498,22 @@ run_docker_with_envs(){
     should_recreate="${3}"
     service_name=""
     sould_recreate_command_args=""
-    
+    envs_for_docker_processed=""
+
     if [ "$should_recreate" = true ]; then
         sould_recreate_command_args=" --force-recreate"
         service_name=" ${4}"
+    fi    
+
+    STRLENGTH=$(echo "${envs_for_docker_process}" | wc -m)
+
+    if [ $STRLENGTH -gt 0 ]; then
+        envs_for_docker_processed="${envs_for_docker_process} "
     fi
 
     # # run docker file
-    catted="${envs_for_docker_process}"
-    catted+=" docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name}"   
-    # echo "$catted"   
-    output=$(eval "$catted")
-
+    catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
+    eval "$catted"
 }
 
 get_services_ids_by_service_name(){
@@ -707,4 +817,102 @@ does_service_exsist(){
         else
             echo true
     fi
+}
+
+
+does_docker_image_exsist(){
+
+    
+    if [ "$1" = "" ]; then
+        echo "Missing docker image name."
+        exit -1
+    fi
+
+    image_name="${1}"
+
+    if [ -z "$(docker images -q ${image_name} 2> /dev/null)" ]; then
+        echo false
+    else
+        echo true
+    fi
+}
+
+#install_file=1, image_name=2, envs=3, build_directory=4
+create_image(){
+
+    if [ $(does_docker_image_exsist "${2}") == false ]; then
+        printf "\nCreating ${2} image....\n"
+
+        build_args=""
+        length=$(echo "${4}" | xargs | wc -m) 
+
+        if [ $(( $length - 1)) -gt 0 ]; then
+            build_args="--build-arg ${4}"
+        fi
+        
+        command="cd ${3} && docker build ${build_args} -t ${2} -f ${1} ."
+        eval "$command"
+    fi
+
+}
+
+get_system_archtechture(){
+
+    echo $(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')
+}
+
+does_docker_network_exsist(){
+
+    network="${1}"
+    does_network_exsist=$(docker network ls|grep ${network} > /dev/null || echo false)
+
+    if [ -z $does_network_exsist  ]; then
+        echo true
+    else
+        echo false
+    fi
+
+}
+
+
+create_docker_network(){
+
+    network="${1}"
+    does_network_exsist=$(docker network create ${network})
+
+}
+
+
+check_to_see_if_we_have_the_tools(){
+
+
+    if [ $(which route | wc -m ) -gt 0 ]; then 
+        echo true 
+    else 
+        echo false 
+    fi 
+}
+
+get_current_server_ip(){
+
+    if [ -z $(check_to_see_if_we_have_the_tools) ]; then
+        command="apt-get update && apt-get install net-tools"
+        eval "$command"
+    fi
+
+    network_card=$(route -n | awk '$1 == "0.0.0.0" {print $8}')
+    IP=$(ifconfig "$network_card" | sed -nre '/^[^ ]+/{N;s/^([^ ]+).*inet *([^ ]+).*/\2/p}')
+    echo "$IP"
+
+}
+
+is_string_length_greater_than_specified(){
+
+    if [ $(( $(echo ${1} | wc -m ) - 1)) -gt "$((${2}))" ]; then
+        echo true
+        else
+        echo false
+
+    fi
+    
 }

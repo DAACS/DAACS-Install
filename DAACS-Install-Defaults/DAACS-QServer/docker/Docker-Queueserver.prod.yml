@@ -17,9 +17,6 @@ services:
   #qserver_service_name:
     restart: unless-stopped
     image: daacs-qserver
-    build: 
-      context: .
-      dockerfile: ./Dockerfile-queue-dev.debian
     env_file: 
       - ${ENV_DIR}queueserver
       - ${ENV_DIR}queuemongo

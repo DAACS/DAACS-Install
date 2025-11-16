@@ -2,7 +2,7 @@
 
 #docker
 sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
+sudo apt-get install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
@@ -32,5 +32,5 @@ sudo apt-get update
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
 sudo apt-get install -y nodejs
 
-# Vim
-sudo apt-get update && apt-get install vim -y
+# Vim & Zip
+sudo apt-get update && apt-get install vim -y && apt-get install -y zip

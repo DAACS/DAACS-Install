@@ -17,16 +17,13 @@ services:
   #qserver_service_name:
     restart: unless-stopped
     image: daacs-qserver
-    build: 
-      context: .
-      dockerfile: ./Dockerfile-queue-dev.debian
     env_file: 
       - ${ENV_DIR}queueserver
       - ${ENV_DIR}queuemongo
       - ${ENV_DIR}oauth
       - ${ENV_DIR}email
     command: >
-      /bin/sh -c "cd /usr/src/app/ && chmod +x lightsidetest.sh && ./lightsidetest.sh && cd /usr/src/app && npm run-script dev"
+      /bin/sh -c "cd /usr/src/app && chmod +x lightsidetest.sh && ./lightsidetest.sh && cd /usr/src/app && npm run-script dev"
     expose:
       - 80
       - 443

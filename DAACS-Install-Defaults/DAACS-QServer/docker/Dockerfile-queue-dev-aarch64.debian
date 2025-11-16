@@ -1,0 +1,11 @@
+FROM node
+RUN apt-get update && apt-get install zip
+RUN wget -P /tmp https://daacs-storage.nyc3.digitaloceanspaces.com/install/pandoc-3.1.1-1-arm64.deb && dpkg -i /tmp/pandoc-3.1.1-1-arm64.deb && rm /tmp/pandoc-3.1.1-1-arm64.deb
+RUN apt install -y --no-install-recommends r-base
+RUN apt update
+RUN apt-get install -y libssl-dev  
+RUN apt-get install -y libsasl2-dev
+RUN apt-get install -y libharfbuzz-dev libfribidi-dev gfortran
+RUN apt-get install -y texlive-latex-base texlive-latex-recommended texlive-fonts-recommended  texlive-latex-extra
+RUN wget -P /tmp https://daacs-storage.nyc3.digitaloceanspaces.com/install/rlibraries-arm.zip && unzip /tmp/rlibraries-arm.zip -d /tmp/ && mv -f /tmp/site-library /usr/local/lib/R/ && rm /tmp/rlibraries-arm.zip; 
+RUN wget -P /root https://daacs-storage.nyc3.digitaloceanspaces.com/install/lightside-with-arm.zip
