@@ -2,7 +2,7 @@
 
 # ./DAACS-Install-Defaults - folder for default .env files
 source "$current_dir/instance_helpers/web.sh"
-source "$current_dir/instance_helpers/webserver.sh"
+source "$current_dir/instance_helpers/webserver-helpers.sh"
 source "$current_dir/instance_helpers/mongo.sh"
 source "$current_dir/instance_helpers/qserver.sh"
 source "$current_dir/instance_helpers/nginx.sh"

@@ -4,8 +4,6 @@ source "$current_dir/instance_helpers/webserver-helpers.sh"
 
 : '
 Comments
-    Move "webserver.sh" to this file and make it readable
-
 
 Instance types
 
@@ -290,7 +288,7 @@ create_webserver_instance_helper(){
     
     case "$database_instance_type_defintion" in
         "S") 
-        
+                    
             if [ "$manual_or_on_site_env" = "m" ]; then
 
 
@@ -340,6 +338,8 @@ create_webserver_instance_helper(){
 
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
+                write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
+
             else
 
 
@@ -361,8 +361,15 @@ create_webserver_instance_helper(){
 
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
-            fi
+                #Creates database config file so we dont have to do this manually when we update
+                write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
+                
+                # destdir="$absolute_dir/database-config/"
+                # create_directory_if_it_does_exsist "$absolute_dir/database-config/"
+                # database_config_env="DB_TYPE=${database_instance_type_defintion}\nDATABASE_FOLDER=${mongo_folder}\nDATABASE_NAME=${mongo_database_directory}"
+                # write_to_file "$database_config_env" "$destdir/$install_folder_destination"
 
+            fi
            
         ;;
         
@@ -402,6 +409,10 @@ create_webserver_instance_helper(){
             IFS=' ' read -ra locarr <<< "$mongo_replica_data"
             mongo_replica_host_list="MONGO_REPLICA_HOST_LIST=\"${locarr[0]}\""
             mongodb_replica_set_id="MONGODB_REPLICA_SET_ID=\"${locarr[1]}\""
+
+            #doesn't work because i haven't try this on a replica yet
+            # write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
+
        
         ;;
     esac
@@ -485,6 +496,11 @@ update_webserver_instance_helper(){
     mongo_envs="" 
     memcached_container_name="" 
     memcached_port_name=""
+    database_instance_type_defintion=""
+    mongo_folder=""
+    mongo_database_directory=""
+    memcached_folder=""
+
 
     printf "\nUpdating Webserver instance....\n"
 
@@ -498,12 +514,41 @@ update_webserver_instance_helper(){
     should_rebuild_frontend=$(ask_read_question_or_try_again "Should I rebuild frontend? (y)es or (n)o: " true)
     should_get_latest=$(ask_read_question_or_try_again "Should I get latest code? (y)es or (n)o: " true)
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
-    database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
-    mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " true)
-    mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
-    memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " true)
+    should_update_database_envs=$(ask_read_question_or_try_again "Should I update db? (y)es or (n)o: " true)
     
-    
+    if [ "$should_update_database_envs" = "y" ]; then
+        database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
+        mongo_folder=$(ask_read_question_or_try_again "Enter mongo folder: " true)
+        mongo_database_directory=$(ask_read_question_or_try_again "Enter database directory name: " true)
+        # memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " false)
+        
+    else
+
+        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DB_TYPE") 
+        mongo_folder=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DATABASE_FOLDER") 
+        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DATABASE_NAME") 
+        
+        database_instance_type_defintion=$(get_env_value "$database_instance_type_defintion" )
+        mongo_folder=$(get_env_value "$mongo_folder" )
+        mongo_database_directory=$(get_env_value "$mongo_database_directory" )
+
+        if [ "$database_instance_type_defintion" = "" ]; then
+            printf "\nMissing database instance type...\n"
+            return 1
+        fi
+
+        if [ "$mongo_folder" = "" ];  then
+            printf "\nMissing mongo folder...\n"
+            return 1
+        fi
+
+        if [ "$mongo_database_directory" = "" ];  then
+            printf "\nMissing database directory...\n"
+            return 1
+        fi
+    fi
+
+
     # # # # get code from repo
     if [ "$should_get_latest" = "y" ]; then
         get_repo_latest "$base_path_folder_destination" "$install_folder_destination" 
@@ -541,7 +586,6 @@ update_webserver_instance_helper(){
     env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
 
     case "$database_instance_type_defintion" in
-        #todo -test
         "S") 
 
             env_mongo_file_db="${absolute_env_dir}webserver-mongo"
@@ -769,3 +813,13 @@ generate_webserver_replica_mongo_connection_string(){
         printf "$write_file3" > "$webserver_mongo2"
 
     }
+
+
+
+write_mongo_config_file(){
+
+    destdir="$1/database-config/"
+    create_directory_if_it_does_exsist "$absolute_dir/database-config/"
+    database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}"
+    write_to_file "$database_config_env" "$destdir/$5"
+}

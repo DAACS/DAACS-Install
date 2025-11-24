@@ -355,7 +355,11 @@ write_env_to_file_new(){
 
 }
 
+write_to_file(){
 
+    printf "$1" > "$2"
+
+}
 
 #Runs fill out env program for all env's
 run_fillout_program_new(){
