@@ -1,0 +1,26 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    restart: unless-stopped
+    expose:
+      - 80
+      - 443
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      - VIRTUAL_HOST=jenkins.daacs.net
+      - LETSENCRYPT_HOST=jenkins.daacs.net
+      - DOCKER_HOST=jenkins.daacs.net
+      - JENKINS_OPTS="--httpPort=80"
+    networks:
+      - nginx-proxy
+
+  ssh-agent:
+    image: jenkins/ssh-agent
+
+volumes:
+  jenkins_home:
+
+networks:
+  nginx-proxy:
+    external: true
