@@ -277,7 +277,7 @@ create_webserver_instance_helper(){
 
     manual_or_on_site_env=$(ask_read_question_or_try_again "(m)anual or  (a)utomatic?: " false)
     root_dest="$install_root/new-env-setups"
-
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
     # memcached_on_or_off=$(ask_for_docker_service_and_check "(t)rue : " true)
 
@@ -338,6 +338,9 @@ create_webserver_instance_helper(){
 
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
+ 
+
+
                 write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
 
             else
@@ -360,7 +363,7 @@ create_webserver_instance_helper(){
                 mongo_database_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_DATABASE_NAME")
 
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
-
+    
                 #Creates database config file so we dont have to do this manually when we update
                 write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
                 
@@ -522,9 +525,9 @@ update_webserver_instance_helper(){
         
     else
 
-        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DB_TYPE") 
-        mongo_folder=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DATABASE_FOLDER") 
-        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$absolute_dir/database-config/$install_folder_destination" "DATABASE_NAME") 
+        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DB_TYPE") 
+        mongo_folder=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_FOLDER") 
+        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_NAME") 
         
         database_instance_type_defintion=$(get_env_value "$database_instance_type_defintion" )
         mongo_folder=$(get_env_value "$mongo_folder" )
@@ -816,8 +819,8 @@ generate_webserver_replica_mongo_connection_string(){
 
 write_mongo_config_file(){
 
-    destdir="$1/database-config/"
-    create_directory_if_it_does_exsist "$absolute_dir/database-config/"
+    destdir="${1}/database-config/"
+    create_directory_if_it_does_exsist "$destdir"
     database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}"
     write_to_file "$database_config_env" "$destdir/$5"
 }
