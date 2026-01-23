@@ -79,6 +79,8 @@ create_nginx_instance_helper(){
     default_email="DEFAULT_EMAIL=$default_email_input"
     env_string="${default_email} "
     
+    NGINX_PROD_NETWORK_NAME="nginx-proxy"
+    
     if [ "$environment_type" = "prod" ]  && [ $(does_docker_network_exsist "$NGINX_PROD_NETWORK_NAME") = false ]; then
         create_docker_network "$NGINX_PROD_NETWORK_NAME"
     fi 

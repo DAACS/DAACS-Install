@@ -10,7 +10,7 @@ services:
       - myNetwork
     env_file: 
       - ${ENV_DIR}webserver
-      - ${ENV_DIR}memcached
+      # - ${ENV_DIR}memcached
       - ${ENV_DIR}email
     environment:
       - "MONGO_USERNAME=${MONGO_USERNAME}"

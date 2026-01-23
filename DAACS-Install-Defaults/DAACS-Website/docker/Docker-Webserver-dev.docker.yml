@@ -28,7 +28,7 @@ services:
       - ${ENV_DIR}webserver
       - ${ENV_DIR}webserver-mongo
       - ${ENV_DIR}oauth
-      - ${ENV_DIR}memcached
+      # - ${ENV_DIR}memcached
       - ${ENV_DIR}email
     volumes:
       - "${FOLDER_START}:/usr/src/app"
