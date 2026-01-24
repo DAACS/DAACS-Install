@@ -1,0 +1,279 @@
+[{
+  "_id": "526441ab-6fed-40ca-8218-86c0253b76e8",
+  "title": "Reset password and send link",
+  "description": "labore et dolore magna al",
+  "subject": "Your DAACS Reset Password URL to %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>We received your request to reset your DAACS account password.</p><p>Click this link to <a href=\"%reset-password-url%\">reset your password.</a></p><p>If you can't open the URL just copy and paste this link into your browser.</p><p>%reset-password-url%</p>",
+  "slug": "reset-password-and-send-link",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%reset-password-url%",
+      "label": "Reset Password URL",
+      "real_key": "https://%domain%/reset-password?token=%reset-code%"
+    }
+  ]
+},
+{
+  "_id": "5046ba52-19f1-4ead-91bc-71817ea3c466",
+  "title": "Footer",
+  "description": "Footer",
+  "subject": "",
+  "body": "<br/>Thank you,<br/>The DAACS Team<br/><a href=\"mailto:support@admin.net\">support@admin.net</a><br/><img src=\"https://%domain%/assets/images/daacs-logo.png\"/><br/>",
+  "slug": "footer",
+  "keys": []
+},
+{
+  "_id": "40ce7d28-5cc4-4b28-87d1-0925fbe613a5",
+  "title": "New Account",
+  "description": "Send email about users new account.",
+  "subject": "Your New DAACS Account - %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS account has been created.</p><p>Click this link to <a href=\"%new-account-url%\">verify your account</a>.</p><p>If you can't open the URL just copy and paste this link into your browser.</p><p>%new-account-url%</p>",
+  "slug": "new-account",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%new-account-url%",
+      "label": "New Acount URL",
+      "real_key": "https://%domain%/verify-account?token=%verify-account-token%"
+    }
+  ]
+},
+{
+  "_id": "01c27381-0d17-4c9e-a19d-4d3a78a70d51",
+  "title": "Verified Account",
+  "description": "labore et dolore magna al",
+  "subject": "Your DAACS Account has been Verified for %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS account has been verified. You can now <a href=\"%login-url%\">login here</a>.</p>",
+  "slug": "verifiy-new-account",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    }
+  ]
+},
+{
+  "_id": "ad2a52fc-5346-4ee6-a6cd-671606b1cf17",
+  "title": "Confirmation User Reset Account Password",
+  "description": "labore et dolore magna al",
+  "subject": "Your DAACS Account Password has been Reset for %domain%",
+  "body": "<p>Hello  %user.firstname% %user.lastname%,</p><p>Your DAACS account password was successfully reset. You can now <a href=\"%login-url%\">log in here</a> using your new password.</p>",
+  "slug": "comfirmation-user-reset-account-password",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    }
+  ]
+},
+{
+  "_id": "31ad46da-7042-408a-a151-fe530142d9e7",
+  "title": "PDF Summary Report is Ready",
+  "description": "labore et dolore magna al",
+  "subject": "Your DAACS Summary Report is Ready for Download on %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS Summary Report is ready. <a href=\"%get-pdf-url%\">Click here to download a copy of your report.</a></p>",
+  "slug": "pdf-summary-report-is-ready",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%get-pdf-url%",
+      "label": "Get PDF URL",
+      "real_key": "https://%domain%/get-pdf"
+    }
+  ]
+},
+{
+  "_id": "c3b32c72-1bd4-4c58-b97c-7778b327c940",
+  "title": "User request Help",
+  "description": "labore et dolore magna al",
+  "subject": "Help text from %user.firstname% %user.lastname% on %domain%",
+  "body": "%helpText%",
+  "slug": "user-request-help",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%user.username%",
+      "label": "Username",
+      "real_key": "username"
+    },
+    {
+      "key": "%get-pdf-url%",
+      "label": "Get PDF URL",
+      "real_key": "https://%domain%/get-pdf"
+    }
+  ]
+},
+{
+  "_id": "245368a6-b528-48ca-81bd-bbe10a917df6",
+  "title": "Forgot email",
+  "description": "labore et dolore magna al",
+  "subject": "Here is your username to %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>You have requested your username. Your username is: <span>%user.username%</span></p><p>Log in to your account by clicking the following <a href=\"%login-url%\">link</a>, or copy and paste it into your browser’s address bar: %login-url%</p><p>For further assistance, please contact us at support@daacs.net.</p>",
+  "slug": "forgot-email",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%user.username%",
+      "label": "Username",
+      "real_key": "username"
+    },
+    {
+      "key": "%get-pdf-url%",
+      "label": "Get PDF URL",
+      "real_key": "https://%domain%/get-pdf"
+    }
+  ]
+},
+{
+  "_id": "516387e1-510d-4582-95d6-528c94404324",
+  "title": "New Account In Admin",
+  "description": "Send email about users new account from admin.",
+  "subject": "Your New DAACS Account - %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS account has been created.</p><p>Click this link to <a href=\"%new-account-url%\">verify your account</a>.</p><p>If you can't open the URL just copy and paste this link into your browser.</p><p>%new-account-url%</p>%userPasswordHtml%",
+  "slug": "new-account-in-admin",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.username%",
+      "label": "Username",
+      "real_key": "username"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%new-account-url%",
+      "label": "New Acount URL",
+      "real_key": "https://%domain%/verify-account?token=%verify-account-token%"
+    }
+  ]
+},
+{
+  "_id": "d4f6b590-b2d8-462e-a04e-22a7bdafa8e0",
+  "title": "New Enrollment in classroom",
+  "description": "Send email to instructor about new student joining classrom. Should also let them know if they need to make a desicison.",
+  "subject": "A student has enrolled into \"%classroom.title%\" classroom - %domain%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p>\n<p>A student with the name \"%student.firstname% %student.lastname%\" has joined the classroom \"%classroom.title%\"</p>\n\n<p>%descision-option%</p>",
+  "slug": "new-enrollment-in-classroom",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.username%",
+      "label": "Username",
+      "real_key": "username"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%new-account-url%",
+      "label": "New Acount URL",
+      "real_key": "https://%domain%/verify-account?token=%verify-account-token%"
+    },
+    {
+      "key": "%descision-option%",
+      "label": "Descision",
+      "real_key": "This student needs you to accept or decline thier enrollment. <a href=\"//%classroom-link%\">Click here</a>"
+    },
+    {
+      "key": "%classroom-link%",
+      "label": "Classroom URL",
+      "real_key": "%domain%/meow/admin/classroom/edit/%classroom.ID%"
+    },
+    {
+      "key": "%classroom.slug%",
+      "label": "Classroom slug",
+      "real_key": "slug"
+    },
+    {
+      "key": "%classroom.title%",
+      "label": "Classroom title",
+      "real_key": "title"
+    },
+    {
+      "key": "%classroom.ID%",
+      "label": "Classroom title",
+      "real_key": "_id"
+    },
+    {
+      "key": "%student.firstname%",
+      "label": "Student first name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%student.lastname%",
+      "label": "Student last name",
+      "real_key": "lastName"
+    }
+  ]
+}]
