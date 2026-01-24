@@ -15,6 +15,7 @@ services:
       - ${MONGODB_MAPPED_PORT}:27017
     volumes:
       - ${LOCAL_PATH_TO_MONGODB_DIR}/assessments:/docker-entrypoint-initdb.d/assessments/
+      - ${LOCAL_PATH_TO_MONGODB_DIR}/insert-json-files:/docker-entrypoint-initdb.d/insert-json-files/
       - ${LOCAL_PATH_TO_MONGODB_DIR}/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     container_name: ${MONGODB_CONTAINER_NAME}
 

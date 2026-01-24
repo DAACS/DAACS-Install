@@ -17,34 +17,39 @@ db.createUser({
   roles: [{ role: "readWrite", db: process.env["MONGODB_DATABASE_NAME"] }],
 });
 
+
+
+/* USER ASSESSMENTS */
+
 db.createCollection("user_assessments");
+db.user_assessments.createIndex({assessmentSlug: 1 }, {sparse:true})
+
+
+
+/* TOKENS */
+
 db.createCollection("tokens");
+db.tokens.createIndex({refreshTokenExpiresAt: 1 }, {expireAfterSeconds:0}) //says its never used, so why are we keeping it?
+
+
+/* Q ITEMS */
+
 db.createCollection("qitems");
-db.createCollection("assessmentcategorygroups");
-db.createCollection("request_helps");
-
-//default asssessment categories to import
-db.assessmentcategorygroups.insertMany([
-  {
-    _id: "precalculus",
-    label: "PreCalculus",
-    assessmentCategory: "MATHEMATICS",
-  },
-  { _id: "writing", label: "writing-group", assessmentCategory: "WRITING" },
-  {
-    _id: "mathematics",
-    label: "mathematics-group",
-    assessmentCategory: "MATHEMATICS",
-  },
-  {
-    _id: "college_skills",
-    label: "college-skills-group",
-    assessmentCategory: "COLLEGE_SKILLS",
-  },
-  { _id: "reading", label: "reading-group", assessmentCategory: "READING" },
-]);
 
 
+/* HELP THREADS */
+db.createCollection("request_helps"); //rename to help-threads
+
+
+/* DAACS INVITES */
+db.createCollection("daacs_invites");//maybe we should add some to email and classroom ID
+
+/* CLASSROOM */
+
+db.createCollection("classrooms");
+db.classrooms.createIndex({slug: 1 }, {sparse:true})
+
+/* CLIENTS */
 
 db.createCollection("clients");
 
@@ -64,18 +69,20 @@ db.clients.insertMany([
   { "_id": clientObjId2.toString(), grants: [ 'password', 'refresh_token', 'urn:foo:bar:baz' ], redirectUris: [], clientId: 'newsaml', clientSecret: '',__v: 0}
 ]);
 
-//SAML CLIENT
+
+/* EVENT CONTAINERS */
 
 db.createCollection("event_containers");
-db.createCollection("message_stats");
-db.createCollection("messages");
-db.createCollection("users");
+db.event_containers.createIndex({userId: 1 }, {unique:true})
 
+
+/* USERS */
+
+db.createCollection("users");
 db.users.createIndex({username: 1 }, {unique: true})
 db.users.createIndex({email: 1 }, {unique: true, sparse:true})
 db.users.createIndex({email: 1, username: 1 }, {unique: true})
 
-//Create default user
  
    const util = require('util');
    const exec = util.promisify(require('child_process').exec);
@@ -95,17 +102,20 @@ db.users.createIndex({email: 1, username: 1 }, {unique: true})
    }catch(e){
 
    }
+//Create comms user
+  let comms_user_id = crypto.randomUUID().toString()
 
    let queue_user = {
-      _id: crypto.randomUUID().toString(),
+      _id: comms_user_id,
     username: process.env.WEB_SERVER_COMMUNICATION_USERNAME ,
     password: communication_password,
     firstName: "communication",
     lastName: "user",
-    roles: ["ROLE_COMMUNICATION"],
-    rolesAreWritable: false,
     createdDate: new Date(),
-    isUserDisabled: false
+    isUserDisabled: false,
+    isSamlAccount: false,
+    saml_properties: [],
+    other_properties: []
    };
 
 
@@ -134,6 +144,7 @@ db.users.createIndex({email: 1, username: 1 }, {unique: true})
 
    communication_password = "";
     
+
    try {
     const {
             stdout,
@@ -143,21 +154,21 @@ db.users.createIndex({email: 1, username: 1 }, {unique: true})
   }catch(e){
 
   }
-
+//Create admin user
+  let admin_user_id = crypto.randomUUID().toString()
    let admin_user = {
-    _id: crypto.randomUUID().toString(),
+    _id: admin_user_id,
   username: process.env.WEB_SERVER_ADMIN_USERNAME ,
   password: communication_password,
   firstName: "admin-firstname",
   lastName: "admin-lastname",
-  roles: ["ROLE_ADMIN"],
-  rolesAreWritable: false,
   isUserDisabled: false,
   createdDate: new Date(),
+    isSamlAccount: false,
+    saml_properties: [],
+    other_properties: []
  };
 
-
-  //default assessment to import
 
 
   if(process.env.WEB_SERVER_ADMIN_EMAIL != undefined && process.env.WEB_SERVER_ADMIN_EMAIL.includes("@")){
@@ -166,16 +177,22 @@ db.users.createIndex({email: 1, username: 1 }, {unique: true})
 
    db.users.insertOne(admin_user);
 
+
+/* ASSESSMENTS */
+
    db.createCollection("assessments");
+   db.assessments.createIndex({slug: 1 }, {sparse:true})
+
+   
+  //default assessment to import
 
   const folderPath = '/docker-entrypoint-initdb.d/assessments/';
   const files_scan_list = fs.readdirSync(folderPath);
-  let asseessments = [];
 
    if(files_scan_list.length >  0){
 
     let asseessments = files_scan_list.map((filename) => { 
-      return JSON.parse(fs.readFileSync(`/docker-entrypoint-initdb.d/assessments/${filename}`))
+      return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
     })
     if(asseessments.length > 0){
       db.assessments.insertMany(asseessments);
@@ -183,6 +200,41 @@ db.users.createIndex({email: 1, username: 1 }, {unique: true})
   }
 
 
+  /* EVENT CONTAINERS */
+
+db.createCollection("system_emails");
+
+  const folderPathSystemEmails = '/docker-entrypoint-initdb.d/insert-json-files/system_emails.json';
+
+  if(folderPathSystemEmails.length >  0){
+      db.system_emails.insertMany(JSON.parse(fs.readFileSync(`${folderPathSystemEmails}`)));
+  }
+
+
+  /* ROLES */
+
+  db.createCollection("roles");
+  const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
+
+  if(folderPathSystemEmails.length >  0){
+      db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
+  }
+
+
+  /* PRIVILEGES */
+
+  db.createCollection("privileges");
+  const folderPathPrivileges = '/docker-entrypoint-initdb.d/insert-json-files/privileges.json';
+
+  if(folderPathPrivileges.length >  0){
+      db.privileges.insertMany(JSON.parse(fs.readFileSync(`${folderPathPrivileges}`)));
+  }
+
+
 
   return;
 })()
+
+
+
+
