@@ -1,0 +1,28 @@
+services:
+
+  idp:
+    build:
+      context: './'
+    networks:
+      - nginx-proxy
+      - myNetwork
+    expose:
+      - 80
+      - 443
+      - 444
+      - 8080
+    container_name: "idp5-moo"
+#     volumes:
+#      - ./data/ssl:/tmp/ssl:ro
+#      - ./data/ssl:/tmp/ssl:ro
+    environment:
+      - "VIRTUAL_HOST=${VIRTUAL_HOST}"
+      - "VIRTUAL_PORT=8080"
+
+networks:
+  myNetwork:
+    external: true
+
+
+
+    # VIRTUAL_HOST=idp.victor.com VIRTUAL_PORT=8080 docker compose -f docker-compose.dev.yml up -d 

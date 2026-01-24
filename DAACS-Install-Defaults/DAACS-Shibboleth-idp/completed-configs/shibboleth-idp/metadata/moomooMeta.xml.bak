@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="moomoo-daacs-saml" ID="_772ef405abf3d521a81196e7df359df544e661c2">
+  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
+    <KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>MIIDazCCAlOgAwIBAgIUFijYaHfg4mTXi8gDuimh5s/py8MwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yNDA4MTMwMjU0NDBaFw0yOTA4
+MTIwMjU0NDBaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw
+HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEB
+AQUAA4IBDwAwggEKAoIBAQC9W1puTki+HNExFTsbooTmSz9WRqxzVzelfe85gZV7
+9CcOYnyDDb1nByjBNnnrz0+8olbIJ+z2A7rM8lhuTg66a4ykxRymE6HGIkrC0Kww
+sx7at0RNkbgJcXPbfDwxLd1aGe61fBM4zyOPuR0vvNmF7ZnhBLhqtFib2SORlw7T
+6w6Mlfe/kpgwFzeqPMs4jORWS0aw68HhphkmzJLyu5hlZq8Ic9oC5eEoeJwMSFVk
+C+vv2yRG+E9R3Q4p81RG1DLvMlgy2P5EpRA9gKzQBzSH1wvsor2nuUoWgE44daqW
+n79sSMlMMR1i5BCl/0cBxXmhJ1+vSxGrb0Haw7O1m2gFAgMBAAGjUzBRMB0GA1Ud
+DgQWBBR4RIawfrwIWyCqKTXvKTB+0kEu4DAfBgNVHSMEGDAWgBR4RIawfrwIWyCq
+KTXvKTB+0kEu4DAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBy
+JWQGCEGMAUmy4gUU0GQoWis+nVxKPaj5jINIE+QhOTKnrZ3QlMdy0VHdZCryMMDz
+9dhMnIGRQ0QqyjcTW7InMnn/qIMNUYen0+DFvImVBzi/ntbECtgdRHklX2nI2eb2
+yYLF7FkJhTjKRRhv/VsHF4e6fcEs67RjA7dUh6srgppzYfIzBQOqHYMaPwTCFkwd
+A5xd95vFtofL07e9u9/DuTHy02/AXcISH+P23EGQ+6ptCIaQhKsZCqHwLAv8HS7r
+CwtUseJlK7kSF80BAhzcNQj9u4a0AUQ/AK9QGzxT11arkLiXEMD10ZtJeESHT0S+
+xlkrUhHIYY2a9B+aBeeP
+</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </KeyDescriptor>
+    <KeyDescriptor use="encryption">
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC9W1puTki+HNEx
+FTsbooTmSz9WRqxzVzelfe85gZV79CcOYnyDDb1nByjBNnnrz0+8olbIJ+z2A7rM
+8lhuTg66a4ykxRymE6HGIkrC0Kwwsx7at0RNkbgJcXPbfDwxLd1aGe61fBM4zyOP
+uR0vvNmF7ZnhBLhqtFib2SORlw7T6w6Mlfe/kpgwFzeqPMs4jORWS0aw68Hhphkm
+zJLyu5hlZq8Ic9oC5eEoeJwMSFVkC+vv2yRG+E9R3Q4p81RG1DLvMlgy2P5EpRA9
+gKzQBzSH1wvsor2nuUoWgE44daqWn79sSMlMMR1i5BCl/0cBxXmhJ1+vSxGrb0Ha
+w7O1m2gFAgMBAAECggEARY2PL3I43QAHxPAn+HQfPdoI5z9pa6pvKa4S13wmNNQP
+HoUFeDvtRLFIAoRojznkb4TvvHCR5SGklVA1NDsexNHpZMJ0TfprEzSYYmu0u+Sn
+Yi4r/BQY1fsi082T7HqM0mIxIN90zgqj5NBZjKXg/oUyXwlVVfhtjb1aB8nFLAiK
+geNGUAu7slByUq5H5Z5PiJ631STEeTqkXb/q5MCBwHI/yp9xmfau6MtFLqypnclX
+KkAXozdRC1yzx8ncBU9BFtkcAw7XFkG7Q7rJq9ZZN9J/q2LjeLj19GJ4kBE0m9LS
+5XHJoDsOPgL68p4ePMz3JnMxA4uio4oEtAQfRGdFJwKBgQDrYII9fDnaJqP0TMT3
+jlr4mNm24q0AjLE+JErQZ3FGhX5asUvjZp6oz90JAfdbiD8KhQoN891zDIQdsjUV
+lTMhURo6YtjbnVIDUDUwHivUlsS0LERROCpak3AwTgi4Z7cFcjk5WmAMaJnj/cmu
+VN0BCL6VAiOk/ZGlpBpxyRovGwKBgQDN8p2aL5ZRrlpuFojaFXaiY5WY7no01A3Q
+Ur8tnxqAZri7ZrIsObmRwZsfZqAzQ68txFihha2PqGJgP1zVo4UAAXNbY9lL5g3f
+YS3NRBpaGJ/gw0V+DlfpHJLHWaOFR6gIwovpRkjvEDywtd/Bg08Vk/n21tAv+wyr
+uT/3nAGXXwKBgQCIkE4AbnsCXzjxHTmKiEWvxr9KpOnLT9XmQBhIIjxOtlVBOWzW
+W0vilfegqktiCALLj7Tts3fgsHpW4HZ8NzybL/sPtRotEXHsCjVR3a+AgJlQD/7z
+QKsSMkj9PclBdKtztXoOFKl1iZr/9Nd3FjXDy9cHjV4w9A31FOli61MN0QKBgQCi
+JEo6kw6o3jkqBSnXcSCGtxqXXeHu56i8g/kqJOJLhxQXzsGmGghkneXQMg8cbURl
+JvmUqVc9DBfvqNMhC+1xVLMKl7EDlWsEnFDgE6cfmdV9sp9qoEZMLIfO1V7tVr4P
+r4NRtFlFhiYSBg7VHtlLpsYctYEQ1XljVaTr//IsxwKBgQDXbpVdCxg/FOEVhmrH
+QKzeBCe8aVejDfgG23Ovcvc9f/h2Kc0WnUKkx7+RIk7NEzbHlAFBXAerZxUuMCWl
+bZHDiVvjsTKv8OKQnM8XyVktlYc/tjIFIcVOqwYWp9h8+ixgX2cZDPTLXbc6D0NR
+p7K+qzQF5GLg90dvb7KegOm3Mg==
+</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+      <EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm"/>
+      <EncryptionMethod Algorithm="http://www.w3.org/2009/xmlenc11#aes128-gcm"/>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"/>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+    </KeyDescriptor>
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://cat.victor.com/logout/callback"/>
+    <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+    <AssertionConsumerService index="1" isDefault="true" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://cat.victor.com/loginMooMoo/callback"/>
+  </SPSSODescriptor>
+</EntityDescriptor>
