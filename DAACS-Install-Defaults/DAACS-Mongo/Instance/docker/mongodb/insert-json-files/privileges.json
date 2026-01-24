@@ -1,0 +1,504 @@
+[{
+  "_id": "can_view_admin",
+  "permission": "can_view_admin",
+  "description": "This allows you to see admin dashboard",
+  "title": "Can see admin",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_roles",
+  "permission": "can_view_roles",
+  "description": "This allows you to see admin roles listing page",
+  "title": "Can see roles",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_users",
+  "permission": "can_view_users",
+  "description": "This allows you to see admin users listing ",
+  "title": "Can see users",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_user",
+  "permission": "can_update_user",
+  "description": "This allows you to edit user. ",
+  "title": "Can update user",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_delete_user",
+  "permission": "can_delete_user",
+  "description": "This allows you to delete user. ",
+  "title": "Can delete user",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_create_user",
+  "permission": "can_create_user",
+  "description": "This allows you to create user.",
+  "title": "Can create user",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_bulk_update_user",
+  "permission": "can_bulk_update_user",
+  "description": "This allows you to bulk users.",
+  "title": "Can bulk users",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_disable_user",
+  "permission": "can_disable_user",
+  "description": "This allows you to disable users account.",
+  "title": "Can disable users account",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_send_user_new_password",
+  "permission": "can_send_user_new_password",
+  "description": "This allows you to send users new password.",
+  "title": "Can send user new password",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_delete_user_session",
+  "permission": "can_delete_user_session",
+  "description": "This allows you to delete users current session. Forcing them to login again.",
+  "title": "Can delete users session",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_other_properties",
+  "permission": "can_view_other_properties",
+  "description": "This allows you to view \"Other Properties\" field.",
+  "title": "Can view other properties",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_saml_properties",
+  "permission": "can_view_saml_properties",
+  "description": "This allows you to view \"SAML Properties\" field.",
+  "title": "Can view other properties",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_user_roles",
+  "permission": "can_view_user_roles",
+  "description": "This allows you to view roles on user.",
+  "title": "Can view other properties",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_edit_other_properties",
+  "permission": "can_edit_other_properties",
+  "description": "This allows you to edit \"Other Properties\" field.",
+  "title": "Can edit other properties",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_role",
+  "permission": "can_update_role",
+  "description": "This allows you to update role",
+  "title": "Can update role",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_delete_role",
+  "permission": "can_delete_role",
+  "description": "This allows you to delete role",
+  "title": "Can delete role",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_classrooms",
+  "permission": "can_view_classrooms",
+  "description": "This allows you to see admin classroom listing page",
+  "title": "Can see classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_create_classroom",
+  "permission": "can_create_classroom",
+  "description": "This allows you to create classroom",
+  "title": "Can create classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_classroom",
+  "permission": "can_update_classroom",
+  "description": "This allows you to update classroom",
+  "title": "Can update classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_delete_classroom",
+  "permission": "can_delete_classroom",
+  "description": "This allows you to delete classroom",
+  "title": "Can delete classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_design",
+  "permission": "can_view_design",
+  "description": "This allows you to view design components",
+  "title": "Can view design components",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_assessments",
+  "permission": "can_view_assessments",
+  "description": "This allows you to view assessments page",
+  "title": "Can view  assessments page",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_emails",
+  "permission": "can_view_emails",
+  "description": "This allows you to view emails listing",
+  "title": "Can view emails listing",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_search_dialog",
+  "permission": "can_view_search_dialog",
+  "description": "This allows you to use search dialog",
+  "title": "Can view emails listing",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_students_in_classroom",
+  "permission": "can_update_students_in_classroom",
+  "description": "This allows you to delete classroom",
+  "title": "Can delete classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessments_in_classroom",
+  "permission": "can_update_assessments_in_classroom",
+  "description": "This allows you to delete classroom",
+  "title": "Can delete classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_remove_student_in_bulk",
+  "permission": "can_remove_student_in_bulk",
+  "description": "This allows you to delete classroom",
+  "title": "Can delete classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_add_student_csv",
+  "permission": "can_add_student_csv",
+  "description": "This allows you to delete classroom",
+  "title": "Can delete classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_email",
+  "permission": "can_update_email",
+  "description": "This allows you to update role",
+  "title": "Can update role",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_create_role",
+  "permission": "can_create_role",
+  "description": "This allows you to create role",
+  "title": "Can create role",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment",
+  "permission": "can_update_assessment",
+  "description": "This allows you to update assessment.",
+  "title": "Can update  assessment page",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_create_assessment",
+  "permission": "can_create_assessment",
+  "description": "This allows you to create assessment",
+  "title": "Can create  assessment",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_delete_assessment",
+  "permission": "can_delete_assessment",
+  "description": "This allows you to delete assessment",
+  "title": "Can delete assessment",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_email_preview",
+  "permission": "can_view_email_preview",
+  "description": "This allows you to view email preview",
+  "title": "Can view email preview",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_send_back_up_email",
+  "permission": "can_send_back_up_email",
+  "description": "This allows you to send system email to user",
+  "title": "Can send system email to user",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_assessment_help_questions",
+  "permission": "can_view_assessment_help_questions",
+  "description": "This allows you to view assessment help questions",
+  "title": "Can view assessment help",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_take_assessment_as_admin",
+  "permission": "can_take_assessment_as_admin",
+  "description": "This allows you to take assessment as admin",
+  "title": "Can take assessment as admin",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_assessment_analytics",
+  "permission": "can_view_assessment_analytics",
+  "description": "This allows you to view assessment analytics",
+  "title": "Can view assessment analytics",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment_content",
+  "permission": "can_update_assessment_content",
+  "description": "This allows you to update assessment content",
+  "title": "Can update assessment content",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment_domains",
+  "permission": "can_update_assessment_domains",
+  "description": "This allows you to update assessment domains",
+  "title": "Can update assessment domains",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment_item_group_settings",
+  "permission": "can_update_assessment_item_group_settings",
+  "description": "This allows you to update assessment item group settings",
+  "title": "Can update assessment item group settings",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment_rubric",
+  "permission": "can_update_assessment_rubric",
+  "description": "This allows you to update assessment rubric",
+  "title": "Can update assessment rubric",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_assessment_questions",
+  "permission": "can_update_assessment_questions",
+  "description": "This allows you to update assessment questions",
+  "title": "Can update assessment questions",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_role",
+  "permission": "can_view_role",
+  "description": "This allows you to see admin roles listing page, and indiviual role page",
+  "title": "Can see roles",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_search_for_users",
+  "permission": "can_search_for_users",
+  "description": "This allows you to search for users system wide",
+  "title": "Can search for users",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_student",
+  "permission": "can_view_student",
+  "description": "This allows you to see student dashboard",
+  "title": "Can see student",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_search_for_assessments",
+  "permission": "can_search_for_assessments",
+  "description": "This allows you to search for assessments system wide",
+  "title": "Can search for assessments",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_student_results",
+  "permission": "can_view_student_results",
+  "description": "This allows you to view student results in classroom",
+  "title": "Can view student results in classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_accept_q_lightside_grades",
+  "permission": "can_accept_q_lightside_grades",
+  "description": "This allows you accept grades from Q server.",
+  "title": "Can accept Q server grades",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_accept_pdf",
+  "permission": "can_accept_pdf",
+  "description": "This allows you accept PDF from Q server.",
+  "title": "Can accept Q server PDFS",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_export_assessments",
+  "permission": "can_export_assessments",
+  "description": "This allows you to export admin grades",
+  "title": "Can export assessment grades",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_make_classroom_decisions",
+  "permission": "can_make_classroom_decisions",
+  "description": "This allows you accept or decline student enrollment in classroom",
+  "title": "Can make classroom decisions",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_help",
+  "permission": "can_view_help",
+  "description": "This allows you to see admin help",
+  "title": "Can see help",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_administer_help",
+  "permission": "can_administer_help",
+  "description": "This allows you to see admin help",
+  "title": "Can see help",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_help_status",
+  "permission": "can_update_help_status",
+  "description": "This allows you to update admin help status",
+  "title": "Can update help thread admin status",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_upload_files",
+  "permission": "can_upload_files",
+  "description": "Allows users to upload files. ",
+  "title": "Can upload files",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+}]

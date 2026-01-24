@@ -1,240 +1,257 @@
-(async ()  => {
+(async () => {
 
-  var fs = require('fs');
+    var fs = require('fs');
 
-  //I think we're going to keep this one 
+    //I think we're going to keep this one 
 
-// db.auth(
-//   process.env["MONGO_INITDB_ROOT_USERNAME"],
-//   process.env["MONGO_INITDB_ROOT_PASSWORD"]
-// );
+    // db.auth(
+    //   process.env["MONGO_INITDB_ROOT_USERNAME"],
+    //   process.env["MONGO_INITDB_ROOT_PASSWORD"]
+    // );
 
-db = db.getSiblingDB(process.env["MONGODB_DATABASE_NAME"]);
+    db = db.getSiblingDB(process.env["MONGODB_DATABASE_NAME"]);
 
-db.createUser({
-  user: process.env["MONGO_USERNAME"],
-  pwd: process.env["MONGO_PASSWORD"],
-  roles: [{ role: "readWrite", db: process.env["MONGODB_DATABASE_NAME"] }],
-});
+    db.createUser({
+        user: process.env["MONGO_USERNAME"],
+        pwd: process.env["MONGO_PASSWORD"],
+        roles: [{
+            role: "readWrite",
+            db: process.env["MONGODB_DATABASE_NAME"]
+        }],
+    });
 
+    /* USER ASSESSMENTS */
 
+    db.createCollection("user_assessments");
+    db.user_assessments.createIndex({
+        assessmentSlug: 1
+    }, {
+        sparse: true
+    })
 
-/* USER ASSESSMENTS */
+    /* TOKENS */
 
-db.createCollection("user_assessments");
-db.user_assessments.createIndex({assessmentSlug: 1 }, {sparse:true})
+    db.createCollection("tokens");
+    db.tokens.createIndex({
+        refreshTokenExpiresAt: 1
+    }, {
+        expireAfterSeconds: 0
+    }) //says its never used, so why are we keeping it?
 
+    /* Q ITEMS */
 
+    db.createCollection("qitems");
 
-/* TOKENS */
+    /* HELP THREADS */
+    db.createCollection("request_helps"); //rename to help-threads
 
-db.createCollection("tokens");
-db.tokens.createIndex({refreshTokenExpiresAt: 1 }, {expireAfterSeconds:0}) //says its never used, so why are we keeping it?
+    /* DAACS INVITES */
+    db.createCollection("daacs_invites"); //maybe we should add some to email and classroom ID
 
+    /* CLASSROOM */
 
-/* Q ITEMS */
+    db.createCollection("classrooms");
+    db.classrooms.createIndex({
+        slug: 1
+    }, {
+        sparse: true
+    })
 
-db.createCollection("qitems");
+    /* CLIENTS */
 
+    db.createCollection("clients");
 
-/* HELP THREADS */
-db.createCollection("request_helps"); //rename to help-threads
+    //default clients to import
+    let clientObjId1 = new ObjectId();
+    let clientObjId2 = new ObjectId();
+    db.clients.insertMany([{
+            _id: clientObjId1.toString(),
+            grants: ["password", "refresh_token"],
+            redirectUris: [],
+            id: process.env["API_CLIENT_ID"],
+            clientId: process.env["API_CLIENT_ID"],
+            clientSecret: "secret",
+            __v: 0,
+        },
+        {
+            "_id": clientObjId2.toString(),
+            grants: ['password', 'refresh_token', 'urn:foo:bar:baz'],
+            redirectUris: [],
+            clientId: 'newsaml',
+            clientSecret: '',
+            __v: 0
+        }
+    ]);
 
+    /* EVENT CONTAINERS */
 
-/* DAACS INVITES */
-db.createCollection("daacs_invites");//maybe we should add some to email and classroom ID
+    db.createCollection("event_containers");
+    db.event_containers.createIndex({
+        userId: 1
+    }, {
+        unique: true
+    })
 
-/* CLASSROOM */
+    /* USERS */
 
-db.createCollection("classrooms");
-db.classrooms.createIndex({slug: 1 }, {sparse:true})
+    db.createCollection("users");
+    db.users.createIndex({
+        username: 1
+    }, {
+        unique: true
+    })
+    db.users.createIndex({
+        email: 1
+    }, {
+        unique: true,
+        sparse: true
+    })
+    db.users.createIndex({
+        email: 1,
+        username: 1
+    }, {
+        unique: true
+    })
 
-/* CLIENTS */
+    const util = require('util');
+    const exec = util.promisify(require('child_process').exec);
 
-db.createCollection("clients");
+    let real_command = "";
 
-//default clients to import
-let clientObjId1 = new ObjectId();
-let clientObjId2 = new ObjectId();
-db.clients.insertMany([
-  {
-    _id: clientObjId1.toString(),
-    grants: ["password", "refresh_token"],
-    redirectUris: [],
-    id: process.env["API_CLIENT_ID"],
-    clientId: process.env["API_CLIENT_ID"],
-    clientSecret: "secret",
-    __v: 0,
-  },
-  { "_id": clientObjId2.toString(), grants: [ 'password', 'refresh_token', 'urn:foo:bar:baz' ], redirectUris: [], clientId: 'newsaml', clientSecret: '',__v: 0}
-]);
+    real_command = `echo -n  ${process.env.WEB_SERVER_COMMUNICATION_PASSWORD} | sha1sum `;
 
+    var communication_password = "";
 
-/* EVENT CONTAINERS */
+    try {
+        const {
+            stdout,
+            stderr
+        } = await exec(real_command)
+        communication_password = stdout.split(" ")[0]
+    } catch (e) {
 
-db.createCollection("event_containers");
-db.event_containers.createIndex({userId: 1 }, {unique:true})
+    }
+    //Create comms user
+    let comms_user_id = crypto.randomUUID().toString()
 
+    let queue_user = {
+        _id: comms_user_id,
+        username: process.env.WEB_SERVER_COMMUNICATION_USERNAME,
+        password: communication_password,
+        firstName: "communication",
+        lastName: "user",
+        createdDate: new Date(),
+        isUserDisabled: false,
+        isSamlAccount: false,
+        saml_properties: [],
+        other_properties: []
+    };
 
-/* USERS */
+    if (process.env.WEB_SERVER_COMMUNICATION_EMAIL != undefined && process.env.WEB_SERVER_COMMUNICATION_EMAIL.includes("@")) {
+        queue_user.email = process.env.WEB_SERVER_COMMUNICATION_EMAIL;
+    }
 
-db.createCollection("users");
-db.users.createIndex({username: 1 }, {unique: true})
-db.users.createIndex({email: 1 }, {unique: true, sparse:true})
-db.users.createIndex({email: 1, username: 1 }, {unique: true})
+    if (process.env.WEB_SERVER_COMMUNICATION_EMAIL_EXTRA != undefined) {
 
- 
-   const util = require('util');
-   const exec = util.promisify(require('child_process').exec);
+        let extra_emails_split = process.env.WEB_SERVER_COMMUNICATION_EMAIL_EXTRA.split(",");
+        if (extra_emails_split.length > 0) {
+            queue_user.extra_alert_emails = [];
 
-  let real_command = "";
+            extra_emails_split.forEach((item) => {
+                if (item.includes("@")) {
+                    queue_user.extra_alert_emails.push(item);
+                }
+            })
+        }
+    }
 
-  real_command = `echo -n  ${process.env.WEB_SERVER_COMMUNICATION_PASSWORD} | sha1sum `;
-  
-  var communication_password = "";
-
-   try {
-           const {
-                   stdout,
-                   stderr
-           } = await exec(real_command)
-           communication_password = stdout.split(" ")[0]
-   }catch(e){
-
-   }
-//Create comms user
-  let comms_user_id = crypto.randomUUID().toString()
-
-   let queue_user = {
-      _id: comms_user_id,
-    username: process.env.WEB_SERVER_COMMUNICATION_USERNAME ,
-    password: communication_password,
-    firstName: "communication",
-    lastName: "user",
-    createdDate: new Date(),
-    isUserDisabled: false,
-    isSamlAccount: false,
-    saml_properties: [],
-    other_properties: []
-   };
-
-
-
-   if(process.env.WEB_SERVER_COMMUNICATION_EMAIL != undefined && process.env.WEB_SERVER_COMMUNICATION_EMAIL.includes("@")){
-    queue_user.email = process.env.WEB_SERVER_COMMUNICATION_EMAIL;
-   }
-
-   if(process.env.WEB_SERVER_COMMUNICATION_EMAIL_EXTRA != undefined){
-    
-    let extra_emails_split = process.env.WEB_SERVER_COMMUNICATION_EMAIL_EXTRA.split(",");
-      if(extra_emails_split.length > 0){
-      queue_user.extra_alert_emails = [];
-
-        extra_emails_split.forEach((item) => {
-          if(item.includes("@")){
-            queue_user.extra_alert_emails.push(item);
-          }
-        })
-      }
-   }
-
-   db.users.insertOne(queue_user);
+    db.users.insertOne(queue_user);
 
     real_command = `echo -n  ${process.env.WEB_SERVER_ADMIN_PASSWORD} | sha1sum `;
 
-   communication_password = "";
-    
+    communication_password = "";
 
-   try {
-    const {
+    try {
+        const {
             stdout,
             stderr
-      } = await exec(real_command)
-      communication_password = stdout.split(" ")[0]
-  }catch(e){
+        } = await exec(real_command)
+        communication_password = stdout.split(" ")[0]
+    } catch (e) {
 
-  }
-//Create admin user
-  let admin_user_id = crypto.randomUUID().toString()
-   let admin_user = {
-    _id: admin_user_id,
-  username: process.env.WEB_SERVER_ADMIN_USERNAME ,
-  password: communication_password,
-  firstName: "admin-firstname",
-  lastName: "admin-lastname",
-  isUserDisabled: false,
-  createdDate: new Date(),
-    isSamlAccount: false,
-    saml_properties: [],
-    other_properties: []
- };
-
-
-
-  if(process.env.WEB_SERVER_ADMIN_EMAIL != undefined && process.env.WEB_SERVER_ADMIN_EMAIL.includes("@")){
-    admin_user.email = process.env.WEB_SERVER_ADMIN_EMAIL;
-   }
-
-   db.users.insertOne(admin_user);
-
-
-/* ASSESSMENTS */
-
-   db.createCollection("assessments");
-   db.assessments.createIndex({slug: 1 }, {sparse:true})
-
-   
-  //default assessment to import
-
-  const folderPath = '/docker-entrypoint-initdb.d/assessments/';
-  const files_scan_list = fs.readdirSync(folderPath);
-
-   if(files_scan_list.length >  0){
-
-    let asseessments = files_scan_list.map((filename) => { 
-      return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
-    })
-    if(asseessments.length > 0){
-      db.assessments.insertMany(asseessments);
     }
-  }
+    //Create admin user
+    let admin_user_id = crypto.randomUUID().toString()
+    let admin_user = {
+        _id: admin_user_id,
+        username: process.env.WEB_SERVER_ADMIN_USERNAME,
+        password: communication_password,
+        firstName: "admin-firstname",
+        lastName: "admin-lastname",
+        isUserDisabled: false,
+        createdDate: new Date(),
+        isSamlAccount: false,
+        saml_properties: [],
+        other_properties: []
+    };
 
+    if (process.env.WEB_SERVER_ADMIN_EMAIL != undefined && process.env.WEB_SERVER_ADMIN_EMAIL.includes("@")) {
+        admin_user.email = process.env.WEB_SERVER_ADMIN_EMAIL;
+    }
 
-  /* EVENT CONTAINERS */
+    db.users.insertOne(admin_user);
 
-db.createCollection("system_emails");
+    /* ASSESSMENTS */
 
-  const folderPathSystemEmails = '/docker-entrypoint-initdb.d/insert-json-files/system_emails.json';
+    db.createCollection("assessments");
+    db.assessments.createIndex({
+        slug: 1
+    }, {
+        sparse: true
+    })
 
-  if(folderPathSystemEmails.length >  0){
-      db.system_emails.insertMany(JSON.parse(fs.readFileSync(`${folderPathSystemEmails}`)));
-  }
+    //default assessment to import
 
+    const folderPath = '/docker-entrypoint-initdb.d/assessments/';
+    const files_scan_list = fs.readdirSync(folderPath);
 
-  /* ROLES */
+    if (files_scan_list.length > 0) {
 
-  db.createCollection("roles");
-  const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
+        let asseessments = files_scan_list.map((filename) => {
+            return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
+        })
+        if (asseessments.length > 0) {
+            db.assessments.insertMany(asseessments);
+        }
+    }
 
-  if(folderPathSystemEmails.length >  0){
-      db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
-  }
+    /* EVENT CONTAINERS */
 
+    db.createCollection("system_emails");
 
-  /* PRIVILEGES */
+    const folderPathSystemEmails = '/docker-entrypoint-initdb.d/insert-json-files/system_emails.json';
 
-  db.createCollection("privileges");
-  const folderPathPrivileges = '/docker-entrypoint-initdb.d/insert-json-files/privileges.json';
+    if (folderPathSystemEmails.length > 0) {
+        db.system_emails.insertMany(JSON.parse(fs.readFileSync(`${folderPathSystemEmails}`)));
+    }
 
-  if(folderPathPrivileges.length >  0){
-      db.privileges.insertMany(JSON.parse(fs.readFileSync(`${folderPathPrivileges}`)));
-  }
+    /* ROLES */
 
+    db.createCollection("roles");
+    const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
 
+    if (folderPathSystemEmails.length > 0) {
+        db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
+    }
 
-  return;
+    /* PRIVILEGES */
+
+    db.createCollection("privileges");
+    const folderPathPrivileges = '/docker-entrypoint-initdb.d/insert-json-files/privileges.json';
+
+    if (folderPathPrivileges.length > 0) {
+        db.privileges.insertMany(JSON.parse(fs.readFileSync(`${folderPathPrivileges}`)));
+    }
+
+    return;
 })()
-
-
-
-
