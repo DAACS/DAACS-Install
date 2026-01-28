@@ -110,149 +110,68 @@ create_memcached_instance_helper(){
 
 update_memcached_instance_helper(){
     printf "\nUPDATING Memcached DB instance....\n"
-    instance_type="6-1"
+    echo "cool"
 
-    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
+    # instance_type="6-1"
+
+    # should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   
-    # #Check to see if package.json or package.json.lock file has changed to redownload node_modules -todo
-    root_dest="$install_root/new-env-setups"
-    environment_type_defintion=$(get_env_type_definition "$environment_type")
-    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    # # #Check to see if package.json or package.json.lock file has changed to redownload node_modules -todo
+    # root_dest="$install_root/new-env-setups"
+    # environment_type_defintion=$(get_env_type_definition "$environment_type")
+    # instance_type_defintion=$(get_instance_type_definition "$instance_type")
 
-    # # build frontend
-    env_to_create=$(get_env_files_for_updating "$root_dest/$install_folder_destination" $environment_type)
+    # # # build frontend
+    # env_to_create=$(get_env_files_for_updating "$root_dest/$install_folder_destination" $environment_type)
 
-    if [ "$should_update_envs" = "y" ]; then
-        # Update env files for updating service
-        run_fillout_program_for_update "$env_to_create"
-    fi
+    # if [ "$should_update_envs" = "y" ]; then
+    #     # Update env files for updating service
+    #     run_fillout_program_for_update "$env_to_create"
+    # fi
 
-    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    # absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
-    env_webserver_mongo_file="${absolute_dir}webserver-mongo"
+    # env_webserver_mongo_file="${absolute_dir}webserver-mongo"
 
-    mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
-    mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
-    docker_file=$(get_memcached_docker_filename "$environment_type_defintion")
-    qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
-    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
-    folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
-    env_dir="ENV_DIR=$absolute_dir"
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} "
+    # mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
+    # mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
+    # docker_file=$(get_memcached_docker_filename "$environment_type_defintion")
+    # qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    # absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+    # full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
+    # full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+    # local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
+    # folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+    # env_dir="ENV_DIR=$absolute_dir"
+    # env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} "
 
-    run_docker_with_envs "$qserver_docker_file_to" "$env_string"
+    # run_docker_with_envs "$qserver_docker_file_to" "$env_string"
 
-    services_file_dir="$root_dest/$install_folder_destination/services"
-    for entry in "$services_file_dir"/*
-    do
-        update_services_ids_in_service_file "$entry"
-    done
+    # services_file_dir="$root_dest/$install_folder_destination/services"
+    # for entry in "$services_file_dir"/*
+    # do
+    #     update_services_ids_in_service_file "$entry"
+    # done
 
 }
 
-create_mongo_image(){
+create_memcached_image(){
 
-    if [ $(does_docker_image_exsist "${2}") == false ]; then
-        printf "\nCreating mongo replica image exsist....\n"
+    echo "cool"
+    # if [ $(does_docker_image_exsist "${2}") == false ]; then
+    #     printf "\nCreating mongo replica image exsist....\n"
 
-        build_args=$(echo "${3}" | wc -m)
+    #     build_args=$(echo "${3}" | wc -m)
 
-        if [ $(echo "${3}" | wc -m) -gt 0 ]; then
-            build_args="--build-arg ${3}"
-        fi
+    #     if [ $(echo "${3}" | wc -m) -gt 0 ]; then
+    #         build_args="--build-arg ${3}"
+    #     fi
         
-        command="cd ${4} && docker build ${build_args} -t ${2} -f ${1} ."
-        eval "$command"
-    fi
+    #     command="cd ${4} && docker build ${build_args} -t ${2} -f ${1} ."
+    #     eval "$command"
+    # fi
 
 }
-
-initiate_mongo_process_to_replica_set(){
-
-    primary_mongo_service_name="${1}"
-    replica_set_id="${2}"
-    priority="${3}"
-    port="${4}"
-    hostname="${5}"
-
-    if [ -z $hostname ]; then
-        hostname=$(get_current_server_ip)
-    fi 
-
-    if [ -z $priority ]; then
-        priority="1"
-    fi 
-
-    config="rs.initiate({ '_id' : '${replica_set_id}', 'members':[ { '_id' : 0, 'host' : '${hostname}:${port}', priority: ${priority} } ] });"
-    
-    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"${config}\""
-    eval "$command"
-
-}
-
-add_mongo_process_to_replica_set(){
-
-    primary_mongo_service_name="${1}"
-    new_mongo_service_name="${2}"
-    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.add({host: '${new_mongo_service_name}' })\" "
-    eval "$command"
-}
-
-
-remove_mongo_process_from_replica_set(){
-
-    primary_mongo_service_name="${1}"
-    new_mongo_service_name="${2}"
-    command="docker exec -it ${primary_mongo_service_name} mongosh --eval \"rs.remove({host: '${new_mongo_service_name}' })\" "
-    eval "$command"
-}
-
-#todo - it works but I need to add this to command so I can add after replica init
-add_my_own_admin_account_to_docker_mongo(){
-
-    primary_mongo_service_name="${1}"
-    username="${2}"
-    password="${3}"
-
-    command=" docker exec -it ${primary_mongo_service_name} mongosh  --eval \"db.getSiblingDB('admin').createUser({ user: '${username}', pwd: '${password}', roles:['root']})\"; " 
-
-# echo "$command"
-    eval "$command"
-   
-#    docker exec -it loadmongo mongosh bash
-#     use admin
-#     db.createUser(
-#     {
-#         user: "tom", 
-#         pwd: "jerry", 
-#         roles:["root"]
-#     })
-
-    
-
-}
-
-#todo 
-get_mongo_replica_status(){
-
-    primary_mongo_service_name="${1}"
-    status=$(docker exec -it ${primary_mongo_service_name} mongosh --eval "rs.status()")
-
-    echo "$status"
-}
-
-#not used but keep it 
-# copy_file_into_container(){
-#     container_id="${1}"
-#     file="${2}"
-#     location="${3}"
-#     command="docker cp ${file} ${container_id}:${location}"
-#     eval "$command"
-# }
-
 
 get_memcached_docker_filename(){
     return_file=""
