@@ -108,8 +108,8 @@ create_memcached_instance_helper(){
 
 }
 
-update_mongo_instance_helper(){
-    printf "\nUPDATING Mongo DB instance....\n"
+update_memcached_instance_helper(){
+    printf "\nUPDATING Memcached DB instance....\n"
     instance_type="6-1"
 
     should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)

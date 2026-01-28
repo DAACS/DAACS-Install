@@ -8,6 +8,12 @@ fi
 source "$current_dir/utils/colors.sh"
 source "$current_dir/instance_helpers/basic.sh"
 
+# I need to add a option to copy container logs
+# sudo cp $(docker inspect --format='{{.LogPath}}' af94a50c07b1) .
+# sudo chgrp qa af94a50c07b10105022b7b76c8cb227a2fcfc67cd0d7e4e8f6f01dee702a6171-json.log && sudo chown qa af94a50c07b10105022b7b76c8cb227a2fcfc67cd0d7e4e8f6f01dee702a6171-json.log
+
+
+
 main(){
         
 step1_option=$(pretty_read "
