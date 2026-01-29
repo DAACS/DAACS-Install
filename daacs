@@ -13,6 +13,10 @@ source "$current_dir/instance_helpers/basic.sh"
 # sudo chgrp qa af94a50c07b10105022b7b76c8cb227a2fcfc67cd0d7e4e8f6f01dee702a6171-json.log && sudo chown qa af94a50c07b10105022b7b76c8cb227a2fcfc67cd0d7e4e8f6f01dee702a6171-json.log
 
 
+# add a tool to mongodump and restore
+# mongodump --uri="mongodb://MONGO_USERNAME:MONGO_PASSWORD@MONGO_HOST:MONGO_IP/MONGO_DATABASE?directConnection=true&authSource=admin" .
+# mongorestore --uri="mongodb://MONGO_USERNAME:MONGO_PASSWORD@MONGO_HOST:MONGO_IP/MONGO_DATABASE?directConnection=true&authSource=admin" .
+
 
 main(){
         
