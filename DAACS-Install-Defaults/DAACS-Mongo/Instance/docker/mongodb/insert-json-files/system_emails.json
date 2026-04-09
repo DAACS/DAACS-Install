@@ -127,7 +127,7 @@
   "title": "User request Help",
   "description": "labore et dolore magna al",
   "subject": "Help text from %user.firstname% %user.lastname% on %domain%",
-  "body": "%helpText%",
+  "body": "\n\n<h2>User</h2>\n<p><span>Name: </span><span>%user.firstname%</span> <span>%user.lastname%</span></p>\n<p><span>Username: </span><span>%user.username%</span></p>\n\n%helpText%",
   "slug": "user-request-help",
   "keys": [
     {
@@ -274,6 +274,41 @@
       "key": "%student.lastname%",
       "label": "Student last name",
       "real_key": "lastName"
+    }
+  ]
+},
+{
+  "_id": "ebc2268e-ccaa-44f7-bd79-e8b2b48331c2",
+  "title": "Contact Form",
+  "description": "labore et dolore magna al",
+  "subject": "Send contact message from instance",
+  "body": "%contactForm%\n\n<br/> %user.firstname%  %user.lastname% is have problems with %cSubject% hello. \n<br/><br/>  %cMessage%\n<br/> ",
+  "slug": "send-contact-form-message",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%user.email%",
+      "label": "email",
+      "real_key": "email"
+    },
+    {
+      "key": "%csubject%",
+      "label": "Subject",
+      "real_key": "csubject"
+    },
+    {
+      "key": "%message%",
+      "label": "message",
+      "real_key": "message"
     }
   ]
 }]

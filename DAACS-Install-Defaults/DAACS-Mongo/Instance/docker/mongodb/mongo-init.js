@@ -25,10 +25,14 @@
     db.createCollection("user_assessments");
     db.user_assessments.createIndex({
         assessmentSlug: 1
-    }, {
-        sparse: true
     })
 
+    db.user_assessments.createIndex({
+        assessmentId: 1
+    })
+    db.user_assessments.createIndex({
+        userId: 1
+    })
     /* TOKENS */
 
     db.createCollection("tokens");
@@ -53,8 +57,6 @@
     db.createCollection("classrooms");
     db.classrooms.createIndex({
         slug: 1
-    }, {
-        sparse: true
     })
 
     /* CLIENTS */
@@ -228,7 +230,12 @@
     /* EVENT CONTAINERS */
 
     db.createCollection("system_emails");
-
+    db.system_emails.createIndex({
+        slug: 1
+    },{
+        unique: true
+    })
+    
     const folderPathSystemEmails = '/docker-entrypoint-initdb.d/insert-json-files/system_emails.json';
 
     if (folderPathSystemEmails.length > 0) {
@@ -244,6 +251,13 @@
         db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
     }
 
+    //NEED TO ADD ADMIN TO ADMIN ROLE
+
+    db.roles.findOneAndUpdate({slug: "admin"}, {$push: {'users': admin_user_id}})
+
+    //NEED TO ADD QCOMMUNICATION TO COMMUNICATION ROLE
+    db.roles.findOneAndUpdate({slug: "q-server"},  {$push: {'users': comms_user_id}})
+
     /* PRIVILEGES */
 
     db.createCollection("privileges");
@@ -252,6 +266,12 @@
     if (folderPathPrivileges.length > 0) {
         db.privileges.insertMany(JSON.parse(fs.readFileSync(`${folderPathPrivileges}`)));
     }
+    /* ADMIN USER ASSESSMENTS */
 
+    db.createCollection("admin_user_assessments");
+
+    /* CONTACT FORMS */
+    db.createCollection("contact_forms");
+    
     return;
 })()

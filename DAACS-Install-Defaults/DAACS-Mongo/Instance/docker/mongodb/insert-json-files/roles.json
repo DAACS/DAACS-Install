@@ -1,6 +1,6 @@
 [{
   "_id": "ba55d21a-df12-4ce7-9481-a836a9049a5f",
-  "description": "I can do anything I want mode232f",
+  "description": "I can do anything I want mode",
   "permissions": [
     "can_view_admin",
     "can_view_role",
@@ -52,22 +52,23 @@
     "can_view_student_results",
     "can_export_assessments",
     "can_view_help",
-    "can_administer_help",
-    "can_upload_files"
+    "can_administer_help"
   ],
-  "users": [],
+  "users": [
+    
+  ],
   "slug": "admin",
   "title": "Admin",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "fb517143-5b72-4f36-a41c-131cf19a5b83",
   "permissions": [
     "can_view_student"
   ],
-  "users": [],
-  "history": [],
+  "users": [ ],
+  "history": [ ],
   "title": "Student",
   "slug": "student",
   "__v": 0,
@@ -80,10 +81,42 @@
     "can_accept_pdf"
   ],
   "users": [
+   
   ],
   "history": [],
   "title": "Q Server Communication",
   "slug": "q-server",
   "__v": 0,
   "description": "Q server communication users "
+},
+{
+  "_id": "912f5c6e-55a1-4209-9d28-237343b59e56",
+  "permissions": [
+    "can_view_brightspace_admin"
+  ],
+  "users": [ ],
+  "history": [ ],
+  "title": "Brightspace Admin",
+  "slug": "brightspace-admin",
+  "__v": 0
+},{
+  "_id": "4c3739dd-84b1-4e7d-ac6d-239b8d20ded6",
+  "permissions": [
+    "can_view_brightspace_instructor"
+  ],
+  "users": [ ],
+  "history": [ ],
+  "title": "Brightspace Instructor",
+  "slug": "brightspace-instructor",
+  "__v": 5
+},{
+  "_id": "6d632336-6b97-436b-840e-83503051f393",
+  "permissions": [
+    "can_view_brightspace_student"
+  ],
+  "users": [ ],
+  "history": [ ],
+  "title": "Brightspace Student",
+  "slug": "brightspace-student",
+  "__v": 2
 }]
