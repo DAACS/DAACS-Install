@@ -35,7 +35,7 @@ mongo_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate (r)eplica (c)reate database (i)nitialize replica set (a)dd to replica set  : " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew, or (u)pdate, (r)eplica, (c)reate database, (i)nitialize replica set, (a)dd to replica set, (nc)reat admin DB : " true)
     
     case "$new_or_update" in
 
@@ -71,6 +71,9 @@ mongo_instance_helper(){
 
     "a")
         add_replica_mongo_instance_helper
+    ;;
+    "nc")
+        create_admin_user_in_db
     ;;
     "crf")
         #create replica files
@@ -185,14 +188,34 @@ create_mongo_instance_helper(){
         copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
     fi
     
+    mongo_container_val=$(get_env_value "${mongo_container_name}")  
+    
     #add database to primary on creation
     if [ "$do_create_database" = "true" ]; then
-        mongo_container_val=$(get_env_value "${mongo_container_name}")  
         add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
     fi
-
 }
 
+create_admin_user_in_db(){
+
+    mongo_service_name=${1}
+    # mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+
+    env_webserver_mongo_file="${absolute_dir}webserver-mongo"
+
+    mongo_admin_username=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_USERNAME"))
+    mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
+
+    mongosh_string=""
+    admin_root_ok="docker exec  ${mongo_service_name} bash -c "
+    admin_root_ok+="\" mongosh --eval ' db.getSiblingDB(\\\"admin\\\").createUser({user:\\\"${mongo_admin_username}\\\", pwd:\\\"$mongo_admin_password\\\", roles:[{role:\\\"root\\\", db:\\\"admin\\\"}] }) ' \""
+    eval $admin_root_ok
+
+}
 #Be nice to initaliza replica all in one function but i need to figure out how to wait and see if mongo process is ready
 #Must use same install folder if want to loop on webserver creation
 create_replica_mongo_instance_helper(){

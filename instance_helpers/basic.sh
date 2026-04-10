@@ -523,6 +523,7 @@ run_docker_with_envs(){
     webserver_docker_file_to="${1}"
     envs_for_docker_process="${2}"
     should_recreate="${3}"
+    command_after="${4}"
     service_name=""
     sould_recreate_command_args=""
     envs_for_docker_processed=""
@@ -540,6 +541,11 @@ run_docker_with_envs(){
 
     # # run docker file
     catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
+
+    if [ -n "$command_after" ]; then
+        catted="${catted} && ${command_after}"
+    fi
+
     eval "$catted"
 }
 
@@ -983,4 +989,11 @@ check_if_port_is_being_used(){
             fi
     fi
             
+}
+
+
+get_container_status_state(){
+
+    echo $( docker container inspect -f '{{.State.Running}}' "${1}" )
+
 }
