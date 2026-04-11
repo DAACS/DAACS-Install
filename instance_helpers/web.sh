@@ -524,10 +524,11 @@ update_webserver_instance_helper(){
         # memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " false)
         
     else
+        database_config_path=$root_dest/$install_folder_destination/database-config/$install_folder_destination
 
-        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DB_TYPE") 
-        mongo_folder=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_FOLDER") 
-        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_NAME") 
+        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$database_config_path" "DB_TYPE") 
+        mongo_folder=$(get_environment_value_from_file_by_env_name "$database_config_path" "DATABASE_FOLDER") 
+        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$database_config_path" "DATABASE_NAME") 
         
         database_instance_type_defintion=$(get_env_value "$database_instance_type_defintion" )
         mongo_folder=$(get_env_value "$mongo_folder" )
