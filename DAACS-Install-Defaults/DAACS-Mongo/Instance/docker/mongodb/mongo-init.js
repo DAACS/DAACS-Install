@@ -49,6 +49,15 @@
     /* HELP THREADS */
     db.createCollection("request_helps"); //rename to help-threads
 
+    db.request_helps.createIndex({
+        userId: 1
+    })
+    
+    db.request_helps.createIndex({
+        assessmentId: 1
+    }, {
+        sparse: true
+    })
     /* DAACS INVITES */
     db.createCollection("daacs_invites"); //maybe we should add some to email and classroom ID
 
@@ -57,6 +66,8 @@
     db.createCollection("classrooms");
     db.classrooms.createIndex({
         slug: 1
+    }, {
+        unique: true
     })
 
     /* CLIENTS */
@@ -245,6 +256,13 @@
     /* ROLES */
 
     db.createCollection("roles");
+
+    db.roles.createIndex({
+        assessmentId: 1
+    }, {
+        unique: true
+    })
+
     const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
 
     if (folderPathSystemEmails.length > 0) {

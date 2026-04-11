@@ -490,8 +490,16 @@ add_mongo_database_to_instance(){
         printf "$webserver_stuff" > "$webserver_mongo"
     fi 
 
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    env_webserver_mongo_file="${absolute_dir}webserver-mongo"
+    
+    mongo_admin_username=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_USERNAME"))
+    mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
+
     #create /dbs/$mongo_folder_filename
-    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh --quiet  < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
+    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh --quiet --authenticationDatabase admin -u \\\"${mongo_admin_username}\\\" -p \\\"${mongo_admin_password}\\\" < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
 
     eval "$command"
 
