@@ -35,7 +35,7 @@ mongo_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew, or (u)pdate, (r)eplica, (c)reate database, (i)nitialize replica set, (a)dd to replica set, (nc)reat admin DB : " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew, or (u)pdate, (r)eplica, (c)reate database, (i)nitialize replica set, (a)dd to replica set, (nc)reat admin DB, (cssl)copy SSL : " true)
     
     case "$new_or_update" in
 
@@ -74,6 +74,9 @@ mongo_instance_helper(){
     ;;
     "nc")
         create_admin_user_in_db
+    ;;
+    "cssl")
+        do_copy_ssl_from_container
     ;;
     "crf")
         #create replica files
@@ -184,22 +187,41 @@ create_mongo_instance_helper(){
 
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
-    if [ "$copy_ssl_cert_from_container" = "true" ]; then
-        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
-    fi
+
     
-    mongo_container_val=$(get_env_value "${mongo_container_name}")  
+    # mongo_container_val=$(get_env_value "${mongo_container_name}")  
     
     #add database to primary on creation
     if [ "$do_create_database" = "true" ]; then
         add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
     fi
 }
+do_copy_ssl_from_container(){
+    root_dest="$install_root/new-env-setups"
+    mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name"
+}
+
+copy_ssl_from_container(){
+    
+    input_1="${1}"
+    input_2="${2}"
+    input_3="${3}"
+
+    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl" - but it should already exsist
+    if  ! $(test -d "$input_1") ;
+    then
+        mkdir -p "$input_1"
+    fi
+    
+    command="docker cp ${input_2}:/home/mongossl.pem ${input_1}mongossl.pem"
+    eval "$command"
+}
 
 create_admin_user_in_db(){
 
     mongo_service_name=${1}
-    # mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
 
     root_dest="$install_root/new-env-setups"
@@ -333,9 +355,9 @@ create_replica_mongo_instance_helper(){
 
     fi 
 
-    if [ "$copy_ssl_cert_from_container" = "true" ]; then
-        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
-    fi
+    # if [ "$copy_ssl_cert_from_container" = "true" ]; then
+    #     copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
+    # fi
     
 }
 
@@ -415,23 +437,6 @@ init_replica_mongo_instance_helper(){
     
 }
 
-copy_ssl_from_container(){
-    
-    input_1="${1}"
-    input_2="${2}"
-    input_3="${3}"
-
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl" - but it should already exsist
-    if  ! $(test -d "$input_1") ;
-    then
-        mkdir -p "$input_1"
-    fi
-    
-    input_3=$(get_services_ids_by_service_name "$input_2")
-    input_3=$(echo "$input_3" | tr -d " " )
-    command="docker cp ${input_3}:/home/mongossl.pem ${input_1}mongossl.pem"
-    eval "$command"
-}
 
 add_mongo_database_to_instance(){
 
