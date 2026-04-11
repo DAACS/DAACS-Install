@@ -188,13 +188,12 @@ create_mongo_instance_helper(){
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 
-    
+    # going to remove for now to make functions simpler. It's its own call
     # mongo_container_val=$(get_env_value "${mongo_container_name}")  
-    
-    #add database to primary on creation
-    if [ "$do_create_database" = "true" ]; then
-        add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
-    fi
+    # #add database to primary on creation
+    # if [ "$do_create_database" = "true" ]; then
+    #     add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
+    # fi
 }
 do_copy_ssl_from_container(){
     root_dest="$install_root/new-env-setups"
@@ -343,6 +342,7 @@ create_replica_mongo_instance_helper(){
 
     if [ "$is_this_init_process" = "true" ]; then
         
+        # Leaving for not but I'm removing it from other functions to make other functions smaller, with simpler options
         #add database to primary on creation
         if [ "$do_create_database" = "true" ]; then
             add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
