@@ -95,12 +95,13 @@ create_web_instance_helper(){
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+    git_branch=$(ask_for_docker_service_and_check "Enter name DAACS Web branch. Leave blank for main : " )
 
     # Create env files for install
     instance_home_folder="$root_dest/$install_folder_destination"
     run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
-    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
+    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination" "$git_branch"
 
     # # # # # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -259,6 +260,8 @@ create_webserver_instance_helper(){
     database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
 
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+    
+    git_branch=$(ask_for_docker_service_and_check "Enter name DAACS Web branch. Leave blank for main : " )
     enter_mongo_data_manually=true
 
     env_webserver_file=""
@@ -426,7 +429,7 @@ create_webserver_instance_helper(){
     # instance_home_folder="$root_dest/$install_folder_destination"
     # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
-    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
+    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination" "$git_branch"
 
     # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -524,7 +527,7 @@ update_webserver_instance_helper(){
         # memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " false)
         
     else
-        database_config_path=$root_dest/$install_folder_destination/database-config/$install_folder_destination
+        database_config_path=$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination
 
         database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$database_config_path" "DB_TYPE") 
         mongo_folder=$(get_environment_value_from_file_by_env_name "$database_config_path" "DATABASE_FOLDER") 

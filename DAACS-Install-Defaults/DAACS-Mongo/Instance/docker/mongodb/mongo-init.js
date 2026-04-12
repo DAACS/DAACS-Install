@@ -258,7 +258,7 @@
     db.createCollection("roles");
 
     db.roles.createIndex({
-        assessmentId: 1
+        slug: 1
     }, {
         unique: true
     })

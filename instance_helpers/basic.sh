@@ -470,11 +470,17 @@ clone_repo(){
     base_path_folder_destination=$1
     install_folder_destination=$2
     repo=$3
+    # branch="--single-branch"
+    branch=""
+
+    if [ -n "${4}"  ]; then
+        branch=" --branch ${4}"
+    fi
     
     mkdir -p "${base_path_folder_destination}/${install_folder_destination}"
 
     cd $base_path_folder_destination
-    command="git clone ${repo} ${base_path_folder_destination}/${install_folder_destination}"
+    command="git clone ${branch} ${repo} ${base_path_folder_destination}/${install_folder_destination}"
     eval "$command"
 }
 

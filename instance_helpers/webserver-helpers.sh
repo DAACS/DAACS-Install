@@ -6,14 +6,15 @@ run_clone_repo_for_web(){
     # ${1}=environment_type
     # ${2}=base_path_folder_destination
     # ${3}=install_folder_destination
+    # ${4}=branch
 
         # # # # get code from repo
     if [ "${1}" = "prod" ]; then
-        clone_repo "${2}" "${3}" "https://github.com/DAACS/DAACS-Website.git"
+        clone_repo "${2}" "${3}" "https://github.com/DAACS/DAACS-Website.git" "${4}"
     fi
 
     if [ "${1}" = "dev" ]; then
-        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACS-Website.git"
+        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACS-Website.git" "${4}"
     fi
 }
 
