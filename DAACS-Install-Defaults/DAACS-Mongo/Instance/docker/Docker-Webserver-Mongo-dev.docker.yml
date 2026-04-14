@@ -1,6 +1,6 @@
 services:
   #mongo_service_name:
-    image: daacs-mongo
+    image: daacs-mongo-dev
     restart: unless-stopped
     env_file: 
       - ${ENV_DIR}webserver-mongo

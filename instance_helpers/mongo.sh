@@ -213,7 +213,7 @@ copy_ssl_from_container(){
         mkdir -p "$input_1"
     fi
     
-    command="docker cp ${input_2}:/home/mongossl.pem ${input_1}mongossl.pem"
+    command="docker cp ${input_2}:/home/ ${input_1}"
     eval "$command"
 }
 
@@ -221,6 +221,7 @@ create_admin_user_in_db(){
 
     mongo_service_name=${1}
     mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    should_mongo_ssl=$(ask_read_question_or_try_again "Should SSL connect : " true)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
 
     root_dest="$install_root/new-env-setups"
@@ -232,8 +233,15 @@ create_admin_user_in_db(){
     mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
 
     mongosh_string=""
+    mongo_tls=""
+
     admin_root_ok="docker exec  ${mongo_service_name} bash -c "
-    admin_root_ok+="\" mongosh --eval ' db.getSiblingDB(\\\"admin\\\").createUser({user:\\\"${mongo_admin_username}\\\", pwd:\\\"$mongo_admin_password\\\", roles:[{role:\\\"root\\\", db:\\\"admin\\\"}] }) ' \""
+     
+    if [ -n $should_mongo_ssl ]; then
+        mongo_tls=" --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --tlsAllowInvalidHostnames"
+    fi 
+    
+    admin_root_ok+="\" mongosh ${mongo_tls} --eval ' db.getSiblingDB(\\\"admin\\\").createUser({user:\\\"${mongo_admin_username}\\\", pwd:\\\"$mongo_admin_password\\\", roles:[{role:\\\"root\\\", db:\\\"admin\\\"}] }) ' \""
     eval $admin_root_ok
 
 }
@@ -451,6 +459,7 @@ add_mongo_database_to_instance(){
         mongo_service=$(ask_read_question_or_try_again "What mongo service name?: " true)
     fi
 
+    should_mongo_ssl=$(ask_read_question_or_try_again "Should SSL connect : " true)
     MONGODB_DATABASE_NAME=$(ask_read_question_or_try_again "Database name: " true)
     MONGO_USERNAME=$(ask_read_question_or_try_again "Username: " true)
     MONGO_PASSWORD=$(ask_read_question_or_try_again "Password: " true)
@@ -497,9 +506,15 @@ add_mongo_database_to_instance(){
     
     mongo_admin_username=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_USERNAME"))
     mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
+    
+    mongo_tls=""
+    if [ -n $should_mongo_ssl ]; then
+        mongo_tls=" --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --tlsAllowInvalidHostnames"
+    fi 
+
 
     #create /dbs/$mongo_folder_filename
-    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh --quiet --authenticationDatabase admin -u \\\"${mongo_admin_username}\\\" -p \\\"${mongo_admin_password}\\\" < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
+    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh ${mongo_tls}  --quiet --authenticationDatabase admin -u \\\"${mongo_admin_username}\\\" -p \\\"${mongo_admin_password}\\\" < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
 
     eval "$command"
 

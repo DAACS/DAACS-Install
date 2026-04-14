@@ -3,5 +3,7 @@ RUN apt-get update && apt-get install vim -y
 WORKDIR /home/
 COPY mongod.conf mongod.conf
 COPY run.sh /home/run.sh
+#COPY run-dev.sh /home/run-dev.sh
+#COPY run-prod.sh /home/run-prod.sh
 RUN chmod +x /home/*.sh
 ENTRYPOINT ["/bin/bash", "/home/run.sh"]

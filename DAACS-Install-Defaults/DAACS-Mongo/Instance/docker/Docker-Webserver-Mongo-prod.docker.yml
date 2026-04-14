@@ -1,6 +1,6 @@
 services:
   #mongo_service_name:
-    # image: mongo
+    # image: daacs-mongo-prod
     build: 
       context: .
       dockerfile: ./Dockerfile-webserver-mongo-dev
