@@ -16,7 +16,5 @@ openssl x509 -req -in mongodb.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateseri
 
 # # Create Server PEM
 cat mongodb.key mongodb.crt > mongodb.pem
-
-mongosh --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt
-# mongod --config /home/mongod.conf
-
+# mongod --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --config /home/mongod.conf --tlsAllowInvalidHostnames
+mongod --config /home/mongod.conf --tlsAllowInvalidHostnames

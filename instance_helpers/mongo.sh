@@ -21,7 +21,6 @@ Instructions:
 
 
 MONGO_REPLICA_IMAGE_NAME="mongo-replica"
-MONGO_IMAGE_NAME="daacs-mongo"
 MY_DOCKER_NETWORK_NAME="myNetwork"
 
 mongo_instance_helper(){
@@ -117,16 +116,35 @@ create_mongo_instance_helper(){
 
     instance_type="6-1"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
-    qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+
+
+     qserver_files_to=""
+    case "$environment_type_defintion" in
+        "env-dev") 
+            qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
+            MONGO_IMAGE_NAME="daacs-mongo"
+                    
+        ;;
+        "env-prod") 
+            qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-prod"
+            MONGO_IMAGE_NAME="daacs-mongo-prod"
+                    
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
     create_image "$qserver_files_to" "${MONGO_IMAGE_NAME}" "$install_env_path/$instance_type_defintion/docker/" 
  
     printf "\nCREATING Mongo server instance....\n"
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " true)
-    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
-    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
+    # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
+    # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
-    environment_type_defintion=$(get_env_type_definition "$environment_type")
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     mongo_docker_directory="$root_dest/$install_folder_destination/docker/"
@@ -252,8 +270,8 @@ create_replica_mongo_instance_helper(){
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process) : " true)
-    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
-    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
+    # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
+    # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
     
     create_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" "file_dir=$install_env_path/${instance_type_defintion}/docker/"
 
@@ -352,9 +370,9 @@ create_replica_mongo_instance_helper(){
         
         # Leaving for not but I'm removing it from other functions to make other functions smaller, with simpler options
         #add database to primary on creation
-        if [ "$do_create_database" = "true" ]; then
-            add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
-        fi
+        # if [ "$do_create_database" = "true" ]; then
+        #     add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
+        # fi
 
         initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id_val" "1" "$mongo_port_val" "$host_or_ip_val" 
 

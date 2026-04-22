@@ -1,9 +1,9 @@
 services:
   #mongo_service_name:
-    # image: daacs-mongo-prod
-    build: 
-      context: .
-      dockerfile: ./Dockerfile-webserver-mongo-dev
+    image: daacs-mongo-prod
+    # build: 
+    #   context: .
+    #   dockerfile: ./Dockerfile-webserver-mongo-dev
     restart: unless-stopped
     env_file: 
       - ${ENV_DIR}webserver-mongo

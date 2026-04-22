@@ -1,8 +1,8 @@
 FROM mongo:latest
 RUN apt-get update && apt-get install vim -y
 WORKDIR /home/
-COPY mongodb-dev.conf mongod.conf
-COPY run.sh /home/run.sh
+COPY mongodb-prod.conf mongod.conf
+COPY run-prod.sh /home/run.sh
 #COPY run-dev.sh /home/run-dev.sh
 #COPY run-prod.sh /home/run-prod.sh
 RUN chmod +x /home/*.sh
