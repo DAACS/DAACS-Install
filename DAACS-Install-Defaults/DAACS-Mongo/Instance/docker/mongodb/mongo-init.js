@@ -155,9 +155,12 @@
         lastName: "user",
         createdDate: new Date(),
         isUserDisabled: false,
+        verifiedAccount: true,
         isSamlAccount: false,
         saml_properties: [],
-        other_properties: []
+        other_properties: [],
+        pdfFileURL: "",
+        q_status: ""
     };
 
     if (process.env.WEB_SERVER_COMMUNICATION_EMAIL != undefined && process.env.WEB_SERVER_COMMUNICATION_EMAIL.includes("@")) {
@@ -202,10 +205,14 @@
         firstName: "admin-firstname",
         lastName: "admin-lastname",
         isUserDisabled: false,
+        verifiedAccount: true,
         createdDate: new Date(),
         isSamlAccount: false,
         saml_properties: [],
-        other_properties: []
+        other_properties: [],
+        pdfFileURL: "",
+        q_status: ""
+
     };
 
     if (process.env.WEB_SERVER_ADMIN_EMAIL != undefined && process.env.WEB_SERVER_ADMIN_EMAIL.includes("@")) {
