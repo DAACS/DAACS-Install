@@ -230,6 +230,10 @@
         sparse: true
     })
 
+    db.roles.createIndex({
+        users: 1
+    })
+
     //default assessment to import
 
     const folderPath = '/docker-entrypoint-initdb.d/assessments/';
