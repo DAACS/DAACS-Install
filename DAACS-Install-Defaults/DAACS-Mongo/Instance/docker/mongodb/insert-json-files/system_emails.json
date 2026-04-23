@@ -118,7 +118,7 @@
     {
       "key": "%get-pdf-url%",
       "label": "Get PDF URL",
-      "real_key": "https://%domain%/get-pdf"
+      "real_key": "https://%domain%/s/get-pdf"
     }
   ]
 },

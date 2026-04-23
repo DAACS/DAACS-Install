@@ -236,18 +236,18 @@
 
     //default assessment to import
 
-    const folderPath = '/docker-entrypoint-initdb.d/assessments/';
-    const files_scan_list = fs.readdirSync(folderPath);
+    // const folderPath = '/docker-entrypoint-initdb.d/assessments/';
+    // const files_scan_list = fs.readdirSync(folderPath);
 
-    if (files_scan_list.length > 0) {
+    // if (files_scan_list.length > 0) {
 
-        let asseessments = files_scan_list.map((filename) => {
-            return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
-        })
-        if (asseessments.length > 0) {
-            db.assessments.insertMany(asseessments);
-        }
-    }
+    //     let asseessments = files_scan_list.map((filename) => {
+    //         return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
+    //     })
+    //     if (asseessments.length > 0) {
+    //         db.assessments.insertMany(asseessments);
+    //     }
+    // }
 
     /* EVENT CONTAINERS */
 
