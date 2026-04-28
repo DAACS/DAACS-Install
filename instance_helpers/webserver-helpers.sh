@@ -10,7 +10,7 @@ run_clone_repo_for_web(){
 
         # # # # get code from repo
     if [ "${1}" = "prod" ]; then
-        clone_repo "${2}" "${3}" "https://github.com/DAACS/DAACS-Website.git" "${4}"
+        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACS-Website.git" "${4}"
     fi
 
     if [ "${1}" = "dev" ]; then

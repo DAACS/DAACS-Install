@@ -143,6 +143,9 @@ create_web_instance_helper(){
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
+    mongo_keys_dir="mongo-keys"
+    mkdir -p "${daacs_server_folder_dir}/${mongo_keys_dir##*=}"
+
     # Build frontend
     env_oauth_file="${absolute_dir}oauth"
     api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")

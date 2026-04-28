@@ -86,7 +86,7 @@ create_backup_instance_helper(){
 
     # get code from repo
     if [ "$environment_type" = "prod" ]; then
-        clone_repo "$base_path_folder_destination" "$install_folder_destination" "https://github.com/DAACS/DAACS-Backup.git"
+        clone_repo "$base_path_folder_destination" "$install_folder_destination" "git@github.com:DAACS/DAACS-Backup.git"
     fi
 
     if [ "$environment_type" = "dev" ]; then
