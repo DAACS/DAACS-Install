@@ -52,7 +52,11 @@
     "can_view_student_results",
     "can_export_assessments",
     "can_view_help",
-    "can_administer_help"
+    "can_administer_help",
+    "can_update_classroom_owner",
+    "can_update_classroom_enrollment_limit",
+    "can_search_for_classrooms",
+    "can_upload_files"
   ],
   "users": [
     

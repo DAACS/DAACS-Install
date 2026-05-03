@@ -528,4 +528,30 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
+},
+{
+  "_id": "can_update_classroom_owner",
+  "permission": "can_update_classroom_owner",
+  "description": "This allows you update who the classroom owner is.",
+  "title": "Can update classroom owner",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_classroom_enrollment_limit",
+  "permission": "can_update_classroom_enrollment_limit",
+  "description": "This allows you update classroom limit.",
+  "title": "Can update classroom limit",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_search_for_classrooms",
+  "permission": "can_search_for_classrooms",
+  "description": "This allows you search for classrooms.",
+  "title": "Can search for classrooms",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
 }]

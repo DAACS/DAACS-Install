@@ -462,6 +462,9 @@ create_webserver_instance_helper(){
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
 
+    mongo_keys_dir="mongo-keys"
+    mkdir -p "${daacs_server_folder_dir}/${mongo_keys_dir##*=}"
+
     # Build frontend
     run_build_frontend "$environment_type" "$api_client_id" "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
 

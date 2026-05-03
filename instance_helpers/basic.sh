@@ -1003,3 +1003,44 @@ get_container_status_state(){
     echo $( docker container inspect -f '{{.State.Running}}' "${1}" )
 
 }
+
+
+get_container_logs(){
+
+    base_path_folder_destination="${2}"
+    install_folder_destination="${3}"
+    instance_type="${4}"
+    environment_type="${5}"
+    service_name="${1}"
+
+    install_root=""
+    install_env_path=""
+
+    if [ "$install_env_path" = "" ]; then
+        install_root=$current_dir
+        install_env_path="$install_root/DAACS-Install-Defaults"
+    fi
+
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
+    env_absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    dir_absolute_dir="$root_dest/$install_folder_destination"
+    docker_file=$(get_docker_file_by_enviroment_and_by_instsance_type "$instance_type" "$environment_type_defintion")
+    log_dir="logs"
+    log_directory="$dir_absolute_dir/$log_dir"
+
+    create_directory_if_it_does_exsist "$log_directory"
+    ids=$(get_services_ids_by_service_name $service_name)
+    IFS=" " read -ra ADDR <<< "$ids"
+
+    current_user=$(whoami)
+    for i in "${ADDR[@]}"; do
+        current_log_file_path="$(docker inspect --format='{{.LogPath}}' $i)"
+        sudo cp "$current_log_file_path" "${log_directory}"
+        filename=$(basename "$current_log_file_path")
+        absolute_log_file_path="$log_directory/$filename"
+        sudo chgrp "$current_user" "$absolute_log_file_path" && sudo chown "$current_user" "$absolute_log_file_path"
+
+    done
+}
