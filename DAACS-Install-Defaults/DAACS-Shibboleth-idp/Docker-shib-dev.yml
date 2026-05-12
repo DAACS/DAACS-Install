@@ -1,0 +1,49 @@
+services:
+  shibboleth4:
+    # command: >
+    #   /bin/sh -c "/opt/shibboleth-idp/bin/install.sh --entityID https://idp.victor.com/idp/shibboleth --targetDir /opt/tomcat/webapps/ --hostName idp.victor.com --scope victor.com && mv /opt/tomcat/webapps/war/idp.war opt/tomcat/webapps/idp.war && /opt/tomcat/bin/startup.sh "
+    expose:
+      - 80
+      - 443
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    # env_file: 
+    #   - ${ENV_DIR}webserver
+    environment:
+      - "VIRTUAL_HOST=${VIRTUAL_HOST}"
+    # volumes:
+    #   - "${FOLDER_START}:/usr/src/app"
+    image: shib521
+
+networks:
+  myNetwork:
+    external: true
+
+
+    # VIRTUAL_HOST=idp4.victor.com docker compose -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-shib-dev.yml up -d --force-recreate
+    # docker build . -t shibb-idp
+# docker exec e997f9270853 ldapsearch -x -H ldap://172.16.215.134 -b dc=example,dc=org -D "cn=admin,dc=example,dc=org" -w admin
+
+# /opt/shibboleth-idp/bin/build.sh  --entityID idp.victor.com --targetDir /opt/tomcat/webapps/ --hostName idp.victor.com --scope victor.com && mv /opt/shibboleth-idp/bin/../war/idp.war /var/lib/jetty/webapps
+
+
+
+# 172.16.215.134
+# 389
+
+#  dc=example,dc=org
+
+
+#  cn=admin,dc=example,dc=org
+
+#  admin
+
+
+#   curl -k -f http://127.0.0.1:80/idp/status 
+#   curl -k -f http://127.0.0.1:8080/idp/status 
+
+
+# cd /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-idp-build && 
+
+# docker build -t shib521 -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-idp-build .

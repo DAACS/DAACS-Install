@@ -53,7 +53,8 @@
     "can_export_assessments",
     "can_view_help",
     "can_administer_help",
-    "can_upload_files"
+    "can_upload_files",
+    "can_view_all_classrooms"
   ],
   "users": [],
   "slug": "admin",
@@ -86,4 +87,28 @@
   "slug": "q-server",
   "__v": 0,
   "description": "Q server communication users "
+},
+{
+  "_id": "064b4c5b-dbea-404b-9eea-57aaec9ea5b0",
+  "description": "I can do anything I want mode as instructor.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_classrooms",
+    "can_update_classroom",
+    "can_update_students_in_classroom",
+    "can_view_assessments",
+    "can_search_for_assessments",
+    "can_update_assessments_in_classroom",
+    "can_make_classroom_decisions",
+    "can_delete_classroom",
+    "can_view_student_results",
+    "can_view_classroom_student_assessment_progress",
+    "can_create_assessments_in_classroom",
+    "can_create_assessment"
+  ],
+  "users": [],
+  "slug": "instructor",
+  "title": "Instructor",
+  "__v": 2,
+  "history": []
 }]

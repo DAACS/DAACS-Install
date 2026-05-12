@@ -501,4 +501,28 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
+},{
+  "_id": "can_view_all_classrooms",
+  "permission": "can_view_all_classrooms",
+  "description": "This allows you to see all classrooms in classroom listing",
+  "title": "Can see all classrooms",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_create_assessments_in_classroom",
+  "permission": "can_create_assessments_in_classroom",
+  "description": "This allows you to create assessment in classroom",
+  "title": "Can create assessment in classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_view_classroom_student_assessment_progress",
+  "permission": "can_view_classroom_student_assessment_progress",
+  "description": "This allows you to view user assessment progress in classroom",
+  "title": "Can view user assessment progress in classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
 }]
