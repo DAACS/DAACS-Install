@@ -30,7 +30,9 @@ RUN curl -sO https://shibboleth.net/downloads/identity-provider/$idp_version/shi
     && echo "$idp_hash shibboleth-identity-provider-$idp_version.tar.gz" | sha256sum -c - \
     && gzip -d shibboleth-identity-provider-$idp_version.tar.gz \
     && tar -xvf "shibboleth-identity-provider-${idp_version}.tar" -C /opt
+
 COPY idp-install.properties /tmp/
+
 RUN $IDP_SRC/bin/install.sh --propertyFile /tmp/idp-install.properties
 RUN rm shibboleth-identity-provider-$idp_version.tar \
     && rm -rf /opt/shibboleth-identity-provider-$idp_version
@@ -57,14 +59,10 @@ RUN curl -sO https://repo1.maven.org/maven2/ch/qos/logback/logback-access/$logba
 EXPOSE 80
 
 COPY jetty-base/ $JETTY_BASE/
+COPY conf/ $IDP_HOME/
 
 #establish a healthcheck command so that docker might know the container's true state
 HEALTHCHECK --interval=1m --timeout=30s \
     CMD curl -k -f http://127.0.0.1:80/idp/status || exit 1
-
-# CMD \
-# "$IDP_HOME"/bin/build.sh -Didp.target.dir="$IDP_HOME" && \
-# "$JAVA_HOME"/bin/java -jar "$JETTY_HOME"/start.jar \
-#    jetty.home="$JETTY_HOME" jetty.base="$JETTY_BASE"
 
 CMD ["/bin/sh", "-c", "\"$IDP_HOME\"/bin/build.sh -Didp.target.dir=\"$IDP_HOME\" && \"$JAVA_HOME\"/bin/java -jar \"$JETTY_HOME\"/start.jar     jetty.home=\"$JETTY_HOME\" jetty.base=\"$JETTY_BASE\"" ]
