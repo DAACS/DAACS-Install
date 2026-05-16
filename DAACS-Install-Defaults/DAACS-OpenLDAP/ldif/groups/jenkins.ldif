@@ -1,0 +1,7 @@
+
+dn: cn=jenkins,ou=Groups,dc=daacs,dc=net
+cn: jenkins
+ou: Groups
+objectclass: groupOfNames
+objectClass: top
+member: uid=vmckenzie.admin,ou=Development,dc=daacs,dc=net

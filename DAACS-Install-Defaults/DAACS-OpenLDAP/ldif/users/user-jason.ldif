@@ -1,0 +1,44 @@
+dn: uid=jbyrer.admin,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: jbyrer.admin
+sn: Byrer
+cn: Jason Byrer
+mail: 
+employeeNumber: 746e6445-7bbe-426d-9c6f-4161fb59b930
+employeeType: admin
+givenName: Jason 
+st: New York
+userPassword: jason
+
+dn: uid=jbyrer.faculty,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: jbyrer.faculty
+sn: Byrer
+cn: Jason Byrer
+mail: 
+employeeNumber: 30261e63-59a0-431e-9f05-07eac3896459
+employeeType: faculty
+givenName: Jason 
+st: New York
+userPassword: jason
+
+dn: uid=jbyrer.student,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: jbyrer.student
+sn: Byrer
+cn: Jason Byrer
+mail: 
+employeeNumber: 47a4c07b-0e42-4c3c-af8d-a1438bf1436c
+employeeType: student
+givenName: Jason 
+st: New York
+userPassword: jason

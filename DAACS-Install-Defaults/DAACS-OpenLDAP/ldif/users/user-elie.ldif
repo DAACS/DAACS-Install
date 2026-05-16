@@ -1,0 +1,44 @@
+dn: uid=eyu.admin,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: eyu.admin
+sn: Yu
+cn: Elie Yu
+mail: cyu5@albany.edu
+employeeNumber: 4308e6f6-3d26-46f6-839a-a48c036a590a
+employeeType: admin
+givenName: Elie 
+st: New York
+userPassword: elie
+
+dn: uid=eyu.faculty,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: eyu.faculty
+sn: Yu
+cn: Elie Yu
+mail: chingyen.yu@gmail.com
+employeeNumber: c4256e6b-a130-4fb0-825c-c04b3dffa5b8
+employeeType: faculty
+givenName: Elie 
+st: New York
+userPassword: elie
+
+dn: uid=eyu.student,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: eyu.student
+sn: Yu
+cn: Elie Yu
+mail: elie.yu@gapp.nthu.edu.tw 
+employeeNumber: 33e56d98-0925-4418-bb96-a8b69e37ef2c
+employeeType: student
+givenName: Elie 
+st: New York
+userPassword: elie

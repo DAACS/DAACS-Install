@@ -1,0 +1,44 @@
+dn: uid=alui.admin,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: alui.admin
+sn: Angela
+cn: Angela Lui
+mail: ms.angelalui@gmail.com
+employeeNumber: 85314270-20f8-442e-8615-a974c83c878b
+employeeType: admin
+givenName: Angela 
+st: New York
+userPassword: angela
+
+dn: uid=alui.faculty,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: alui.faculty
+sn: Angela
+cn: Angela Lui
+mail: lui.angelam20@gmail.com
+employeeNumber: 0d250de1-5f36-4de9-a9b8-8d13e4bffff9
+employeeType: faculty
+givenName: Angela 
+st: New York
+userPassword: angela
+
+dn: uid=alui.student,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: alui.student
+sn: Angela
+cn: Angela Lui
+mail: lui.angela@gmail.com
+employeeNumber: 5b86cd3c-2234-41be-b8e5-a778f350da8f
+employeeType: student
+givenName: Angela 
+st: New York
+userPassword: angela

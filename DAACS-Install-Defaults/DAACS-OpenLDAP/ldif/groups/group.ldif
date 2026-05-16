@@ -1,0 +1,4 @@
+# Group employees
+dn: ou=Groups,dc=daacs,dc=net
+objectclass: organizationalunit
+ou: Groups

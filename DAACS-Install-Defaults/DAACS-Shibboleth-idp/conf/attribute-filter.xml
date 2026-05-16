@@ -24,6 +24,10 @@
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
 
+     <AttributeRule attributeID="employeeNumber">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+
    <AttributeRule attributeID="uidNumber">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
@@ -43,10 +47,6 @@
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
 
-        <AttributeRule attributeID="memberOf">
-            <PermitValueRule xsi:type="ANY" />
-        </AttributeRule>
-
         <AttributeRule attributeID="awsRoles">
             <PermitValueRule xsi:type="ANY"/>
         </AttributeRule>
@@ -61,6 +61,10 @@
 
         <AttributeRule attributeID="UserId">
             <PermitValueRule xsi:type="ANY"/>
+        </AttributeRule>
+
+        <AttributeRule attributeID="memberOf">
+            <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
 
     </AttributeFilterPolicy>
