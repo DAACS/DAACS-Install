@@ -39,9 +39,8 @@ list of possible components and their options.
         <AttributeEncoder xsi:type="SAML2String" name="username" friendlyName="username"  nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" encodeType="false" />
     </AttributeDefinition>
 
-  <AttributeDefinition id="mail" xsi:type="Simple">
-
-    <InputDataConnector ref="myLDAP" attributeNames="mail" />
+    <AttributeDefinition id="mail" xsi:type="Simple">
+       <InputDataConnector ref="myLDAP" attributeNames="mail" />
        <AttributeEncoder xsi:type="SAML2String" name="mail" friendlyName="mail"  nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" encodeType="false" />
     </AttributeDefinition>
 
@@ -93,7 +92,7 @@ list of possible components and their options.
         baseDN="%{idp.attribute.resolver.LDAP.baseDN}" 
         principal="%{idp.attribute.resolver.LDAP.bindDN}"
         principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
-        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS:true}">
+        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}">
         <FilterTemplate>
             <![CDATA[
                 %{idp.attribute.resolver.LDAP.searchFilter}

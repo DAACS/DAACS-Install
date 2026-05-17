@@ -32,7 +32,9 @@ RUN curl -sO https://shibboleth.net/downloads/identity-provider/$idp_version/shi
 
 COPY ./idp-install.properties /tmp/
 
-RUN $IDP_SRC/bin/install.sh --propertyFile /tmp/idp-install.properties
+# test to make sure this works
+RUN $IDP_SRC/bin/install.sh --entityID $ENTITY_ID --targetDir $JETTY_BASE/webapps --hostName $VIRTUAL_HOST --scope $SHIBBOLETH_SCOPE 
+
 RUN rm shibboleth-identity-provider-$idp_version.tar 
 # && rm -rf /opt/shibboleth-identity-provider-$idp_version
 
@@ -55,11 +57,18 @@ RUN curl -sO https://repo1.maven.org/maven2/ch/qos/logback/logback-core/$logback
 RUN curl -sO https://repo1.maven.org/maven2/ch/qos/logback/logback-access/$logback_version/logback-access-$logback_version.jar \
     && echo "$logback_access_hash  logback-access-$logback_version.jar" | sha256sum -c - \
     && mv logback-access-$logback_version.jar ${JETTY_BASE}/lib/logging/
+
 EXPOSE 80
-EXPOSE 801
 
 COPY jetty-base/ $JETTY_BASE/webapps
-# COPY conf/ $IDP_HOME/conf
+COPY start.d/http.ini $JETTY_BASE/start.d/http.ini
+
+RUN mkdir -p /default-shibboleth-files
+RUN mkdir -p /default-shibboleth-files/conf-default
+RUN mkdir -p /default-shibboleth-files/views-default
+
+COPY conf/ /default-shibboleth-files/conf-default
+COPY view/ /default-shibboleth-files/views-default
 
 # Copy the script
 COPY docker-entrypoint.sh /entrypoint.sh

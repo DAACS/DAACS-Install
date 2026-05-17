@@ -129,4 +129,3 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
      </body>
 </html>
-                                                                                                                                                      128,1         Bot

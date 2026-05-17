@@ -22,6 +22,14 @@ if [ "$1" = jetty.sh ]; then
 	EOWARN
 fi
 
+# dont need idp.properties because it gets made on install
+
+cp $IDP_HOME/conf/ /default-shibboleth-files/conf-default/attribute-filter.xml /default-shibboleth-files/conf-default/attribute-resolver.xml /default-shibboleth-files/conf-default/ldap.properties
+
+cp $IDP_HOME/view/  /default-shibboleth-files/views-default/error.vm /default-shibboleth-files/views-default/login.vm
+
+#need to do idp.properties here  because is isn't using the fields I set 
+
 $IDP_SRC/bin/install.sh --entityID $ENTITY_ID --targetDir $JETTY_BASE/webapps --hostName $VIRTUAL_HOST --scope $SHIBBOLETH_SCOPE && mv $JETTY_BASE/webapps/war/idp.war $JETTY_BASE/webapps/idp.war
 
 if ! command -v -- "$1" >/dev/null 2>&1 ; then
