@@ -63,26 +63,11 @@
             <PermitValueRule xsi:type="ANY"/>
         </AttributeRule>
 
-        <!-- <AttributeRule attributeID="memberOf">
+        <AttributeRule attributeID="memberOf">
             <PermitValueRule xsi:type="ANY" />
-        </AttributeRule> -->
-
-        
+        </AttributeRule>
 
     </AttributeFilterPolicy>
-
-
-<AttributeFilterPolicy id="OnlyMembersForSpecificSP">
-
-    <!-- Match the SP -->
-    <PolicyRequirementRule xsi:type="Requester" value="https://yogurt.victor.com" />
-
-    <!-- Only release if user is in LDAP group -->
-    <AttributeRule attributeID="memberOf">
-        <PermitValueRule xsi:type="ValueRegex" regex="^cn=daacs,ou=Groups,dc=daacs,dc=net" />
-    </AttributeRule>
-
-</AttributeFilterPolicy>
 
 </AttributeFilterPolicyGroup>
 
