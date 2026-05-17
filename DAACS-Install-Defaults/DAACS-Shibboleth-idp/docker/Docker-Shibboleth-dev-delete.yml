@@ -1,10 +1,12 @@
 services:
-  shibboleth4:
+  shibboleth3:
     # command: >
     #   /bin/sh -c "/opt/shibboleth-idp/bin/install.sh --entityID https://idp.victor.com/idp/shibboleth --targetDir /opt/tomcat/webapps/ --hostName idp.victor.com --scope victor.com && mv /opt/tomcat/webapps/war/idp.war opt/tomcat/webapps/idp.war && /opt/tomcat/bin/startup.sh "
     expose:
       - 80
       - 443
+    # ports:
+      # - 80:8080
     restart: unless-stopped
     networks:
       - myNetwork
@@ -14,14 +16,17 @@ services:
       - "VIRTUAL_HOST=${VIRTUAL_HOST}"
     # volumes:
     #   - "${FOLDER_START}:/usr/src/app"
-    image: shib521
+    image: shibboleth5-idp
+    # deploy:
+    #   mode: replicated
+    #   replicas: ${REPLICAS}
 
 networks:
   myNetwork:
     external: true
 
 
-    # VIRTUAL_HOST=idp4.victor.com docker compose -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-shib-dev.yml up -d --force-recreate
+    # VIRTUAL_HOST=idp3.victor.com docker compose -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-Shibboleth-dev.yml up -d --force-recreate
     # docker build . -t shibb-idp
 # docker exec e997f9270853 ldapsearch -x -H ldap://172.16.215.134 -b dc=example,dc=org -D "cn=admin,dc=example,dc=org" -w admin
 
@@ -43,7 +48,3 @@ networks:
 #   curl -k -f http://127.0.0.1:80/idp/status 
 #   curl -k -f http://127.0.0.1:8080/idp/status 
 
-
-# cd /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-idp-build && 
-
-# docker build -t shib521 -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/Docker-idp-build .

@@ -77,6 +77,12 @@ get_instance_type_definition(){
         "7") 
             echo "DAACS-Webserver"
         ;;
+        "8") 
+            echo "DAACS-Shibboleth"
+        ;;
+        "9") 
+            echo "DAACS-OpenLDAP"
+        ;;
         *)
             echo "Invalid instance option"
             exit -1
