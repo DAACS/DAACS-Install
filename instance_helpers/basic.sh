@@ -78,7 +78,7 @@ get_instance_type_definition(){
             echo "DAACS-Webserver"
         ;;
         "8") 
-            echo "DAACS-Shibboleth"
+            echo "DAACS-Shibboleth-idp"
         ;;
         "9") 
             echo "DAACS-OpenLDAP"

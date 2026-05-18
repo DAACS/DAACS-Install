@@ -41,30 +41,32 @@ if [ "$1" = jetty.sh ]; then
 	EOWARN
 fi
 
-# $IDP_SRC/bin/install.sh  --noPrompt --hostName $VIRTUAL_HOST --scope $SHIBBOLETH_SCOPE --entityID $ENTITY_ID --targetDir $IDP_HOME && mv $IDP_HOME/war/idp.war $JETTY_BASE/webapps/idp.war
+if [ ! -f "/installed" ]; then
 
-sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
+	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
+	cp /conf-default/attribute-filter.xml $IDP_HOME/conf/attribute-filter.xml
+	cp /conf-default/attribute-resolver.xml $IDP_HOME/conf/attribute-resolver.xml
+	cp /conf-default/ldap.properties $IDP_HOME/conf/ldap.properties
+	cp /conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
+	cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
 
-cp /conf-default/attribute-filter.xml $IDP_HOME/conf/attribute-filter.xml
-cp /conf-default/attribute-resolver.xml $IDP_HOME/conf/attribute-resolver.xml
-cp /conf-default/ldap.properties $IDP_HOME/conf/ldap.properties
-cp /conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
-cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
+	ldap_file_dirs="$IDP_HOME/conf/ldap.properties"
 
-# cp -r /jetty-base/root $JETTY_BASE/webapps/root
+	do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$LDAP_URL" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.baseDN=" "$ldap_file_dirs") "$LDAP_BASE_DN" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.bindDN=" "$ldap_file_dirs") "$LDAP_BIND_DN" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.dnFormat=" "$ldap_file_dirs") "$LDAP_DN_FORMAT" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.useStartTLS=" "$ldap_file_dirs") "$LDAP_TLS" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.useSSL=" "$ldap_file_dirs") "$LDAP_USE_SSL" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.bindDNCredential=" "$ldap_file_dirs") "$LDAP_BIND_PASSWORD" "$ldap_file_dirs"
 
-ldap_file_dirs="$IDP_HOME/conf/ldap.properties"
+	cp /views-default/login.vm $IDP_HOME/views/login.vm
+	cp /views-default/error.vm $IDP_HOME/views/error.vm 
 
-do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$LDAP_URL" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.baseDN=" "$ldap_file_dirs") "$LDAP_BASE_DN" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.bindDN=" "$ldap_file_dirs") "$LDAP_BIND_DN" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.dnFormat=" "$ldap_file_dirs") "$LDAP_DN_FORMAT" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.useStartTLS=" "$ldap_file_dirs") "$LDAP_TLS" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.useSSL=" "$ldap_file_dirs") "$LDAP_USE_SSL" "$ldap_file_dirs"
-do_replace $(grep "idp.authn.LDAP.bindDNCredential=" "$ldap_file_dirs") "$LDAP_BIND_PASSWORD" "$ldap_file_dirs"
 
-cp /views-default/login.vm $IDP_HOME/views/login.vm
-cp /views-default/error.vm $IDP_HOME/views/error.vm 
+	touch /installed
+
+fi 
 
 if ! command -v -- "$1" >/dev/null 2>&1 ; then
 	set -- java -jar "$JETTY_HOME/start.jar" "$@"

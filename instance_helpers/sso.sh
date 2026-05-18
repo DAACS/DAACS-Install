@@ -47,27 +47,29 @@ create_web_idp_helper(){
     # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
     # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
     
-    create_image "$install_env_path/${instance_type_defintion}/docker/Docker-idp-build-dev" "${SHIBBOLETH_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" "file_dir=$install_env_path/${instance_type_defintion}/docker/"
+    build_file="Docker-idp-build-dev"
+    shibboleth_files_to="$install_env_path/${instance_type_defintion}/docker/${build_file}"
+    create_image "$shibboleth_files_to" "${SHIBBOLETH_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" 
 
     printf "\nCREATING Shibboleth instance....\n"
  
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    # instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     shibboleth_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth service : " )
 
     # Create env files for install
     instance_home_folder="$root_dest/$install_folder_destination"
-    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
+    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     # # filename - enviroment variables for webserver
     env_shibboleth_file="${absolute_dir}shibboleth"
+    env_ldap_file="${absolute_dir}ldap"
 
-    shibboleth_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "SHIBBOLETH_CONTAINER_NAME")
+    shibboleth_container_name=$(get_environment_value_from_file_by_env_name "${env_shibboleth_file}" "SHIBBOLETH_CONTAINER_NAME")
     # open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_shibboleth_file}" "PORT")
 
     # # Checks to see if port is being used by something else and ask for a different port for openLDAP
@@ -102,8 +104,7 @@ create_web_idp_helper(){
     local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     env_dir="ENV_DIR=$absolute_dir"
 
-    env_string="${env_dir} ${shibboleth_service_name}"
-    # env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_container_name} ${mongo_port}"
+    env_string="${env_dir}"
 
     run_docker_with_envs "$shibboleth_docker_file_to" "$env_string"
 
