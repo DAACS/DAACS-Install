@@ -6,3 +6,4 @@
     <AssertionConsumerService index="1" isDefault="true" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://yogurt.victor.com/loginMooMoo/callback"/>
   </SPSSODescriptor>
 </EntityDescriptor>
+<!-- SAMPLE -->

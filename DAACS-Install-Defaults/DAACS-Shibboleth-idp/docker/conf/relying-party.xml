@@ -58,12 +58,12 @@
 
     <util:list id="shibboleth.RelyingPartyOverrides">
 
-    <bean id="ExampleSP4" parent="RelyingPartyByName" c:relyingPartyIds="https://yogurt.victor.com">
+        <!-- <bean id="ExampleSP4" parent="RelyingPartyByName" c:relyingPartyIds="https://yogurt.victor.com">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO" p:encryptAssertions="false" />
                 </list>
             </property>
-        </bean>
+        </bean> -->
     </util:list>
 </beans>

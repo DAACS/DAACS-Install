@@ -53,15 +53,6 @@ cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
 
 # cp -r /jetty-base/root $JETTY_BASE/webapps/root
 
-
-# idp.authn.LDAP.ldapURL=
-# idp.authn.LDAP.baseDN=
-# idp.authn.LDAP.bindDN=
-# idp.authn.LDAP.dnFormat=
-# idp.authn.LDAP.useStartTLS=
-# idp.authn.LDAP.useSSL=
-# idp.authn.LDAP.bindDNCredential=
-
 ldap_file_dirs="$IDP_HOME/conf/ldap.properties"
 
 do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$LDAP_URL" "$ldap_file_dirs"
