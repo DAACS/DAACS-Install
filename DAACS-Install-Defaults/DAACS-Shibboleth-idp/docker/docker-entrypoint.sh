@@ -22,15 +22,20 @@ if [ "$1" = jetty.sh ]; then
 	EOWARN
 fi
 
-# dont need idp.properties because it gets made on install
+# $IDP_SRC/bin/install.sh  --noPrompt --hostName $VIRTUAL_HOST --scope $SHIBBOLETH_SCOPE --entityID $ENTITY_ID --targetDir $IDP_HOME && mv $IDP_HOME/war/idp.war $JETTY_BASE/webapps/idp.war
 
-cp $IDP_HOME/conf/ /default-shibboleth-files/conf-default/attribute-filter.xml /default-shibboleth-files/conf-default/attribute-resolver.xml /default-shibboleth-files/conf-default/ldap.properties
+sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
 
-cp $IDP_HOME/view/  /default-shibboleth-files/views-default/error.vm /default-shibboleth-files/views-default/login.vm
+cp /conf-default/attribute-filter.xml $IDP_HOME/conf/attribute-filter.xml
+cp /conf-default/attribute-resolver.xml $IDP_HOME/conf/attribute-resolver.xml
+cp /conf-default/ldap.properties $IDP_HOME/conf/ldap.properties
+cp /conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
+cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
 
-#need to do idp.properties here  because is isn't using the fields I set 
+# cp -r /jetty-base/root $JETTY_BASE/webapps/root
 
-$IDP_SRC/bin/install.sh --entityID $ENTITY_ID --targetDir $JETTY_BASE/webapps --hostName $VIRTUAL_HOST --scope $SHIBBOLETH_SCOPE && mv $JETTY_BASE/webapps/war/idp.war $JETTY_BASE/webapps/idp.war
+cp /views-default/login.vm $IDP_HOME/views/login.vm
+cp /views-default/error.vm $IDP_HOME/views/error.vm 
 
 if ! command -v -- "$1" >/dev/null 2>&1 ; then
 	set -- java -jar "$JETTY_HOME/start.jar" "$@"
