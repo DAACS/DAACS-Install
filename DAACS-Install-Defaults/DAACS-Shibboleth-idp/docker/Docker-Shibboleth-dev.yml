@@ -13,6 +13,13 @@ services:
       - "SHIBBOLETH_CONTAINER_NAME=${SHIBBOLETH_CONTAINER_NAME}"
       - "ENTITY_ID=${ENTITY_ID}"
       - "SHIBBOLETH_SCOPE=${SHIBBOLETH_SCOPE}"
+      - "LDAP_URL=${LDAP_URL}"
+      - "LDAP_BASE_DN=${LDAP_BASE_DN}"
+      - "LDAP_BIND_DN=${LDAP_BIND_DN}"
+      - "LDAP_DN_FORMAT=${LDAP_DN_FORMAT}"
+      - "LDAP_TLS=${LDAP_TLS}"
+      - "LDAP_USE_SSL=${LDAP_USE_SSL}"
+      - "LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD}"
     # volumes:
     #   - "${FOLDER_START}:/usr/src/app"
     image: shibbolethreal

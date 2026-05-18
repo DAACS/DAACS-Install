@@ -1,5 +1,24 @@
 #!/bin/bash
 
+
+get_replace(){
+    var=$1
+    echo "${var%=*}=$2"
+}
+
+
+do_replace(){
+
+    i="$1"
+    user_input="$2"
+    input_file="$3"
+
+    value2=$(get_replace $i $user_input)
+    string_reaplce_in_file_expression="s/${i}/${value2}/g" 
+    echo $string_reaplce_in_file_expression
+    sed -i -E -e "$string_reaplce_in_file_expression" $input_file
+}
+
 set -e
 
 if [ "$1" = jetty.sh ]; then
@@ -33,6 +52,25 @@ cp /conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
 cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
 
 # cp -r /jetty-base/root $JETTY_BASE/webapps/root
+
+
+# idp.authn.LDAP.ldapURL=
+# idp.authn.LDAP.baseDN=
+# idp.authn.LDAP.bindDN=
+# idp.authn.LDAP.dnFormat=
+# idp.authn.LDAP.useStartTLS=
+# idp.authn.LDAP.useSSL=
+# idp.authn.LDAP.bindDNCredential=
+
+ldap_file_dirs="$IDP_HOME/conf/ldap.properties"
+
+do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$LDAP_URL" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.baseDN=" "$ldap_file_dirs") "$LDAP_BASE_DN" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.bindDN=" "$ldap_file_dirs") "$LDAP_BIND_DN" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.dnFormat=" "$ldap_file_dirs") "$LDAP_DN_FORMAT" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.useStartTLS=" "$ldap_file_dirs") "$LDAP_TLS" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.useSSL=" "$ldap_file_dirs") "$LDAP_USE_SSL" "$ldap_file_dirs"
+do_replace $(grep "idp.authn.LDAP.bindDNCredential=" "$ldap_file_dirs") "$LDAP_BIND_PASSWORD" "$ldap_file_dirs"
 
 cp /views-default/login.vm $IDP_HOME/views/login.vm
 cp /views-default/error.vm $IDP_HOME/views/error.vm 
