@@ -70,11 +70,6 @@ create_web_idp_helper(){
     env_ldap_file="${absolute_dir}ldap"
 
     shibboleth_container_name=$(get_environment_value_from_file_by_env_name "${env_shibboleth_file}" "SHIBBOLETH_CONTAINER_NAME")
-    # open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_shibboleth_file}" "PORT")
-
-    # # Checks to see if port is being used by something else and ask for a different port for openLDAP
-    # check_if_port_is_being_used "$shibboleth_port" "$env_shibboleth_file" "shibboleth"
-
     if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
         create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
