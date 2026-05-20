@@ -1,7 +1,3 @@
 dn: ou=Development,dc=daacs,dc=net
 objectclass: organizationalunit
 ou: Development
-
-dn: ou=Production,dc=daacs,dc=net
-objectclass: organizationalunit
-ou: Production
