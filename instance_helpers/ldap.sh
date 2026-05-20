@@ -15,7 +15,7 @@ ldap_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(NLD)New LDAP or (ULD) Update LDAP: " true)
+    new_or_update=$(ask_read_question_or_try_again "(NLD)New LDAP or (ULD) Update LDAP (SEED) Seed database: " true)
 
     case "$new_or_update" in
     "NLD") 
@@ -33,6 +33,9 @@ ldap_instance_helper(){
         fi
     ;;
 
+    "SEED")
+        seed_ldap_database
+    ;;
     *)
         echo "Invalid option"
     ;;
@@ -172,11 +175,81 @@ update_ldap_instance_helper(){
 
 seed_ldap_database(){
 
-    # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f development.ldif
-    # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-victor.ldif
-    # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-angela.ldif
-    # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/group.ldif
-    # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/create-daacs-group-of-names.ldif
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    ldif_seed_dir="$install_env_path/${instance_type_defintion}/ldif/"
+    ldap_service_name=$(ask_read_question_or_try_again "What LDAP container name?: " true)
+
+
+    service_ID=$(get_services_ids_by_service_name "$ldap_service_name")
+    service_ID=$(echo "$service_ID" | tr -d " " )
+
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    env_ldap_file="${absolute_dir}ldap"
+
+    dc_suffix=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "OPENLDAP_BOOTSTRAP_SUFFIX"))
+    port=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT"))
+    ld_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
+    ld_conf_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONFIG_PASSWORD"))
+
+    conf_files=("configs/memberof.ldif")
+    files=("groups/ou/group.ldif" "groups/ou/development.ldif")
+    files+=("users/user-victor.ldif" "users/user-angela.ldif" "users/user-elie.ldif" "users/user-jason.ldif")
+    files+=("groups/groupofnames/daacs.ldif" "groups/groupofnames/jenkins.ldif" )
+
+
+    for i in "${conf_files[@]}"; do  
+        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,cn=config\" -w ${ld_conf_password} -f /ldif/${i}"
+        beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\""
+
+        eval $beginnig_exec
+        break
+
+    done
+
+    commands=""
+    for i in "${files[@]}"; do  
+        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
+        beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
+        echo "${i}"
+        echo "${files[-1]}"
+
+        if [ ${i} != "${files[-1]}" ]; then
+            commands+="$beginnig_exec && "
+            else 
+            commands+="$beginnig_exec"
+
+        fi 
+    done
+
+    commands=""
+
+    for i in "${files[@]}"; do  
+        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
+        beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
+        echo "${i}"
+        echo "${files[-1]}"
+
+        if [ ${i} != "${files[-1]}" ]; then
+            commands+="$beginnig_exec && "
+            else 
+            commands+="$beginnig_exec"
+
+        fi 
+    done
+
+    eval $commands
+    echo $commands
+
+    
+    # eval "$catted"
+
+    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f development.ldif
+    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-victor.ldif
+    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-angela.ldif
+    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/group.ldif
+    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/create-daacs-group-of-names.ldif
 
 
 }

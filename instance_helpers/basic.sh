@@ -172,8 +172,7 @@ get_env_and_equal(){
 get_env_value(){
 
     value=$1
-    i_escaped=$(escape_backslash "${value}")
-    expression="s/[^][\w+]*=//g"
+    expression="s/^([^=]+)=//"
     new_new=$(echo $value | sed -E "${expression}")
     echo "$new_new"
 }
