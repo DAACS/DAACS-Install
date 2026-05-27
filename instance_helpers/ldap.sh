@@ -45,11 +45,6 @@ ldap_instance_helper(){
 create_ldap_helper(){
 
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
-    
-    # build_file="Docker-idp-build-dev"
-    # shibboleth_files_to="$install_env_path/${instance_type_defintion}/docker/${build_file}"
-    # create_image "$shibboleth_files_to" "${SHIBBOLETH_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" 
-
     printf "\nCREATING LDAP instance....\n"
  
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
@@ -118,8 +113,9 @@ create_ldap_helper(){
 
 echo "WOOF"
 
+    folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"
     env_dir="ENV_DIR=$absolute_dir"
-    env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name}"
+    env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name} ${folder_start_ldif_dir}"
 
 
     run_docker_with_envs "$ldap_docker_file_to" "$env_string"
@@ -304,9 +300,9 @@ generate_ssl_for_ldap(){
     openssl genrsa -out "${save_file_directory_ldap}/ca.key" 2048
     openssl req -x509 -new -nodes -key "${save_file_directory_ldap}/ca.key" -sha256 -days 1825 -out "${save_file_directory_ldap}/ca.crt" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
 
-    openssl genrsa -out "${save_file_directory_ldap}/server.key" 2048
-    openssl req -new -key "${save_file_directory_ldap}/server.key" -out "${save_file_directory_ldap}/server.csr" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
-    openssl x509 -req -in "${save_file_directory_ldap}/server.csr" -CA "${save_file_directory_ldap}/ca.crt" -CAkey "${save_file_directory_ldap}/ca.key" -CAcreateserial -out "${save_file_directory_ldap}/server.crt" -days 825 -sha256 -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+    openssl genrsa -out "${save_file_directory_ldap}/cert.key" 2048
+    openssl req -new -key "${save_file_directory_ldap}/cert.key" -out "${save_file_directory_ldap}/cert.csr" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+    openssl x509 -req -in "${save_file_directory_ldap}/cert.csr" -CA "${save_file_directory_ldap}/ca.crt" -CAkey "${save_file_directory_ldap}/ca.key" -CAcreateserial -out "${save_file_directory_ldap}/cert.crt" -days 825 -sha256 -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
     openssl dhparam -dsaparam  -out "${save_file_directory_ldap}/dhparam.pem" 4096
     
     # copy ssl directory to mine that works for me

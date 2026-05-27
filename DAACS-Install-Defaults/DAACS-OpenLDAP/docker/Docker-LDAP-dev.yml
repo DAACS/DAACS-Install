@@ -10,28 +10,22 @@ services:
       LDAP_RFC2307BIS_SCHEMA: "false"
       LDAP_BACKEND: "mdb"
       LDAP_TLS: "false"
-      LDAP_TLS_CRT_FILENAME: "ldap.crt"
-      LDAP_TLS_KEY_FILENAME: "ldap.key"
-      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
-      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
       LDAP_TLS_ENFORCE: "false"
       LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
       LDAP_TLS_VERIFY_CLIENT: "demand"
       KEEP_EXISTING_CONFIG: false
       LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
       LDAP_SSL_HELPER_PREFIX: "ldap"
+      OPENLDAP_BOOTSTRAP_MEMBEROF: true
     tty: true
     stdin_open: true
     volumes:
       - /var/lib/ldap
       - /etc/ldap/slapd.d
-      - /container/service/slapd/assets/certs/
+      - ${FOLDER_START_LDIF}/ldif:/container/service/slapd/assets/ldif
     ports:
-      - "${PORT}:389"
-    # For replication to work correctly, domainname and hostname must be
-    # set correctly so that "hostname"."domainname" equates to the
-    # fully-qualified domain name for the host.
-    domainname: "daacs.net"
+      - "${PORT}:3890"
+    domainname: "${LDAP_BASE_DN}"
     hostname: "ldap-server"
     networks:
       - myNetwork

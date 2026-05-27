@@ -6,42 +6,18 @@ services:
       - ${ENV_DIR}ldap
     environment:
       OPENLDAP_BOOTSTRAP_TLS: true
-      OPENLDAP_BOOTSTRAP_MEMBEROF: true
       # OPENLDAP_BOOTSTRAP_TLS_REQUIRED: true
-
-      # LDAP_LOG_LEVEL: "256"
-      # LDAP_RFC2307BIS_SCHEMA: "false"
-      # LDAP_BACKEND: "mdb"
-      # LDAP_TLS_CRT_FILENAME: "server.crt"
-      # LDAP_TLS_KEY_FILENAME: "server.key"
-      # LDAP_TLS_DH_PARAM_FILENAME: dhparam.pem
-      # LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
-      # LDAP_TLS_ENFORCE: "false"
-      # LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
-      # LDAP_TLS_VERIFY_CLIENT: allow
-      # KEEP_EXISTING_CONFIG: false
-      # LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
-      # LDAP_SSL_HELPER_PREFIX: "ldap"
-  #     docker run --name openldanewssl2 --hostname ldap.example.org -p 3891:3890 -p 6362:6360 \
-  # -e OPENLDAP_BOOTSTRAP_ORGANIZATION="DAACS" \
-  # -e OPENLDAP_BOOTSTRAP_TLS=true \
-  # -e OPENLDAP_BOOTSTRAP_MEMBEROF=true \
-  # -e OPENLDAP_BOOTSTRAP_SUFFIX="dc=daacs,dc=net" \
-  # -v /home/moo/DAACS-Install/new-env-setups/openldanew/ssl:/container/services/openldap/assets/certs \
-  # osixia/openldap:2.6.10-alpha
+      OPENLDAP_BOOTSTRAP_MEMBEROF: true
     tty: true
     stdin_open: true
     volumes:
-      # - /var/lib/ldap
-      # - /etc/ldap/slapd.d
-      - ${FOLDER_START}/ssl:/container/service/slapd/assets/certs
-      - ${FOLDER_START}/ldif:/container/service/slapd/assets/ldif
+      - /var/lib/ldap
+      - /etc/ldap/slapd.d
+      - ${FOLDER_START}/ssl:/container/services/openldap/assets/certs
+      - ${FOLDER_START_LDIF}/ldif:/container/service/slapd/assets/ldif
     ports:
       - "${PORT}:3890"
       - "${SSL_PORT}:6360"
-    # For replication to work correctly, domainname and hostname must be
-    # set correctly so that "hostname"."domainname" equates to the
-    # fully-qualified domain name for the host.
     domainname: "${LDAP_BASE_DN}"
     hostname: "ldap-server"
     networks:
