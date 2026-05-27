@@ -90,12 +90,7 @@ create_web_idp_helper(){
 
     shibboleth_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#shibboleth_service_name/$shibboleth_service_name/g ;" $docker_file)
 
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
-
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
     absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
-    # local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     env_dir="ENV_DIR=$absolute_dir"
     env_ldap_file="ENV_LDAP_DIR=$absolute_dir_for_ldap"
     env_string="${env_dir} ${env_ldap_file}"
@@ -109,16 +104,11 @@ create_web_idp_helper(){
 
 }
 
-
-
-
 update_web_idp_helper(){
 
   printf "\nUPDATING Shibboleth IDP server instance....\n"
 
-    should_update_envs="n" # $(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
- 
-    # #Check to see if package.json or package.json.lock file has changed to redownload node_modules -todo
+    should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true) 
     root_dest="$install_root/new-env-setups"
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
@@ -155,11 +145,6 @@ update_web_idp_helper(){
 
 
     ldap_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
-
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
-
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
 
     env_dir="ENV_DIR=$absolute_dir"
     env_ldap_file="ENV_LDAP_DIR=$absolute_dir_for_ldap"

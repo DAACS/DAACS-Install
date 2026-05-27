@@ -9,8 +9,6 @@ services:
     env_file: 
       - ${ENV_DIR}shibboleth
       - ${ENV_LDAP_DIR}ldap
-    # volumes:
-    #   - "${FOLDER_START}:/usr/src/app"
     image: shibbolethreal
 
 networks:
