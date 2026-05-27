@@ -92,15 +92,17 @@ list of possible components and their options.
         baseDN="%{idp.attribute.resolver.LDAP.baseDN}" 
         principal="%{idp.attribute.resolver.LDAP.bindDN}"
         principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
-        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}">
+        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}"
+        authCert="/opt/shibboleth-idp/credentials/ldap/cert.crt"
+        authKey="/opt/shibboleth-idp/credentials/ldap/cert.key"
+        trustFile="/opt/shibboleth-idp/credentials/ldap/ca.crt"
+        disableHostnameVerification="%{idp.attribute.resolver.LDAP.disableHostnameVerification}"
+        >
         <FilterTemplate>
             <![CDATA[
                 %{idp.attribute.resolver.LDAP.searchFilter}
             ]]>
         </FilterTemplate>
-        <!--<StartTLSTrustCredential id="LDAPtoIdPCredential" xsi:type="sec:X509ResourceBacked">
-            <sec:Certificate>%{idp.attribute.resolver.LDAP.trustCertificates}</sec:Certificate>
-        </StartTLSTrustCredential>-->
 	 <ReturnAttributes>uid st mail employeeType givenName employeeNumber cn sn memberOf</ReturnAttributes>		
     </DataConnector>
 

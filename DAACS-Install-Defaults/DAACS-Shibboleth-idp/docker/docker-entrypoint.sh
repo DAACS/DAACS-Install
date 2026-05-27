@@ -43,27 +43,54 @@ fi
 
 if [ ! -f "/installed" ]; then
 
+	# Add real SLO url - todo its adding SLO but removing SOAP.. do we need SOAP ?
+	sed -i -e "s/\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/\<md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\> \<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" $IDP_HOME/metadata/idp-metadata.xml
+
+	# Update default URL to entity ID URL
 	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
-	cp /conf-default/attribute-filter.xml $IDP_HOME/conf/attribute-filter.xml
-	cp /conf-default/attribute-resolver.xml $IDP_HOME/conf/attribute-resolver.xml
-	cp /conf-default/ldap.properties $IDP_HOME/conf/ldap.properties
-	cp /conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
-	cp /conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
+
+	# We have to update idp.properties with set and replace idp3.victor.com with $ENTITY_ID
+	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/conf/idp.properties
+
+	# We have to update idp.properties with set and replace idp.scope=victor.com with idp.scope=${SHIBBOLETH_SCOPE}
+	sed -i -e "s/idp.scope=victor.com/idp.scope=${SHIBBOLETH_SCOPE}/g" $IDP_HOME/conf/idp.properties
+
+	# We have to rebuild the war file so it has the proper properties
+	$IDP_HOME/bin/build.sh -Didp.target.dir="$IDP_HOME"
+
+	cp /default-shibboleth-files/conf-default/attribute-filter.xml $IDP_HOME/conf/attribute-filter.xml
+	cp /default-shibboleth-files/conf-default/attribute-resolver.xml $IDP_HOME/conf/attribute-resolver.xml
+	cp /default-shibboleth-files/conf-default/ldap.properties $IDP_HOME/conf/ldap.properties
+	cp /default-shibboleth-files/conf-default/relying-party.xml $IDP_HOME/conf/relying-party.xml
+	cp /default-shibboleth-files/conf-default/metadata-providers.xml $IDP_HOME/conf/metadata-providers.xml
 
 	ldap_file_dirs="$IDP_HOME/conf/ldap.properties"
+	LDAP_TLS=false
 
-	do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$LDAP_URL" "$ldap_file_dirs"
-	do_replace $(grep "idp.authn.LDAP.baseDN=" "$ldap_file_dirs") "$LDAP_BASE_DN" "$ldap_file_dirs"
-	do_replace $(grep "idp.authn.LDAP.bindDN=" "$ldap_file_dirs") "$LDAP_BIND_DN" "$ldap_file_dirs"
-	do_replace $(grep "idp.authn.LDAP.dnFormat=" "$ldap_file_dirs") "$LDAP_DN_FORMAT" "$ldap_file_dirs"
+	ldap_url=""
+	if [ $OPENLDAP_BOOTSTRAP_TLS == "true" ]; then
+		ldap_url="ldaps\:\/\/${LDAP_CONTAINER_NAME}:6360"
+	else
+		ldap_url="ldap\:\/\/${LDAP_CONTAINER_NAME}:3890"
+	fi 
+
+
+	ldap_bind_dn="cn=admin,${OPENLDAP_BOOTSTRAP_SUFFIX}"
+	ldap_dn_format="$LDAP_DN_FORMAT,${OPENLDAP_BOOTSTRAP_SUFFIX}"
+	
+	do_replace $(grep "idp.authn.LDAP.ldapURL=" "$ldap_file_dirs") "$ldap_url" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.baseDN=" "$ldap_file_dirs") "$OPENLDAP_BOOTSTRAP_SUFFIX" "$ldap_file_dirs" # new
+	do_replace $(grep "idp.authn.LDAP.bindDN=" "$ldap_file_dirs") "$ldap_bind_dn" "$ldap_file_dirs"    # new
+	do_replace $(grep "idp.authn.LDAP.dnFormat=" "$ldap_file_dirs") "$ldap_dn_format" "$ldap_file_dirs"   # new
 	do_replace $(grep "idp.authn.LDAP.useStartTLS=" "$ldap_file_dirs") "$LDAP_TLS" "$ldap_file_dirs"
-	do_replace $(grep "idp.authn.LDAP.useSSL=" "$ldap_file_dirs") "$LDAP_USE_SSL" "$ldap_file_dirs"
-	do_replace $(grep "idp.authn.LDAP.bindDNCredential=" "$ldap_file_dirs") "$LDAP_BIND_PASSWORD" "$ldap_file_dirs"
+	do_replace $(grep "idp.authn.LDAP.bindDNCredential=" "$ldap_file_dirs") "$LDAP_ADMIN_PASSWORD" "$ldap_file_dirs"  # new
+	do_replace $(grep "idp.authn.LDAP.disableHostnameVerification=" "$ldap_file_dirs") "$LDAP_DISABLE_HOST_NAME_VERIFICATION" "$ldap_file_dirs"  # new
 
-	cp /views-default/login.vm $IDP_HOME/views/login.vm
-	cp /views-default/error.vm $IDP_HOME/views/error.vm 
+	cp /default-shibboleth-files/views-default/login.vm $IDP_HOME/views/login.vm
+	cp /default-shibboleth-files/views-default/error.vm $IDP_HOME/views/error.vm 
 
-
+	cp -R /default-shibboleth-files/jetty-default/root $JETTY_BASE/webapps/root
+	cp -R /default-shibboleth-files/jetty-default/webapps/idp.xml $JETTY_BASE/webapps/idp.xml
 	touch /installed
 
 fi 

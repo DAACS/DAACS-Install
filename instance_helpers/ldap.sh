@@ -42,9 +42,6 @@ ldap_instance_helper(){
     esac
 }
 
-
-
-
 create_ldap_helper(){
 
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
@@ -72,13 +69,15 @@ create_ldap_helper(){
 
     ldap_container_name=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONTAINER_NAME")
     open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT")
+    ldap_base_dn=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_BASE_DN")
+    open_ldap_ssl_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "SSL_PORT")
 
     # # Checks to see if port is being used by something else and ask for a different port for openLDAP - todo check to make sure this is working before production
     # check_if_port_is_being_used "$open_ldap_port" "$env_ldap_file" "ldap"
 
-    if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
-        create_docker_network "$MY_DOCKER_NETWORK_NAME"
-    fi
+    # if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
+    #     create_docker_network "$MY_DOCKER_NETWORK_NAME"
+    # fi
 
     docker_file=""
 
@@ -97,15 +96,34 @@ create_ldap_helper(){
 
     ldap_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#ldap_service_name/$ldap_service_name/g ;" $docker_file)
 
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+     case "$environment_type_defintion" in
+        "env-dev") 
+            # docker_file="Docker-LDAP-dev.yml"
+        ;;
+        "env-prod") 
 
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+            # Create SSL certs in folder $instance_home_folder/ssl
+            save_file_directory_ldap="${instance_home_folder}/ssl"
+            save_file_directory_mine="${instance_home_folder}/mine"
+            generate_ssl_for_ldap $save_file_directory_ldap $save_file_directory_mine
+            
+            folder_start_env="FOLDER_START=$instance_home_folder"
+            
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
+echo "WOOF"
 
     env_dir="ENV_DIR=$absolute_dir"
-    env_string="${env_dir} ${open_ldap_port}"
+    env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name}"
+
 
     run_docker_with_envs "$ldap_docker_file_to" "$env_string"
+echo "bark"
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
@@ -138,7 +156,7 @@ update_ldap_instance_helper(){
 
     # enviroment variables for webserver
     env_ldap_file="${absolute_dir}ldap"
-
+    instance_home_folder="$root_dest/$install_folder_destination"
 
     ldap_container_name=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONTAINER_NAME")
     open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT")
@@ -157,7 +175,7 @@ update_ldap_instance_helper(){
             exit -1
         ;;
     esac
-
+    
     ldap_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
     env_dir="ENV_DIR=$absolute_dir"
     env_string="${env_dir} ${open_ldap_port}"
@@ -172,48 +190,80 @@ update_ldap_instance_helper(){
     
 }
 
-
 seed_ldap_database(){
 
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     ldif_seed_dir="$install_env_path/${instance_type_defintion}/ldif/"
     ldap_service_name=$(ask_read_question_or_try_again "What LDAP container name?: " true)
+    ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)
+    ldap_config_password=$(ask_read_question_or_try_again "What LDAP config password?: " true)
+    should_write_env_passwords=$(ask_read_question_or_try_again "Should write password to env file?: " true)
 
+    # if not production then ask
+    should_ssl_connect=$(ask_read_question_or_try_again "SSL Connect?: " true)
 
     service_ID=$(get_services_ids_by_service_name "$ldap_service_name")
-    service_ID=$(echo "$service_ID" | tr -d " " )
+    # service_ID="704c1c5cafd5"
+     
 
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     env_ldap_file="${absolute_dir}ldap"
 
     dc_suffix=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "OPENLDAP_BOOTSTRAP_SUFFIX"))
-    port=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT"))
-    ld_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
-    ld_conf_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONFIG_PASSWORD"))
 
-    conf_files=("configs/memberof.ldif")
-    files=("groups/ou/group.ldif" "groups/ou/development.ldif")
+    # Write passwords to ENV Files
+    # ld_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
+    # ld_conf_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONFIG_PASSWORD"))
+
+    # conf_files=("configs/memberof.ldif")
+    files=()
+    
+    # case "$environment_type_defintion" in
+    #     "env-dev") 
+    #         files+=("groups/ou/group.ldif" "groups/ou/development.ldif")
+    #     ;;
+    #     "env-prod") 
+    #         files+=("groups/ou/group.ldif" "groups/ou/production.ldif")
+    #     ;;
+    #     *)
+    #         echo "Invalid instance option"
+    #         exit -1
+    #     ;;
+    # esac
+    
     files+=("users/user-victor.ldif" "users/user-angela.ldif" "users/user-elie.ldif" "users/user-jason.ldif")
     files+=("groups/groupofnames/daacs.ldif" "groups/groupofnames/jenkins.ldif" )
 
+    commands=""
 
     for i in "${conf_files[@]}"; do  
-        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,cn=config\" -w ${ld_conf_password} -f /ldif/${i}"
+        catted="ldapadd -x -H ldap://localhost:3890 -D \"cn=admin,cn=config\" -w ${ld_conf_password} -f /ldif/${i}"
         beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\""
+
+        echo $i
+        echo "${conf_files[-1]}"
+
+        if [ ${i} != "${conf_files[-1]}" ]; then
+            commands+="$beginnig_exec && "
+            else 
+            commands+="$beginnig_exec"
+
+        fi 
 
         eval $beginnig_exec
         break
 
     done
+    eval $commands
 
     commands=""
     for i in "${files[@]}"; do  
-        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
+        catted="ldapadd -x -H ldap://localhost:3890 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
         beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
-        echo "${i}"
-        echo "${files[-1]}"
+        # echo "${i}"
+        # echo "${files[-1]}"
 
         if [ ${i} != "${files[-1]}" ]; then
             commands+="$beginnig_exec && "
@@ -222,9 +272,9 @@ seed_ldap_database(){
 
         fi 
     done
+    eval $commands
 
     commands=""
-
     for i in "${files[@]}"; do  
         catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
         beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
@@ -240,16 +290,30 @@ seed_ldap_database(){
     done
 
     eval $commands
-    echo $commands
 
+}
+
+generate_ssl_for_ldap(){
+
+    save_file_directory_ldap="${1}"
+    save_file_directory_mine="${2}"
+        
+    create_directory_if_it_does_exsist  "${save_file_directory_ldap}"
+    create_directory_if_it_does_exsist  "${save_file_directory_mine}"
+
+    openssl genrsa -out "${save_file_directory_ldap}/ca.key" 2048
+    openssl req -x509 -new -nodes -key "${save_file_directory_ldap}/ca.key" -sha256 -days 1825 -out "${save_file_directory_ldap}/ca.crt" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+
+    openssl genrsa -out "${save_file_directory_ldap}/server.key" 2048
+    openssl req -new -key "${save_file_directory_ldap}/server.key" -out "${save_file_directory_ldap}/server.csr" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+    openssl x509 -req -in "${save_file_directory_ldap}/server.csr" -CA "${save_file_directory_ldap}/ca.crt" -CAkey "${save_file_directory_ldap}/ca.key" -CAcreateserial -out "${save_file_directory_ldap}/server.crt" -days 825 -sha256 -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+    openssl dhparam -dsaparam  -out "${save_file_directory_ldap}/dhparam.pem" 4096
     
-    # eval "$catted"
+    # copy ssl directory to mine that works for me
+    sudo cp -R ${save_file_directory_ldap}/*  ${save_file_directory_mine}
+    sudo chown $who_ami_i:$who_ami_i ${save_file_directory_mine}/*
 
-    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f development.ldif
-    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-victor.ldif
-    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f user-angela.ldif
-    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/group.ldif
-    # # ldapadd  -x -H ldap://172.20.0.2:389 -D "cn=admin,dc=daacs,dc=net" -w admin -f groups/create-daacs-group-of-names.ldif
-
+    # # change owner:group to 911:911
+    sudo chown 911:911 ${save_file_directory_ldap}/*
 
 }

@@ -33,3 +33,9 @@ services:
     # fully-qualified domain name for the host.
     domainname: "daacs.net"
     hostname: "ldap-server"
+    networks:
+      - myNetwork
+
+networks:
+  myNetwork:
+    external: true

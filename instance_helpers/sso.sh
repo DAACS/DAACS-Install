@@ -23,11 +23,10 @@ sso_instance_helper(){
     ;;
 
     "UIDP") 
-        does_dir_exist=$(does_dir_exsist "$base_path_folder_destination/$install_folder_destination")
         does_dir_env=$(does_dir_exsist "$install_root/new-env-setups/$install_folder_destination")
 
-        if [[ $does_dir_exist == true && $does_dir_env == true ]]; then
-            update_web_instance_helper
+        if [[ $does_dir_env == true ]]; then
+            update_web_idp_helper
         else
             echo "Is dir missing: $does_dir_exist or Is env missing: $does_dir_env"
         fi
@@ -41,13 +40,10 @@ sso_instance_helper(){
 
 
 create_web_idp_helper(){
+    root_dest="$install_root/new-env-setups"
 
-    instance_type_defintion=$(get_instance_type_definition "$instance_type")
-    # is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process) : " true)
-    # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
-    # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
-    
-    build_file="Docker-idp-build-dev"
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")    
+    build_file="Docker-idp-build"
     shibboleth_files_to="$install_env_path/${instance_type_defintion}/docker/${build_file}"
     create_image "$shibboleth_files_to" "${SHIBBOLETH_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" 
 
@@ -55,19 +51,22 @@ create_web_idp_helper(){
  
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    root_dest="$install_root/new-env-setups"
-    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     shibboleth_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth service : " )
+    ldap_service_directory=$(ask_read_question_or_try_again "Enter folder directory for LDAP envs: " true)
 
-    # Create env files for install
+
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
     instance_home_folder="$root_dest/$install_folder_destination"
+        
+    # Create env files for install
     run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     # # filename - enviroment variables for webserver
     env_shibboleth_file="${absolute_dir}shibboleth"
-    env_ldap_file="${absolute_dir}ldap"
+    env_ldap_file="${absolute_dir_for_ldap}"
 
     shibboleth_container_name=$(get_environment_value_from_file_by_env_name "${env_shibboleth_file}" "SHIBBOLETH_CONTAINER_NAME")
     if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
@@ -95,24 +94,92 @@ create_web_idp_helper(){
 
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
     full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
-
-    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
+    absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
+    # local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     env_dir="ENV_DIR=$absolute_dir"
-
-    env_string="${env_dir}"
+    env_ldap_file="ENV_LDAP_DIR=$absolute_dir_for_ldap"
+    env_string="${env_dir} ${env_ldap_file}"
 
     run_docker_with_envs "$shibboleth_docker_file_to" "$env_string"
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
     add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
+    write_mongo_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
 
 }
 
 
 
 
-update_web_instance_helper(){
+update_web_idp_helper(){
 
-echo "hello"
+  printf "\nUPDATING Shibboleth IDP server instance....\n"
+
+    should_update_envs="n" # $(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
+ 
+    # #Check to see if package.json or package.json.lock file has changed to redownload node_modules -todo
+    root_dest="$install_root/new-env-setups"
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    
+    absolute_dir_for_ldap_config_file="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination"
+
+    ldap_folder=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "DATABASE_FOLDER") 
+    mongo_database_directory=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "DATABASE_NAME") 
+    absolute_dir_for_ldap_ssl="$root_dest/$(get_env_value "$ldap_folder" )/$(get_env_value "$mongo_database_directory" )"
+    absolute_dir_for_ldap="$root_dest/$(get_env_value "$ldap_folder" )/$environment_type_defintion/$environment_type_defintion-"
+    
+    # Update env files for updating service
+    env_to_create=$(get_env_files_for_updating "$root_dest/$install_folder_destination" $environment_type)
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    if [ "$should_update_envs" = "y" ]; then
+        
+        run_fillout_program_for_update "$env_to_create"
+    fi
+
+    docker_file=""
+
+    case "$environment_type_defintion" in
+        "env-dev") 
+            docker_file="Docker-Shibboleth-dev.yml"
+        ;;
+        "env-prod") 
+            docker_file="Docker-Shibboleth-prod.yml"
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
+
+    ldap_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+
+    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+
+    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
+    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+
+    env_dir="ENV_DIR=$absolute_dir"
+    env_ldap_file="ENV_LDAP_DIR=$absolute_dir_for_ldap"
+    env_ldap_ssl_file="ENV_LDAP_SSL_DIR=$absolute_dir_for_ldap_ssl"
+ 
+    env_string="${env_dir} ${env_ldap_file} ${env_ldap_ssl_file}"
+
+    run_docker_with_envs "$ldap_docker_file_to" "$env_string"
+
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    for entry in "$services_file_dir"/*
+    do
+        update_services_ids_in_service_file "$entry"
+    done
+}
+
+write_mongo_config_file(){
+
+    destdir="${1}/database-config/"
+    create_directory_if_it_does_exsist "$destdir"
+    database_config_env="LDAP_DB_DIRECTORY=${2}"
+    write_to_file "$database_config_env" "$destdir/$"
 }
