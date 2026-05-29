@@ -100,7 +100,7 @@ create_web_idp_helper(){
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
     add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
-    write_mongo_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
+    write_ldap_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
 
 }
 
@@ -115,9 +115,9 @@ update_web_idp_helper(){
     
     absolute_dir_for_ldap_config_file="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination"
 
-    ldap_folder=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "DATABASE_FOLDER") 
-    mongo_database_directory=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "DATABASE_NAME") 
-    absolute_dir_for_ldap_ssl="$root_dest/$(get_env_value "$ldap_folder" )/$(get_env_value "$mongo_database_directory" )"
+    ldap_folder=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "LDAP_DB_DIRECTORY") 
+    # mongo_database_directory=$(get_environment_value_from_file_by_env_name "$absolute_dir_for_ldap_config_file" "DATABASE_NAME") 
+    absolute_dir_for_ldap_ssl="$root_dest/$(get_env_value "$ldap_folder" )/$(get_env_value "$ldap_folder" )" # i need to check to make sure this works
     absolute_dir_for_ldap="$root_dest/$(get_env_value "$ldap_folder" )/$environment_type_defintion/$environment_type_defintion-"
     
     # Update env files for updating service
@@ -161,7 +161,7 @@ update_web_idp_helper(){
     done
 }
 
-write_mongo_config_file(){
+write_ldap_config_file(){
 
     destdir="${1}/database-config/"
     create_directory_if_it_does_exsist "$destdir"

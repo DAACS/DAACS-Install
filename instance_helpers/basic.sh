@@ -360,6 +360,12 @@ write_env_to_file_new(){
 
 }
 
+
+append_to_file(){
+
+    printf "$1" >> "$2"
+
+}
 write_to_file(){
 
     printf "$1" > "$2"

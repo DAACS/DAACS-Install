@@ -154,8 +154,16 @@ update_ldap_instance_helper(){
     env_ldap_file="${absolute_dir}ldap"
     instance_home_folder="$root_dest/$install_folder_destination"
 
+    # ldap_container_name=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONTAINER_NAME")
+    # open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT")
+
+
     ldap_container_name=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONTAINER_NAME")
     open_ldap_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "PORT")
+    ldap_base_dn=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_BASE_DN")
+    open_ldap_ssl_port=$(get_environment_value_from_file_by_env_name "${env_ldap_file}" "SSL_PORT")
+
+
 
     docker_file=""
 
@@ -173,10 +181,16 @@ update_ldap_instance_helper(){
     esac
     
     ldap_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+    folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"
     env_dir="ENV_DIR=$absolute_dir"
-    env_string="${env_dir} ${open_ldap_port}"
+    folder_start_env="FOLDER_START=$instance_home_folder"
 
-    run_docker_with_envs "$ldap_docker_file_to" "$env_string"
+    env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name} ${folder_start_ldif_dir}"
+
+echo $env_string
+    run_docker_with_envs "$ldap_docker_file_to" "$env_string ${folder_start_ldif_dir}"
+
+
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     for entry in "$services_file_dir"/*
@@ -191,75 +205,80 @@ seed_ldap_database(){
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     ldif_seed_dir="$install_env_path/${instance_type_defintion}/ldif/"
+
     ldap_service_name=$(ask_read_question_or_try_again "What LDAP container name?: " true)
-    ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)
-    ldap_config_password=$(ask_read_question_or_try_again "What LDAP config password?: " true)
-    should_write_env_passwords=$(ask_read_question_or_try_again "Should write password to env file?: " true)
-
-    # if not production then ask
-    should_ssl_connect=$(ask_read_question_or_try_again "SSL Connect?: " true)
-
     service_ID=$(get_services_ids_by_service_name "$ldap_service_name")
-    # service_ID="704c1c5cafd5"
-     
 
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     env_ldap_file="${absolute_dir}ldap"
+    should_write_env_passwords="false"
 
     dc_suffix=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "OPENLDAP_BOOTSTRAP_SUFFIX"))
+    ldap_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
+    
+    if [ "$ldap_admin_password" == "" ]; then 
+        ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)
+        append_to_file "LDAP_ADMIN_PASSWORD=${ldap_admin_password}\r" "${env_ldap_file}"
+    fi 
 
-    # Write passwords to ENV Files
-    # ld_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
-    # ld_conf_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_CONFIG_PASSWORD"))
+    
+    # if not production then ask
+    case "$environment_type_defintion" in
+        "env-dev") 
+           should_ssl_connect=$(ask_read_question_or_try_again "SSL Connect?: " true)
+
+        ;;
+        "env-prod") 
+
+            # if [ "$password" == "" ]; then 
+            #     ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)
+            #     append_to_file "LDAP_ADMIN_PASSWORD=${ldap_admin_password}\r" "${env_ldap_file}"
+            # fi 
+
+            should_ssl_connect=true
+
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
 
     # conf_files=("configs/memberof.ldif")
     files=()
     
-    # case "$environment_type_defintion" in
-    #     "env-dev") 
-    #         files+=("groups/ou/group.ldif" "groups/ou/development.ldif")
-    #     ;;
-    #     "env-prod") 
-    #         files+=("groups/ou/group.ldif" "groups/ou/production.ldif")
-    #     ;;
-    #     *)
-    #         echo "Invalid instance option"
-    #         exit -1
-    #     ;;
-    # esac
+    case "$environment_type_defintion" in
+        "env-dev") 
+            files+=("groups/ou/group.ldif" "groups/ou/development.ldif")
+        ;;
+        "env-prod") 
+            files+=("groups/ou/group.ldif" "groups/ou/production.ldif")
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
     
     files+=("users/user-victor.ldif" "users/user-angela.ldif" "users/user-elie.ldif" "users/user-jason.ldif")
     files+=("groups/groupofnames/daacs.ldif" "groups/groupofnames/jenkins.ldif" )
-
-    commands=""
-
-    for i in "${conf_files[@]}"; do  
-        catted="ldapadd -x -H ldap://localhost:3890 -D \"cn=admin,cn=config\" -w ${ld_conf_password} -f /ldif/${i}"
-        beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\""
-
-        echo $i
-        echo "${conf_files[-1]}"
-
-        if [ ${i} != "${conf_files[-1]}" ]; then
-            commands+="$beginnig_exec && "
-            else 
-            commands+="$beginnig_exec"
-
-        fi 
-
-        eval $beginnig_exec
-        break
-
-    done
-    eval $commands
-
     commands=""
     for i in "${files[@]}"; do  
-        catted="ldapadd -x -H ldap://localhost:3890 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
+        catted=""
+
+        case "$environment_type_defintion" in
+            "env-dev") 
+                catted="ldapadd -x -H ldap://localhost:3890 -D \"cn=admin,${dc_suffix}\" -w ${ldap_admin_password} -f /container/services/openldap/assets/ldif/${i}"
+            
+            ;;
+            "env-prod") 
+                catted="ldapadd -x -H ldaps://localhost:6360 -D \"cn=admin,${dc_suffix}\" -w ${ldap_admin_password}  -o TLS_CACERT=/container/services/openldap/assets/certs/ca.crt -o TLS_REQCERT=allow -o TLS_CERT=/container/services/openldap/assets/certs/cert.crt -o TLS_KEY=/container/services/openldap/assets/certs/cert.key -f /container/services/openldap/asset/ldif/${i} "
+            
+            ;;
+        esac
+
         beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
-        # echo "${i}"
-        # echo "${files[-1]}"
 
         if [ ${i} != "${files[-1]}" ]; then
             commands+="$beginnig_exec && "
@@ -267,25 +286,11 @@ seed_ldap_database(){
             commands+="$beginnig_exec"
 
         fi 
-    done
-    eval $commands
 
-    commands=""
-    for i in "${files[@]}"; do  
-        catted="ldapadd -x -H ldap://localhost:389 -D \"cn=admin,${dc_suffix}\" -w ${ld_admin_password} -f /ldif/${i}"
-        beginnig_exec="docker exec -it ${service_ID} sh -c  \"${catted}\" "
-        echo "${i}"
-        echo "${files[-1]}"
-
-        if [ ${i} != "${files[-1]}" ]; then
-            commands+="$beginnig_exec && "
-            else 
-            commands+="$beginnig_exec"
-
-        fi 
     done
 
     eval $commands
+
 
 }
 
@@ -301,7 +306,8 @@ generate_ssl_for_ldap(){
     openssl req -x509 -new -nodes -key "${save_file_directory_ldap}/ca.key" -sha256 -days 1825 -out "${save_file_directory_ldap}/ca.crt" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
 
     openssl genrsa -out "${save_file_directory_ldap}/cert.key" 2048
-    openssl req -new -key "${save_file_directory_ldap}/cert.key" -out "${save_file_directory_ldap}/cert.csr" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
+    openssl req -new -key "${save_file_directory_ldap}/cert.key" -out "${save_file_directory_ldap}/cert.csr" -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net" 
+    #  -addext "subjectAltName = DNS:example.com, DNS:www.example.com, IP:10.0.0.1"
     openssl x509 -req -in "${save_file_directory_ldap}/cert.csr" -CA "${save_file_directory_ldap}/ca.crt" -CAkey "${save_file_directory_ldap}/ca.key" -CAcreateserial -out "${save_file_directory_ldap}/cert.crt" -days 825 -sha256 -subj "/C=US/ST=New York/L=Richmond /O=DAACS /OU=Technology /CN=ldap-server.daacs.net/emailAddress=admin@daacs.net"
     openssl dhparam -dsaparam  -out "${save_file_directory_ldap}/dhparam.pem" 4096
     

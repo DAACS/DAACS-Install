@@ -1,30 +1,22 @@
 services:
   #ldap_service_name:
-    image: osixia/openldap
+    image: osixia/openldap:2.6.10-alpha
     container_name: ${LDAP_CONTAINER_NAME}
-    command: --copy-service
     env_file: 
       - ${ENV_DIR}ldap
     environment:
-      LDAP_LOG_LEVEL: "256"
-      LDAP_RFC2307BIS_SCHEMA: "false"
-      LDAP_BACKEND: "mdb"
-      LDAP_TLS: "false"
-      LDAP_TLS_ENFORCE: "false"
-      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
-      LDAP_TLS_VERIFY_CLIENT: "demand"
-      KEEP_EXISTING_CONFIG: false
-      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
-      LDAP_SSL_HELPER_PREFIX: "ldap"
+      OPENLDAP_BOOTSTRAP_TLS: false
       OPENLDAP_BOOTSTRAP_MEMBEROF: true
     tty: true
     stdin_open: true
     volumes:
       - /var/lib/ldap
       - /etc/ldap/slapd.d
-      - ${FOLDER_START_LDIF}/ldif:/container/service/slapd/assets/ldif
+      - ${FOLDER_START}/ssl:/container/services/openldap/assets/certs
+      - ${FOLDER_START_LDIF}:/container/services/openldap/assets/ldif
     ports:
       - "${PORT}:3890"
+      # - "${SSL_PORT}:6360"
     domainname: "${LDAP_BASE_DN}"
     hostname: "ldap-server"
     networks:

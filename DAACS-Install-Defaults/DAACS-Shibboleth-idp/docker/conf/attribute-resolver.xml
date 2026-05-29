@@ -87,23 +87,61 @@ list of possible components and their options.
         <AttributeEncoder xsi:type="SAML2String" name="memberOf" friendlyName="memberOf" />
     </AttributeDefinition>
 
-    <DataConnector id="myLDAP" xsi:type="LDAPDirectory"
+<!-- 
+
+Use this one
+<DataConnector id="myLDAP" xsi:type="LDAPDirectory"
         ldapURL="%{idp.attribute.resolver.LDAP.ldapURL}"
-        baseDN="%{idp.attribute.resolver.LDAP.baseDN}" 
+        baseDN="%{idp.attribute.resolver.LDAP.baseDN}"
         principal="%{idp.attribute.resolver.LDAP.bindDN}"
         principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
         useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}"
-        authCert="/opt/shibboleth-idp/credentials/ldap/cert.crt"
-        authKey="/opt/shibboleth-idp/credentials/ldap/cert.key"
-        trustFile="/opt/shibboleth-idp/credentials/ldap/ca.crt"
         disableHostnameVerification="%{idp.attribute.resolver.LDAP.disableHostnameVerification}"
+        authCert="%{daacs.authCert}"
+        authKey="%{daacs.authKey}"
+        trustFile="%{daacs.trustFile}">
+        <FilterTemplate>
+            <![CDATA[
+                %{idp.attribute.resolver.LDAP.searchFilter}
+            ]]>
+        </FilterTemplate>
+         <ReturnAttributes>uid st mail employeeType givenName employeeNumber cn sn memberOf</ReturnAttributes>
+    </DataConnector> -->
+    
+
+    <!-- <DataConnector id="myLDAP" xsi:type="LDAPDirectory"
+        ldapURL="%{idp.attribute.resolver.LDAP.ldapURL}"
+        baseDN="%{idp.attribute.resolver.LDAP.baseDN}"
+        principal="%{idp.attribute.resolver.LDAP.bindDN}"
+        principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
+        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}"
+        disableHostnameVerification="%{daacs.disableHostnameVerification}"
+        authCert="%{daacs.authCert}"
+        authKey="%{daacs.authKey}"
+        trustFile="%{daacs.trustFile}"
+
         >
         <FilterTemplate>
             <![CDATA[
                 %{idp.attribute.resolver.LDAP.searchFilter}
             ]]>
         </FilterTemplate>
-	 <ReturnAttributes>uid st mail employeeType givenName employeeNumber cn sn memberOf</ReturnAttributes>		
+         <ReturnAttributes>uid st mail employeeType givenName employeeNumber cn sn memberOf</ReturnAttributes>
+    </DataConnector> -->
+
+
+  <DataConnector id="myLDAP" xsi:type="LDAPDirectory"
+        ldapURL="%{idp.attribute.resolver.LDAP.ldapURL}"
+        baseDN="%{idp.attribute.resolver.LDAP.baseDN}"
+        principal="%{idp.attribute.resolver.LDAP.bindDN}"
+        principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
+        useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS}">
+        <FilterTemplate>
+            <![CDATA[
+                %{idp.attribute.resolver.LDAP.searchFilter}
+            ]]>
+        </FilterTemplate>
+         <ReturnAttributes>uid st mail employeeType givenName employeeNumber cn sn memberOf</ReturnAttributes>
     </DataConnector>
 
 </AttributeResolver>

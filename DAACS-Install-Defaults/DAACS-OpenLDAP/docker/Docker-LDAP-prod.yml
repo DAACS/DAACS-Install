@@ -14,7 +14,7 @@ services:
       - /var/lib/ldap
       - /etc/ldap/slapd.d
       - ${FOLDER_START}/ssl:/container/services/openldap/assets/certs
-      - ${FOLDER_START_LDIF}/ldif:/container/service/slapd/assets/ldif
+      - ${FOLDER_START_LDIF}:/container/services/openldap/assets/ldif
     ports:
       - "${PORT}:3890"
       - "${SSL_PORT}:6360"
