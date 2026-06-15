@@ -4,6 +4,18 @@ source "$current_dir/instance_helpers/basic.sh"
 SHIBBOLETH_IMAGE_NAME="shibbolethreal"
 MY_DOCKER_NETWORK_NAME="myNetwork"
 
+
+: '
+
+
+/opt/shibboleth-idp/bin/aacli.sh --principal vmckenzie --requester https://yogurt.victor.com/
+/opt/shibboleth-idp/bin/aacli.sh --principal winstonhong --requester https://yogurt.victor.com
+/opt/shibboleth-idp/bin/reload-service.sh -id shibboleth.AttributeResolverService
+/opt/shibboleth-idp/bin/aacli.sh --principal vmckenzie.admin --requester https://yogurt.victor.com/
+
+/opt/shibboleth-idp/bin/reload-service.sh -id shibboleth.RelyingPartyResolverService
+'
+
 sso_instance_helper(){
 
     instance_type="${1}"

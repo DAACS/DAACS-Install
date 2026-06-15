@@ -44,13 +44,16 @@ fi
 if [ ! -f "/installed" ]; then
 
 	# Add real SLO url - todo its adding SLO but removing SOAP.. do we need SOAP ?
-	sed -i -e "s/\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/\<md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\> \<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" $IDP_HOME/metadata/idp-metadata.xml
+	sed -i -e "s/<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/>/\<md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\> \r\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" 
 
 	# Update default URL to entity ID URL
 	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
 
 	# We have to update idp.properties with set and replace idp3.victor.com with $ENTITY_ID
 	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/conf/idp.properties
+
+	# We have to update idp.properties with set and replace idp3.victor.com with $ENTITY_ID
+	sed -i -e "s/idp.searchForProperties=true/idp.searchForProperties=true\ridp.slo.supported = true/g" $IDP_HOME/conf/idp.properties
 
 	# We have to update idp.properties with set and replace idp.scope=victor.com with idp.scope=${SHIBBOLETH_SCOPE}
 	sed -i -e "s/idp.scope=victor.com/idp.scope=${SHIBBOLETH_SCOPE}/g" $IDP_HOME/conf/idp.properties

@@ -28,7 +28,7 @@
   "title": "Footer",
   "description": "Footer",
   "subject": "",
-  "body": "<br/>Thank you,<br/>The DAACS Team<br/><a href=\"mailto:support@admin.net\">support@admin.net</a><br/><img src=\"https://%domain%/assets/images/daacs-logo.png\"/><br/>",
+  "body": "<br/>Thank you,<br/>The DAACS Team<br/><a href='mailto:support@admin.net'>support@admin.net</a><br/><img crossorigin='anonymous'     width='250px' style='padding-top: .5rem;' src='https://cdn.daacs.net/uploads/daacslogo.png'/><br/>",
   "slug": "footer",
   "keys": []
 },

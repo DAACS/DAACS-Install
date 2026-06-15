@@ -5,7 +5,7 @@ services:
     env_file: 
       - ${ENV_DIR}ldap
     environment:
-      OPENLDAP_BOOTSTRAP_TLS: false
+      # OPENLDAP_BOOTSTRAP_TLS: false
       OPENLDAP_BOOTSTRAP_MEMBEROF: true
     tty: true
     stdin_open: true
@@ -16,7 +16,7 @@ services:
       - ${FOLDER_START_LDIF}:/container/services/openldap/assets/ldif
     ports:
       - "${PORT}:3890"
-      # - "${SSL_PORT}:6360"
+      - "${SSL_PORT}:6360"
     domainname: "${LDAP_BASE_DN}"
     hostname: "ldap-server"
     networks:

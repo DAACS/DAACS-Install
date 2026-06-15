@@ -210,6 +210,21 @@ else
                 printf "Running recreate on ${parameterS} \n"
                 recreate_service "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
             ;;
+            "copy-file-to-container") 
+
+                # docker cp /where/to/save/that/file/or/folder/to/locally service_name:/what/file/or/folder/to/take
+                # docker cp /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/docker/docker-entrypoint.sh 3c09df0bfd77:/entrypoint.sh
+            ;;
+            "copy-file-from-container") 
+
+                # docker cp service_name:/what/file/or/folder/to/take /where/to/save/that/file/or/folder/to/locally
+                # docker cp 3c09df0bfd77:/entrypoint.sh .
+            ;; 
+
+            "get-log") 
+
+                # sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' service_name)
+            ;;
 
         esac
     fi

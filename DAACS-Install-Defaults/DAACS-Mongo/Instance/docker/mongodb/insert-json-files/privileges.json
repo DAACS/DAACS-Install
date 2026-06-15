@@ -525,4 +525,68 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-}]
+},{
+  "_id": "can_view_classrooms_case_manager",
+  "permission": "can_view_classrooms_case_manager",
+  "description": "This allows you to use and see case manager",
+  "title": "Can user case manager",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_add_new_case_manager_to_classroom",
+  "permission": "can_add_new_case_manager_to_classroom",
+  "description": "This allows you to add case manager",
+  "title": "Can add case manager to classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_generate_download_pdf",
+  "permission": "can_generate_download_pdf",
+  "description": "This allows you to be case manager",
+  "title": "Can be case manager to classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_add_roles_to_user",
+  "permission": "can_add_roles_to_user",
+  "description": "This allows you to view logged in users page",
+  "title": "Can view logged in users ",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_search_for_permission",
+  "permission": "can_search_for_permission",
+  "description": "This allows you to be case manager",
+  "title": "Can be case manager to classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_search_for_role",
+  "permission": "can_search_for_role",
+  "description": "This allows you to search for role",
+  "title": "Can search for roles",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_search_for_my_classrooms",
+  "permission": "can_search_for_my_classrooms",
+  "description": "This allows you to search for your classrooms. This will get override by can_search_for_classrooms.",
+  "title": "Can search for roles",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_view_all_assessments",
+  "permission": "can_view_all_assessments",
+  "description": "This allows you to view all assessments",
+  "title": "Can view all assessments",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},]

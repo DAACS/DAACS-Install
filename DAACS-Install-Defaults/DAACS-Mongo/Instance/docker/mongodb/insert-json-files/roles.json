@@ -1,15 +1,23 @@
 [{
   "_id": "ba55d21a-df12-4ce7-9481-a836a9049a5f",
-  "description": "I can do anything I want mode232f",
+  "description": "I can do anything I want mode",
   "permissions": [
     "can_view_admin",
+    "can_add_new_case_manager_to_classroom",
+    "can_generate_download_pdf",
+    "can_add_roles_to_user",
+    "can_view_logged_in_users",
+    "can_update_classroom_owner",
+    "can_update_classroom_enrollment_limit",
     "can_view_role",
+    "can_view_all_classrooms",
     "can_view_users",
     "can_update_user",
     "can_create_user",
     "can_delete_user",
     "can_bulk_update_user",
     "can_disable_user",
+    "can_search_for_classrooms",
     "can_send_user_new_password",
     "can_delete_user_session",
     "can_view_other_properties",
@@ -23,6 +31,7 @@
     "can_view_design",
     "can_update_help_status",
     "can_view_assessments",
+    "can_view_classroom_student_assessment_progress",
     "can_view_emails",
     "can_view_search_dialog",
     "can_update_students_in_classroom",
@@ -53,14 +62,13 @@
     "can_export_assessments",
     "can_view_help",
     "can_administer_help",
-    "can_upload_files",
-    "can_view_all_classrooms"
+    "can_view_classrooms_case_manager"
   ],
-  "users": [],
+  "users": [ ],
   "slug": "admin",
   "title": "Admin",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "fb517143-5b72-4f36-a41c-131cf19a5b83",
@@ -96,19 +104,147 @@
     "can_view_classrooms",
     "can_update_classroom",
     "can_update_students_in_classroom",
+    "can_view_classroom_student_assessment_progress",
     "can_view_assessments",
     "can_search_for_assessments",
     "can_update_assessments_in_classroom",
     "can_make_classroom_decisions",
     "can_delete_classroom",
     "can_view_student_results",
-    "can_view_classroom_student_assessment_progress",
-    "can_create_assessments_in_classroom",
-    "can_create_assessment"
+    "can_create_assessment",
+    "can_add_new_case_manager_to_classroom",
+    "can_view_classrooms_case_manager",
+    "can_search_for_users"
   ],
   "users": [],
   "slug": "instructor",
   "title": "Instructor",
-  "__v": 2,
+  "__v": 0,
+  "history": []
+},{
+  "_id": "0547cded-d89d-458e-a393-46ccb13bd578",
+  "description": "I can do anything I want mode as case manager.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_case_manager"
+  ],
+  "users": [
+    "6540a0fe-451f-43e6-8d90-236f34a99393"
+  ],
+  "slug": "case-manager",
+  "title": "Case Manager",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "dded8a33-189e-475f-a4c5-ced9c41ebdf2",
+  "description": "I can do anything I want mode as user manager.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_users",
+    "can_send_user_new_password",
+    "can_create_user",
+    "can_view_other_properties",
+    "can_edit_other_properties",
+    "can_view_saml_properties",
+    "can_search_for_users",
+    "can_view_user_roles",
+    "can_add_roles_to_user",
+    "can_disable_user",
+    "can_delete_user_session",
+    "can_view_student_results",
+    "can_view_logged_in_users",
+    "can_bulk_update_user",
+    "can_update_user",
+    "can_delete_user"
+  ],
+  "users": [],
+  "slug": "user-manager",
+  "title": "User Manager",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "3fe34122-e059-4007-a182-cdebf301986c",
+  "description": "I can do anything I want mode as system email manager.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_emails",
+    "can_view_email_preview",
+    "can_search_for_users",
+    "can_update_email",
+    "can_send_back_up_email"
+  ],
+  "users": [ ],
+  "slug": "system-email-manager",
+  "title": "System Email Manager",
+  "__v": 0,
+  "history": []
+},
+{
+  "_id": "f05294f9-37b2-4a9a-aec4-49ca4b24bb3f",
+  "description": "I can do anything I want mode as role manager.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_role",
+    "can_search_for_permission",
+    "can_search_for_role",
+    "can_search_for_users",
+    "can_update_role",
+    "can_create_role",
+    "can_delete_role"
+  ],
+  "users": [  ],
+  "slug": "role-manager",
+  "title": "Role Manager",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "197f39bd-9ad9-4a46-b657-94ffd14c31a9",
+  "description": "I view admin search dialog.",
+  "permissions": [
+    "can_view_search_dialog",
+    "can_search_for_users",
+    "can_view_users",
+    "can_search_for_my_classrooms",
+    "can_view_classrooms",
+    "can_search_for_my_assessments",
+    "can_view_assessments"
+  ],
+  "users": [
+  ],
+  "slug": "admin-my-search-dialog",
+  "title": "Admin My Search Dialog",
+  "__v": 3,
+  "history": []
+},{
+  "_id": "5fa6c514-9ae7-45fe-9bdb-8b35abc64d09",
+  "description": "I view admin search dialog.",
+  "permissions": [
+    "can_view_search_dialog",
+    "can_search_for_users",
+    "can_view_users",
+    "can_search_for_classrooms",
+    "can_view_classrooms",
+    "can_search_for_assessments",
+    "can_view_assessments"
+  ],
+  "users": [
+  ],
+  "slug": "admin-search-dialog",
+  "title": "Admin Search Dialog",
+  "__v": 3,
+  "history": []
+},{
+  "_id": "ee2ec45a-b558-4e56-80c2-d4c1967ad450",
+  "description": "I view help threads dialog.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_help",
+    "can_administer_help",
+    "can_update_help_status"
+  ],
+  "users": [  ],
+  "slug": "help-manager",
+  "title": "Help Manager",
+  "__v": 0,
   "history": []
 }]
