@@ -157,21 +157,22 @@ helpFunction()
 while getopts "f:s:a:q:b:d:t:i:e:" opt
 do
    case "$opt" in
-      f ) parameterF="$OPTARG" ;;
-      s ) parameterS="$OPTARG" ;;
-      a ) parameterA="$OPTARG" ;;
-      q ) parameterQ="$OPTARG" ;;
-      b ) parameterB="$OPTARG" ;;
-      d ) parameterD="$OPTARG" ;;
-      t ) parameterT="$OPTARG" ;;
-      i ) parameterI="$OPTARG" ;;
-      e ) parameterE="$OPTARG" ;;
+      f ) parameterF="$OPTARG" ;; #function to run 
+      s ) parameterS="$OPTARG" ;; #service to run on 
+      a ) parameterA="$OPTARG" ;; #integer value - Used for how many services to restart at once 
+      q ) parameterQ="$OPTARG" ;; #boolean value - Used for quiet mode  
+      b ) parameterB="$OPTARG" ;; #base_path_folder_destination
+      d ) parameterD="$OPTARG" ;; #install_folder_destination
+      t ) parameterT="$OPTARG" ;; #instance_type
+      i ) parameterI="$OPTARG" ;; #not used at all
+      e ) parameterE="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 #example
 #daacs -f refresh -s testweb -a 2
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
+#daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
 
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
@@ -196,13 +197,11 @@ else
         helpFunction
     else
 
-
         case "$parameterF" in
             
             "refresh") 
                 printf "Running refresh on ${parameterS} \n"
                 restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
-
             ;;
 
             "recreate") 
@@ -234,6 +233,12 @@ else
             "restore-mongo-data") 
                 MONGODB_CERT_PATH="" MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_CONTAINER_NAME="" PORT="" MONGODB_DATABASE_NAME="" PATH_TO_DUMP="" 
 
+            ;;
+
+            "getlogs") 
+
+                printf "Running get container logs on ${parameterS} \n"
+                get_container_logs "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
             ;;
 
         esac

@@ -95,12 +95,13 @@ create_web_instance_helper(){
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " )
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+    git_branch=$(ask_for_docker_service_and_check "Enter name DAACS Web branch. Leave blank for main : " )
 
     # Create env files for install
     instance_home_folder="$root_dest/$install_folder_destination"
     run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
-    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
+    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination" "$git_branch"
 
     # # # # # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -141,6 +142,9 @@ create_web_instance_helper(){
 
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
+
+    mongo_keys_dir="mongo-keys"
+    mkdir -p "${daacs_server_folder_dir}/${mongo_keys_dir##*=}"
 
     # Build frontend
     env_oauth_file="${absolute_dir}oauth"
@@ -259,6 +263,8 @@ create_webserver_instance_helper(){
     database_instance_type_defintion=$(ask_for_docker_service_and_check "(S)ingle, (R)eplica  : " true)
 
     webserver_service_name=$(ask_for_docker_service_and_check "Enter name for web service : " )
+    
+    git_branch=$(ask_for_docker_service_and_check "Enter name DAACS Web branch. Leave blank for main : " )
     enter_mongo_data_manually=true
 
     env_webserver_file=""
@@ -426,7 +432,7 @@ create_webserver_instance_helper(){
     # instance_home_folder="$root_dest/$install_folder_destination"
     # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type"
 
-    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination"
+    run_clone_repo_for_web "$environment_type" "$base_path_folder_destination" "$install_folder_destination" "$git_branch"
 
     # install node modules for web server
     get_node_modules "$base_path_folder_destination/$install_folder_destination/$web_server_path/" 
@@ -455,6 +461,9 @@ create_webserver_instance_helper(){
 
     saml_keys_dir=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "SAML_KEYS_DIR")
     mkdir -p "${daacs_server_folder_dir}/${saml_keys_dir##*=}"
+
+    mongo_keys_dir="mongo-keys"
+    mkdir -p "${daacs_server_folder_dir}/${mongo_keys_dir##*=}"
 
     # Build frontend
     run_build_frontend "$environment_type" "$api_client_id" "$base_path_folder_destination/$install_folder_destination/$frontend_path/"
@@ -524,10 +533,11 @@ update_webserver_instance_helper(){
         # memcached_folder=$(ask_read_question_or_try_again "Enter memcached folder: " false)
         
     else
+        database_config_path=$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination
 
-        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DB_TYPE") 
-        mongo_folder=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_FOLDER") 
-        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/database-config/$install_folder_destination" "DATABASE_NAME") 
+        database_instance_type_defintion=$(get_environment_value_from_file_by_env_name "$database_config_path" "DB_TYPE") 
+        mongo_folder=$(get_environment_value_from_file_by_env_name "$database_config_path" "DATABASE_FOLDER") 
+        mongo_database_directory=$(get_environment_value_from_file_by_env_name "$database_config_path" "DATABASE_NAME") 
         
         database_instance_type_defintion=$(get_env_value "$database_instance_type_defintion" )
         mongo_folder=$(get_env_value "$mongo_folder" )

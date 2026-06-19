@@ -21,7 +21,6 @@ Instructions:
 
 
 MONGO_REPLICA_IMAGE_NAME="mongo-replica"
-MONGO_IMAGE_NAME="daacs-mongo"
 MY_DOCKER_NETWORK_NAME="myNetwork"
 
 mongo_instance_helper(){
@@ -35,7 +34,7 @@ mongo_instance_helper(){
 
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate (r)eplica (c)reate database (i)nitialize replica set (a)dd to replica set  : " true)
+    new_or_update=$(ask_read_question_or_try_again "(n)ew, or (u)pdate, (r)eplica, (c)reate database, (i)nitialize replica set, (a)dd to replica set, (nc)reat admin DB, (cssl)copy SSL : " true)
     
     case "$new_or_update" in
 
@@ -71,6 +70,12 @@ mongo_instance_helper(){
 
     "a")
         add_replica_mongo_instance_helper
+    ;;
+    "nc")
+        create_admin_user_in_db
+    ;;
+    "cssl")
+        do_copy_ssl_from_container
     ;;
     "crf")
         #create replica files
@@ -111,16 +116,35 @@ create_mongo_instance_helper(){
 
     instance_type="6-1"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
-    qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+
+
+     qserver_files_to=""
+    case "$environment_type_defintion" in
+        "env-dev") 
+            qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
+            MONGO_IMAGE_NAME="daacs-mongo"
+                    
+        ;;
+        "env-prod") 
+            qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-prod"
+            MONGO_IMAGE_NAME="daacs-mongo-prod"
+                    
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
     create_image "$qserver_files_to" "${MONGO_IMAGE_NAME}" "$install_env_path/$instance_type_defintion/docker/" 
  
     printf "\nCREATING Mongo server instance....\n"
 
     mongo_service_name=$(ask_for_docker_service_and_check "Enter name for mongo service : " true)
-    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
-    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
+    # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
+    # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
-    environment_type_defintion=$(get_env_type_definition "$environment_type")
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     mongo_docker_directory="$root_dest/$install_folder_destination/docker/"
@@ -181,18 +205,64 @@ create_mongo_instance_helper(){
 
     add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
-    if [ "$copy_ssl_cert_from_container" = "true" ]; then
-        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
-    fi
-    
-    #add database to primary on creation
-    if [ "$do_create_database" = "true" ]; then
-        mongo_container_val=$(get_env_value "${mongo_container_name}")  
-        add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
-    fi
 
+    # going to remove for now to make functions simpler. It's its own call
+    # mongo_container_val=$(get_env_value "${mongo_container_name}")  
+    # #add database to primary on creation
+    # if [ "$do_create_database" = "true" ]; then
+    #     add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
+    # fi
+}
+do_copy_ssl_from_container(){
+    root_dest="$install_root/new-env-setups"
+    mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name"
 }
 
+copy_ssl_from_container(){
+    
+    input_1="${1}"
+    input_2="${2}"
+    input_3="${3}"
+
+    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl" - but it should already exsist
+    if  ! $(test -d "$input_1") ;
+    then
+        mkdir -p "$input_1"
+    fi
+    
+    command="docker cp ${input_2}:/home/ ${input_1}"
+    eval "$command"
+}
+
+create_admin_user_in_db(){
+
+    mongo_service_name=${1}
+    mongo_service_name=$(ask_read_question_or_try_again "Enter name for mongo service : " true)
+    should_mongo_ssl=$(ask_read_question_or_try_again "Should SSL connect : " true)
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+
+    env_webserver_mongo_file="${absolute_dir}webserver-mongo"
+
+    mongo_admin_username=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_USERNAME"))
+    mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
+
+    mongosh_string=""
+    mongo_tls=""
+
+    admin_root_ok="docker exec  ${mongo_service_name} bash -c "
+     
+    if [ -n $should_mongo_ssl ]; then
+        mongo_tls=" --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --tlsAllowInvalidHostnames"
+    fi 
+    
+    admin_root_ok+="\" mongosh ${mongo_tls} --eval ' db.getSiblingDB(\\\"admin\\\").createUser({user:\\\"${mongo_admin_username}\\\", pwd:\\\"$mongo_admin_password\\\", roles:[{role:\\\"root\\\", db:\\\"admin\\\"}] }) ' \""
+    eval $admin_root_ok
+
+}
 #Be nice to initaliza replica all in one function but i need to figure out how to wait and see if mongo process is ready
 #Must use same install folder if want to loop on webserver creation
 create_replica_mongo_instance_helper(){
@@ -200,8 +270,8 @@ create_replica_mongo_instance_helper(){
     instance_type="6-3"
     instance_type_defintion=$(get_instance_type_definition "$instance_type")
     is_this_init_process=$(ask_read_question_or_try_again "Is this process the first one? (Init replica process) : " true)
-    copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
-    do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
+    # copy_ssl_cert_from_container=$(ask_for_docker_service_and_check "Copy SSL cert from container? : " true)
+    # do_create_database=$(ask_read_question_or_try_again "Do you want to create database for web server? : " true)
     
     create_image "$install_env_path/${instance_type_defintion}/docker/Dockerfile-webserver-mongo-dev" "${MONGO_REPLICA_IMAGE_NAME}" "$install_env_path/${instance_type_defintion}/docker/" "file_dir=$install_env_path/${instance_type_defintion}/docker/"
 
@@ -298,10 +368,11 @@ create_replica_mongo_instance_helper(){
 
     if [ "$is_this_init_process" = "true" ]; then
         
+        # Leaving for not but I'm removing it from other functions to make other functions smaller, with simpler options
         #add database to primary on creation
-        if [ "$do_create_database" = "true" ]; then
-            add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
-        fi
+        # if [ "$do_create_database" = "true" ]; then
+        #     add_mongo_database_to_instance "$mongo_container_val" "$root_dest/$install_folder_destination/" "$environment_type_defintion-"
+        # fi
 
         initiate_mongo_process_to_replica_set "$mongo_container_val" "$replica_set_id_val" "1" "$mongo_port_val" "$host_or_ip_val" 
 
@@ -310,9 +381,9 @@ create_replica_mongo_instance_helper(){
 
     fi 
 
-    if [ "$copy_ssl_cert_from_container" = "true" ]; then
-        copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
-    fi
+    # if [ "$copy_ssl_cert_from_container" = "true" ]; then
+    #     copy_ssl_from_container "$root_dest/$mongo_service_name/ssl/" "$mongo_service_name" "$mongo_id"
+    # fi
     
 }
 
@@ -392,23 +463,6 @@ init_replica_mongo_instance_helper(){
     
 }
 
-copy_ssl_from_container(){
-    
-    input_1="${1}"
-    input_2="${2}"
-    input_3="${3}"
-
-    # # Checks to see if directory exsist in "DAACS-Install/new-env-setups/$mongo_service_name/ssl" - but it should already exsist
-    if  ! $(test -d "$input_1") ;
-    then
-        mkdir -p "$input_1"
-    fi
-    
-    input_3=$(get_services_ids_by_service_name "$input_2")
-    input_3=$(echo "$input_3" | tr -d " " )
-    command="docker cp ${input_3}:/home/mongossl.pem ${input_1}mongossl.pem"
-    eval "$command"
-}
 
 add_mongo_database_to_instance(){
 
@@ -423,6 +477,7 @@ add_mongo_database_to_instance(){
         mongo_service=$(ask_read_question_or_try_again "What mongo service name?: " true)
     fi
 
+    should_mongo_ssl=$(ask_read_question_or_try_again "Should SSL connect : " true)
     MONGODB_DATABASE_NAME=$(ask_read_question_or_try_again "Database name: " true)
     MONGO_USERNAME=$(ask_read_question_or_try_again "Username: " true)
     MONGO_PASSWORD=$(ask_read_question_or_try_again "Password: " true)
@@ -462,8 +517,22 @@ add_mongo_database_to_instance(){
         printf "$webserver_stuff" > "$webserver_mongo"
     fi 
 
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    root_dest="$install_root/new-env-setups"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    env_webserver_mongo_file="${absolute_dir}webserver-mongo"
+    
+    mongo_admin_username=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_USERNAME"))
+    mongo_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGO_INITDB_ROOT_PASSWORD"))
+    
+    mongo_tls=""
+    if [ -n $should_mongo_ssl ]; then
+        mongo_tls=" --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --tlsAllowInvalidHostnames"
+    fi 
+
+
     #create /dbs/$mongo_folder_filename
-    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh --quiet  < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
+    command="docker exec -it ${mongo_service} sh -c \"export MONGODB_DATABASE_NAME=${MONGODB_DATABASE_NAME} MONGO_USERNAME=${MONGO_USERNAME} MONGO_PASSWORD=${MONGO_PASSWORD} API_CLIENT_ID=${API_CLIENT_ID} WEB_SERVER_COMMUNICATION_PASSWORD=${WEB_SERVER_COMMUNICATION_PASSWORD} WEB_SERVER_COMMUNICATION_USERNAME=${WEB_SERVER_COMMUNICATION_USERNAME} WEB_SERVER_COMMUNICATION_EMAIL=${WEB_SERVER_COMMUNICATION_EMAIL} WEB_SERVER_ADMIN_PASSWORD=${WEB_SERVER_ADMIN_PASSWORD} WEB_SERVER_ADMIN_USERNAME=${WEB_SERVER_ADMIN_USERNAME} WEB_SERVER_ADMIN_EMAIL=${WEB_SERVER_ADMIN_EMAIL} && mongosh ${mongo_tls}  --quiet --authenticationDatabase admin -u \\\"${mongo_admin_username}\\\" -p \\\"${mongo_admin_password}\\\" < /docker-entrypoint-initdb.d/mongo-init.js \" > /dev/null"
 
     eval "$command"
 

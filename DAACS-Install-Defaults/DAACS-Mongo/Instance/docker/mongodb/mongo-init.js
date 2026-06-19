@@ -25,10 +25,14 @@
     db.createCollection("user_assessments");
     db.user_assessments.createIndex({
         assessmentSlug: 1
-    }, {
-        sparse: true
     })
 
+    db.user_assessments.createIndex({
+        assessmentId: 1
+    })
+    db.user_assessments.createIndex({
+        userId: 1
+    })
     /* TOKENS */
 
     db.createCollection("tokens");
@@ -45,6 +49,15 @@
     /* HELP THREADS */
     db.createCollection("request_helps"); //rename to help-threads
 
+    db.request_helps.createIndex({
+        userId: 1
+    })
+    
+    db.request_helps.createIndex({
+        assessmentId: 1
+    }, {
+        sparse: true
+    })
     /* DAACS INVITES */
     db.createCollection("daacs_invites"); //maybe we should add some to email and classroom ID
 
@@ -54,7 +67,7 @@
     db.classrooms.createIndex({
         slug: 1
     }, {
-        sparse: true
+        unique: true
     })
 
     /* CLIENTS */
@@ -142,9 +155,12 @@
         lastName: "user",
         createdDate: new Date(),
         isUserDisabled: false,
+        verifiedAccount: true,
         isSamlAccount: false,
         saml_properties: [],
-        other_properties: []
+        other_properties: [],
+        pdfFileURL: "",
+        q_status: ""
     };
 
     if (process.env.WEB_SERVER_COMMUNICATION_EMAIL != undefined && process.env.WEB_SERVER_COMMUNICATION_EMAIL.includes("@")) {
@@ -189,10 +205,14 @@
         firstName: "admin-firstname",
         lastName: "admin-lastname",
         isUserDisabled: false,
+        verifiedAccount: true,
         createdDate: new Date(),
         isSamlAccount: false,
         saml_properties: [],
-        other_properties: []
+        other_properties: [],
+        pdfFileURL: "",
+        q_status: ""
+
     };
 
     if (process.env.WEB_SERVER_ADMIN_EMAIL != undefined && process.env.WEB_SERVER_ADMIN_EMAIL.includes("@")) {
@@ -210,25 +230,34 @@
         sparse: true
     })
 
+    db.roles.createIndex({
+        users: 1
+    })
+
     //default assessment to import
 
-    const folderPath = '/docker-entrypoint-initdb.d/assessments/';
-    const files_scan_list = fs.readdirSync(folderPath);
+    // const folderPath = '/docker-entrypoint-initdb.d/assessments/';
+    // const files_scan_list = fs.readdirSync(folderPath);
 
-    if (files_scan_list.length > 0) {
+    // if (files_scan_list.length > 0) {
 
-        let asseessments = files_scan_list.map((filename) => {
-            return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
-        })
-        if (asseessments.length > 0) {
-            db.assessments.insertMany(asseessments);
-        }
-    }
+    //     let asseessments = files_scan_list.map((filename) => {
+    //         return JSON.parse(fs.readFileSync(`${folderPath}/${filename}`))
+    //     })
+    //     if (asseessments.length > 0) {
+    //         db.assessments.insertMany(asseessments);
+    //     }
+    // }
 
     /* EVENT CONTAINERS */
 
     db.createCollection("system_emails");
-
+    db.system_emails.createIndex({
+        slug: 1
+    },{
+        unique: true
+    })
+    
     const folderPathSystemEmails = '/docker-entrypoint-initdb.d/insert-json-files/system_emails.json';
 
     if (folderPathSystemEmails.length > 0) {
@@ -238,11 +267,25 @@
     /* ROLES */
 
     db.createCollection("roles");
+
+    db.roles.createIndex({
+        slug: 1
+    }, {
+        unique: true
+    })
+
     const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
 
     if (folderPathSystemEmails.length > 0) {
         db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
     }
+
+    //NEED TO ADD ADMIN TO ADMIN ROLE
+
+    db.roles.findOneAndUpdate({slug: "admin"}, {$push: {'users': admin_user_id}})
+
+    //NEED TO ADD QCOMMUNICATION TO COMMUNICATION ROLE
+    db.roles.findOneAndUpdate({slug: "q-server"},  {$push: {'users': comms_user_id}})
 
     /* PRIVILEGES */
 
@@ -252,6 +295,12 @@
     if (folderPathPrivileges.length > 0) {
         db.privileges.insertMany(JSON.parse(fs.readFileSync(`${folderPathPrivileges}`)));
     }
+    /* ADMIN USER ASSESSMENTS */
 
+    db.createCollection("admin_user_assessments");
+
+    /* CONTACT FORMS */
+    db.createCollection("contact_forms");
+    
     return;
 })()

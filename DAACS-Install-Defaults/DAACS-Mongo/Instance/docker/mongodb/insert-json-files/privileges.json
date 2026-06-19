@@ -494,6 +494,33 @@
   }
 },
 {
+  "_id": "can_view_brightspace_instructor",
+  "permission": "can_view_brightspace_instructor",
+  "description": "This allows you to see brightspace instructor",
+  "title": "Can brightspace see instructor",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_brightspace_admin",
+  "permission": "can_view_brightspace_admin",
+  "description": "This allows you to see brightspace admin",
+  "title": "Can brightspace see admin",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_view_brightspace_student",
+  "permission": "can_view_brightspace_student",
+  "description": "This allows you to see brightspace student",
+  "title": "Can brightspace see student",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
   "_id": "can_upload_files",
   "permission": "can_upload_files",
   "description": "Allows users to upload files. ",

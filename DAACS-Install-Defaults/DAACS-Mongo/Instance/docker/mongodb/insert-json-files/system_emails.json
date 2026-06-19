@@ -118,7 +118,7 @@
     {
       "key": "%get-pdf-url%",
       "label": "Get PDF URL",
-      "real_key": "https://%domain%/get-pdf"
+      "real_key": "https://%domain%/s/get-pdf"
     }
   ]
 },
@@ -127,7 +127,7 @@
   "title": "User request Help",
   "description": "labore et dolore magna al",
   "subject": "Help text from %user.firstname% %user.lastname% on %domain%",
-  "body": "%helpText%",
+  "body": "\n\n<h2>User</h2>\n<p><span>Name: </span><span>%user.firstname%</span> <span>%user.lastname%</span></p>\n<p><span>Username: </span><span>%user.username%</span></p>\n\n%helpText%",
   "slug": "user-request-help",
   "keys": [
     {
@@ -249,6 +249,105 @@
       "key": "%classroom-link%",
       "label": "Classroom URL",
       "real_key": "%domain%/meow/admin/classroom/edit/%classroom.ID%"
+    },
+    {
+      "key": "%classroom.slug%",
+      "label": "Classroom slug",
+      "real_key": "slug"
+    },
+    {
+      "key": "%classroom.title%",
+      "label": "Classroom title",
+      "real_key": "title"
+    },
+    {
+      "key": "%classroom.ID%",
+      "label": "Classroom title",
+      "real_key": "_id"
+    },
+    {
+      "key": "%student.firstname%",
+      "label": "Student first name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%student.lastname%",
+      "label": "Student last name",
+      "real_key": "lastName"
+    }
+  ]
+},
+{
+  "_id": "ebc2268e-ccaa-44f7-bd79-e8b2b48331c2",
+  "title": "Contact Form",
+  "description": "labore et dolore magna al",
+  "subject": "Send contact message from instance",
+  "body": "%contactForm%\n\n<br/> %user.firstname%  %user.lastname% is have problems with %cSubject% hello. \n<br/><br/>  %cMessage%\n<br/> ",
+  "slug": "send-contact-form-message",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%user.email%",
+      "label": "email",
+      "real_key": "email"
+    },
+    {
+      "key": "%csubject%",
+      "label": "Subject",
+      "real_key": "csubject"
+    },
+    {
+      "key": "%message%",
+      "label": "message",
+      "real_key": "message"
+    }
+  ]
+},{
+  "_id": "315e5692-972e-489d-b0b1-d607fe120410",
+  "title": "Accepted Enrollment into classroom",
+  "description": "Send email to student about instructor accepting enrollment into classroom.",
+  "subject": "You have been enrolled into \"%classroom.title%\" classroom - %domain%",
+  "body": "<p>Hello %student.firstname% %student.lastname%,</p>\n<p>You've been accepted into the %user.firstname% %user.lastname%, \"%classroom.title%\" classroom.</p>\n<p>Click this link to view the classroom, and assessments. %student-classroom-link%</p>",
+  "slug": "accepted-enrollment-in-classroom",
+  "keys": [
+    {
+      "key": "%user.firstname%",
+      "label": "First name",
+      "real_key": "firstName"
+    },
+    {
+      "key": "%user.username%",
+      "label": "Username",
+      "real_key": "username"
+    },
+    {
+      "key": "%user.lastname%",
+      "label": "Last name",
+      "real_key": "lastName"
+    },
+    {
+      "key": "%descision-option%",
+      "label": "Descision",
+      "real_key": "This student needs you to accept or decline thier enrollment. <a href=\"//%classroom-link%\">Click here</a>"
+    },
+    {
+      "key": "%student-classroom-url%",
+      "label": "Classroom URL",
+      "real_key": "%domain%/s/classroom/%classroom.slug%"
+    },
+    {
+      "key": "%student-classroom-link%",
+      "label": "Classroom URL",
+      "real_key": "<a href='//%domain%/s/classroom/%classroom.slug%'>%classroom.slug%</a>"
     },
     {
       "key": "%classroom.slug%",

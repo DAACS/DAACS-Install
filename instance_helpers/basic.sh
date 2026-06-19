@@ -481,11 +481,17 @@ clone_repo(){
     base_path_folder_destination=$1
     install_folder_destination=$2
     repo=$3
+    # branch="--single-branch"
+    branch=""
+
+    if [ -n "${4}"  ]; then
+        branch=" --branch ${4}"
+    fi
     
     mkdir -p "${base_path_folder_destination}/${install_folder_destination}"
 
     cd $base_path_folder_destination
-    command="git clone ${repo} ${base_path_folder_destination}/${install_folder_destination}"
+    command="git clone ${branch} ${repo} ${base_path_folder_destination}/${install_folder_destination}"
     eval "$command"
 }
 
@@ -534,6 +540,7 @@ run_docker_with_envs(){
     webserver_docker_file_to="${1}"
     envs_for_docker_process="${2}"
     should_recreate="${3}"
+    command_after="${4}"
     service_name=""
     sould_recreate_command_args=""
     envs_for_docker_processed=""
@@ -550,7 +557,12 @@ run_docker_with_envs(){
     fi
 
     # # run docker file
-    catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "
+    catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
+
+    if [ -n "$command_after" ]; then
+        catted="${catted} && ${command_after}"
+    fi
+
     eval "$catted"
 }
 
@@ -994,4 +1006,52 @@ check_if_port_is_being_used(){
             fi
     fi
             
+}
+
+
+get_container_status_state(){
+
+    echo $( docker container inspect -f '{{.State.Running}}' "${1}" )
+
+}
+
+
+get_container_logs(){
+
+    base_path_folder_destination="${2}"
+    install_folder_destination="${3}"
+    instance_type="${4}"
+    environment_type="${5}"
+    service_name="${1}"
+
+    install_root=""
+    install_env_path=""
+
+    if [ "$install_env_path" = "" ]; then
+        install_root=$current_dir
+        install_env_path="$install_root/DAACS-Install-Defaults"
+    fi
+
+    environment_type_defintion=$(get_env_type_definition "$environment_type")
+    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    root_dest="$install_root/new-env-setups"
+    env_absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    dir_absolute_dir="$root_dest/$install_folder_destination"
+    docker_file=$(get_docker_file_by_enviroment_and_by_instsance_type "$instance_type" "$environment_type_defintion")
+    log_dir="logs"
+    log_directory="$dir_absolute_dir/$log_dir"
+
+    create_directory_if_it_does_exsist "$log_directory"
+    ids=$(get_services_ids_by_service_name $service_name)
+    IFS=" " read -ra ADDR <<< "$ids"
+
+    current_user=$(whoami)
+    for i in "${ADDR[@]}"; do
+        current_log_file_path="$(docker inspect --format='{{.LogPath}}' $i)"
+        sudo cp "$current_log_file_path" "${log_directory}"
+        filename=$(basename "$current_log_file_path")
+        absolute_log_file_path="$log_directory/$filename"
+        sudo chgrp "$current_user" "$absolute_log_file_path" && sudo chown "$current_user" "$absolute_log_file_path"
+
+    done
 }
