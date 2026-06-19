@@ -3,7 +3,7 @@ services:
     command: >
         /bin/sh -c "cd /usr/src/app && npm run-script start-production --prefix=./DAACS-Webserver"
     expose:
-      - ${PORT}
+      - 80
       - 443
     restart: unless-stopped
     networks:

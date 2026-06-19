@@ -1,0 +1,16 @@
+services:
+  #shibboleth_service_name:
+    expose:
+      - 80
+      - 443
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    env_file: 
+      - ${ENV_DIR}shibboleth
+      - ${ENV_LDAP_DIR}ldap
+    image: shibbolethreal
+
+networks:
+  myNetwork:
+    external: true

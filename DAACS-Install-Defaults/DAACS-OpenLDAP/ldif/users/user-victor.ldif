@@ -1,0 +1,44 @@
+dn: uid=vmckenzie.admin,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: vmckenzie.admin
+sn: Mckenzie
+cn: Victor Mckenzie
+mail: mrgraze@moomoodev.com
+employeeNumber: 87f02f5e-388a-40b0-82a6-e4dc2948574a
+employeeType: admin
+givenName: Victor
+st: New York
+userPassword: victor
+
+dn: uid=vmckenzie.faculty,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: vmckenzie.faculty
+sn: Mckenzie
+cn: Victor Mckenzie
+mail: victor.l.mckenzie@gmail.com
+employeeNumber: 35184be7-b72a-4103-9583-a94dd9bcb4b2
+employeeType: faculty
+givenName: Victor
+st: New York
+userPassword: victor
+
+dn: uid=vmckenzie.student,ou=Development,dc=daacs,dc=net
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+objectclass: inetOrgPerson
+uid: vmckenzie.student
+sn: Mckenzie
+cn: Victor Mckenzie
+mail: djcode.redpro@gmail.com
+employeeNumber: 0bb04757-934b-42c5-8eb7-aed71786dc1d
+employeeType: student
+givenName: Victor
+st: New York
+userPassword: victor

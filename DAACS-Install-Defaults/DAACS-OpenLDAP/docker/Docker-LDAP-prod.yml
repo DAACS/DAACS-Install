@@ -1,0 +1,28 @@
+services:
+  #ldap_service_name:
+    image: osixia/openldap:2.6.10-alpha
+    container_name: ${LDAP_CONTAINER_NAME}
+    env_file: 
+      - ${ENV_DIR}ldap
+    environment:
+      OPENLDAP_BOOTSTRAP_TLS: true
+      # OPENLDAP_BOOTSTRAP_TLS_REQUIRED: true
+      OPENLDAP_BOOTSTRAP_MEMBEROF: true
+    tty: true
+    stdin_open: true
+    volumes:
+      - /var/lib/ldap
+      - /etc/ldap/slapd.d
+      - ${FOLDER_START}/ssl:/container/services/openldap/assets/certs
+      - ${FOLDER_START_LDIF}:/container/services/openldap/assets/ldif
+    ports:
+      - "${PORT}:3890"
+      - "${SSL_PORT}:6360"
+    domainname: "${LDAP_BASE_DN}"
+    hostname: "ldap-server"
+    networks:
+      - myNetwork
+
+networks:
+  myNetwork:
+    external: true

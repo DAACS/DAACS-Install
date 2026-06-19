@@ -9,6 +9,8 @@ source "$current_dir/instance_helpers/nginx.sh"
 source "$current_dir/instance_helpers/backup.sh"
 source "$current_dir/instance_helpers/memcache.sh"
 source "$current_dir/instance_helpers/basic.sh"
+source "$current_dir/instance_helpers/sso.sh"
+source "$current_dir/instance_helpers/ldap.sh"
 
 : '
 1 - Pick instance type to create
@@ -18,6 +20,10 @@ source "$current_dir/instance_helpers/basic.sh"
     3: DAACS-Nginx
     4: DAACS-Backup 
     5: DAACS-Memcached
+    6: DAACS-Mongo
+    7: DAACS-Webserver
+    8: DAACS-Shibboleth
+    9: DAACS-OpenLDAP
 
 2 - Type envirmoment type to create
 3 - Enter base path for install of DAACS
@@ -33,6 +39,8 @@ Pick instance type to create
     5 - DAACS-Memcached
     6 - DAACS-Mongo
     7 - Create MongoDB 
+    8 - Create Shibboleth IDP
+    9 - Create OpenLDAP
 
 Select instance type to create: " instance_type
 environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
@@ -93,6 +101,16 @@ case "$instance_type" in
 "7")
     
     add_mongo_database_to_instance 
+
+;;
+
+"8")
+    sso_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+
+;;
+
+"9")
+    ldap_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 
 ;;
 

@@ -77,6 +77,12 @@ get_instance_type_definition(){
         "7") 
             echo "DAACS-Webserver"
         ;;
+        "8") 
+            echo "DAACS-Shibboleth-idp"
+        ;;
+        "9") 
+            echo "DAACS-OpenLDAP"
+        ;;
         *)
             echo "Invalid instance option"
             exit -1
@@ -166,8 +172,7 @@ get_env_and_equal(){
 get_env_value(){
 
     value=$1
-    i_escaped=$(escape_backslash "${value}")
-    expression="s/[^][\w+]*=//g"
+    expression="s/^([^=]+)=//"
     new_new=$(echo $value | sed -E "${expression}")
     echo "$new_new"
 }
@@ -355,6 +360,12 @@ write_env_to_file_new(){
 
 }
 
+
+append_to_file(){
+
+    printf "$1" >> "$2"
+
+}
 write_to_file(){
 
     printf "$1" > "$2"
