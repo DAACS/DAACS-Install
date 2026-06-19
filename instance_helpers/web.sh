@@ -339,8 +339,7 @@ create_webserver_instance_helper(){
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
 
  
-
-
+                #todo - add if IS_SSL=true or IS_SSL=false
                 write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
 
             else
@@ -364,6 +363,7 @@ create_webserver_instance_helper(){
 
                 api_client_id=$(get_environment_value_from_file_by_env_name "${env_oauth_file}" "API_CLIENT_ID")
     
+                #todo - add if IS_SSL=true or IS_SSL=false
                 #Creates database config file so we dont have to do this manually when we update
                 write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
                 
@@ -816,11 +816,11 @@ generate_webserver_replica_mongo_connection_string(){
     }
 
 
-
+#todo - add IS_SSL to this function but we need to add it if we copy SSL 
 write_mongo_config_file(){
 
     destdir="${1}/database-config/"
     create_directory_if_it_does_exsist "$destdir"
-    database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}"
+    database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}\nIS_SSL=${5}"
     write_to_file "$database_config_env" "$destdir/$5"
 }

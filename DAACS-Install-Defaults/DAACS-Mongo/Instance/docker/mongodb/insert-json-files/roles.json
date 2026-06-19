@@ -3,6 +3,10 @@
   "description": "I can do anything I want mode",
   "permissions": [
     "can_view_admin",
+    "can_search_for_permission",
+    "can_search_for_students",
+    "can_view_all_assessments",
+    "can_search_for_role",
     "can_add_new_case_manager_to_classroom",
     "can_generate_download_pdf",
     "can_add_roles_to_user",
@@ -24,6 +28,7 @@
     "can_view_saml_properties",
     "can_view_user_roles",
     "can_edit_other_properties",
+    "can_create_classroom_assessments",
     "can_view_classrooms",
     "can_create_classroom",
     "can_update_classroom",
@@ -88,8 +93,7 @@
     "can_accept_q_lightside_grades",
     "can_accept_pdf"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "history": [],
   "title": "Q Server Communication",
   "slug": "q-server",
@@ -128,9 +132,7 @@
     "can_view_admin",
     "can_view_case_manager"
   ],
-  "users": [
-    "6540a0fe-451f-43e6-8d90-236f34a99393"
-  ],
+  "users": [  ],
   "slug": "case-manager",
   "title": "Case Manager",
   "__v": 0,
@@ -209,8 +211,7 @@
     "can_search_for_my_assessments",
     "can_view_assessments"
   ],
-  "users": [
-  ],
+  "users": [  ],
   "slug": "admin-my-search-dialog",
   "title": "Admin My Search Dialog",
   "__v": 3,
@@ -245,6 +246,82 @@
   "users": [  ],
   "slug": "help-manager",
   "title": "Help Manager",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "15db99f7-35dd-4a3e-ab04-cd9bda585bcd",
+  "description": "I can do anything I want mode as clasroom manager (admin) .",
+  "permissions": [
+    "can_view_admin",
+    "can_view_all_classrooms",
+    "can_view_all_assessments",
+    "can_search_for_classrooms",
+    "can_search_for_assessments",
+    "can_update_assessments_in_classroom",
+    "can_update_classroom",
+    "can_make_classroom_decisions",
+    "can_view_users",
+    "can_update_classroom_owner",
+    "can_create_classroom",
+    "can_delete_classroom",
+    "can_update_students_in_classroom",
+    "can_search_for_students"
+  ],
+  "users": [ ],
+  "slug": "classroom-manager",
+  "title": "Classroom Manager",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "80f56d48-9559-4a7a-82e9-d5ee1551d3c1",
+  "description": "I can do anything I want mode as instructor.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_classrooms",
+    "can_search_for_my_classrooms",
+    "can_search_for_my_assessments",
+    "can_update_assessments_in_classroom",
+    "can_view_assessments",
+    "can_update_classroom",
+    "can_create_classroom_assessments",
+    "can_view_classroom_student_assessment_progress",
+    "can_view_student_results",
+    "can_view_classrooms_case_manager",
+    "can_add_new_case_manager_to_classroom",
+    "can_search_for_users",
+    "can_make_classroom_decisions"
+  ],
+  "users": [ ],
+  "slug": "instructor-basic",
+  "title": "Instructor Basic",
+  "__v": 0,
+  "history": []
+},{
+  "_id": "bc573b34-5325-471a-ab8e-478cc0f00f5c",
+  "description": "I can do anything I want mode as instructor.",
+  "permissions": [
+    "can_view_admin",
+    "can_view_classrooms",
+    "can_search_for_my_classrooms",
+    "can_search_for_my_assessments",
+    "can_update_assessments_in_classroom",
+    "can_view_assessments",
+    "can_update_classroom",
+    "can_create_classroom_assessments",
+    "can_view_classroom_student_assessment_progress",
+    "can_view_student_results",
+    "can_view_classrooms_case_manager",
+    "can_add_new_case_manager_to_classroom",
+    "can_search_for_users",
+    "can_update_students_in_classroom",
+    "can_search_for_students",
+    "can_create_classroom",
+    "can_delete_classroom",
+    "can_make_classroom_decisions"
+  ],
+  "users": [  ],
+  "slug": "instructor-full",
+  "title": "Instructor Full",
   "__v": 0,
   "history": []
 }]

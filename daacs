@@ -226,6 +226,16 @@ else
                 # sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' service_name)
             ;;
 
+
+            "export-mongo-data") 
+
+            ;;
+
+            "restore-mongo-data") 
+                MONGODB_CERT_PATH="" MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_CONTAINER_NAME="" PORT="" MONGODB_DATABASE_NAME="" PATH_TO_DUMP="" 
+
+            ;;
+
         esac
     fi
 fi

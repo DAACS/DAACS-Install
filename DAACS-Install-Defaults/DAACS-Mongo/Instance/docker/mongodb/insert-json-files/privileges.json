@@ -589,4 +589,20 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},]
+},{
+  "_id": "can_create_classroom_assessments",
+  "permission": "can_create_classroom_assessments",
+  "description": "This allows you to create assessments in classroom",
+  "title": "Can create assessments in classroom",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},{
+  "_id": "can_search_for_students",
+  "permission": "can_search_for_students",
+  "description": "This allows you to search for users with role student",
+  "title": "Can search for students",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+}]

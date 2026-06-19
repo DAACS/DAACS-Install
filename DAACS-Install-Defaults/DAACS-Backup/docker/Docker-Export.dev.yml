@@ -4,14 +4,15 @@ services:
     image: daacs-backup-cron
     networks:
       - myNetwork
+    environment:
+      MONGODB_IS_SSL: "${MONGODB_IS_SSL}"
     env_file: 
       - ${MONGO_ENV_DIR}webserver-mongo
       - ${BACKUP_ENV_DIR}digitalocean
     volumes:
       - "${FOLDER_START}:/usr/src/app"
-    build: 
-      context: .
-      dockerfile: $DIR/Dockerfile-export
+      - "${MONGODB_DB_CERT_PATH}/mongodb.crt:/mongodb.crt"
+      - "${MONGODB_DB_CERT_PATH}/mongodb.pem:/mongodb.pem"
 
 networks:
   myNetwork:
