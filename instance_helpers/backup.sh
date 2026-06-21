@@ -27,13 +27,13 @@ backup_instance_helper(){
     printf "\nBackup instance....\n"
     base_path_folder_destination=$(ask_read_question_or_try_again "Enter absolute path destination for install of DAACS: " true)
     install_folder_destination=$(ask_read_question_or_try_again "Enter folder destination for install of DAACS: " true)
-    folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
-    # instance_name=$(ask_read_question_or_try_again "Enter name of instance to backup: " true)
+    # folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
+    # # instance_name=$(ask_read_question_or_try_again "Enter name of instance to backup: " true)
 
-    # if [ $(does_service_exsist $instance_name) = false ]; then
-    #     pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
-    #     return 
-    # fi
+    # # if [ $(does_service_exsist $instance_name) = false ]; then
+    # #     pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
+    # #     return 
+    # # fi
 
     new_or_update=$(ask_read_question_or_try_again "(n)ew or (u)pdate: " true)
     
@@ -81,6 +81,13 @@ create_backup_instance_helper(){
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
+    # folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
+
+    # if [ $(does_service_exsist $folder_name) = false ]; then
+    #     pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
+    #     return 
+    # fi
+
     # instance_type_defintion=$(get_instance_type_definition "$instance_type")
     root_dest="$install_root/new-env-setups"
     
@@ -122,6 +129,10 @@ create_backup_instance_helper(){
 
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
+
+    FOLDER_NAME=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-digitalocean" "MONGO_DB_FOLDER_NAME") 
+    folder_name=$(get_env_value "$FOLDER_NAME" )
+    
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#backup_service_name/$backup_service_name/g " $docker_file)
 
      mongo_folder=$(get_environment_value_from_file_by_env_name "$root_dest/$folder_name/$environment_type_defintion/$environment_type_defintion-/database-config/$folder_name" "DATABASE_FOLDER") 
@@ -147,8 +158,9 @@ create_backup_instance_helper(){
     backup_env_dir="BACKUP_ENV_DIR=$backup_env_file_path"
     mongo_env_dir="MONGO_ENV_DIR=$mongo_env_file_path_service"
     pwd="DIR=$install_env_path/$instance_type_defintion/docker/"
+    container_name="CONTAINER_NAME=$install_folder_destination"
 
-    env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} ${db_cert_path} ${mongo_is_ssl}"
+    env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} ${db_cert_path} ${mongo_is_ssl} ${container_name}"
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
     services_file_dir="$root_dest/$install_folder_destination/services"
@@ -201,23 +213,43 @@ update_backup_instance_helper(){
     esac
 
     backup_env_file_path="$install_root/new-env-setups/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-    mongo_env_file_path="$install_root/new-env-setups/$folder_name/$environment_type_defintion/$environment_type_defintion-"
+
+    FOLDER_NAME=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-digitalocean" "MONGO_DB_FOLDER_NAME") 
+    folder_name=$(get_env_value "$FOLDER_NAME" )
 
     backup_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
+
+    mongo_folder=$(get_environment_value_from_file_by_env_name "$root_dest/$folder_name/$environment_type_defintion/$environment_type_defintion-/database-config/$folder_name" "DATABASE_FOLDER") 
+        
+    mongo_database_directory=$(get_environment_value_from_file_by_env_name "$root_dest/$folder_name/$environment_type_defintion/$environment_type_defintion-/database-config/$folder_name" "DATABASE_NAME") 
+
+    mongo_is_ssl=$(get_environment_value_from_file_by_env_name "$root_dest/$folder_name/$environment_type_defintion/$environment_type_defintion-/database-config/$folder_name" "IS_SSL") 
+    
+    mongo_folder=$(get_env_value "$mongo_folder" )
+    mongo_database_directory=$(get_env_value "$mongo_database_directory" )
+    mongo_is_ssl=$(get_env_value "$mongo_is_ssl" )
+
+
+    absolute_database_mongo_dir="$root_dest/$mongo_folder/"
+    absolute_database_mongo_dir_env="$root_dest/$mongo_folder/ssl/home"
+    mongo_env_file_path_service="$root_dest/$mongo_folder/databases/$mongo_database_directory/"
+
+    db_cert_path="MONGODB_DB_CERT_PATH=$absolute_database_mongo_dir_env"
+    mongo_is_ssl="MONGODB_IS_SSL=$mongo_is_ssl"
 
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     backup_env_dir="BACKUP_ENV_DIR=$backup_env_file_path"
-    mongo_env_dir="MONGO_ENV_DIR=$mongo_env_file_path"
+    mongo_env_dir="MONGO_ENV_DIR=$mongo_env_file_path_service"
     pwd="DIR=$install_env_path/$instance_type_defintion/docker/"
+    container_name="CONTAINER_NAME=$install_folder_destination"
 
-    env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} "
+    env_string="${folder_start_env} ${backup_env_dir} ${mongo_env_dir} ${pwd} ${db_cert_path} ${mongo_is_ssl} ${container_name} "
     run_docker_with_envs "$backup_docker_file_to" "$env_string"
+    
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    # mkdir -p "$services_file_dir"
+    add_services_service_file "$install_folder_destination" "$services_file_dir/$install_folder_destination"
 
-   services_file_dir="$root_dest/$install_folder_destination/services"
-    for entry in "$services_file_dir"/*
-    do
-        update_services_ids_in_service_file "$entry"
-    done
 
 }

@@ -582,8 +582,8 @@ add_services_service_file(){
     service_touch_file_dir="$2"
 
     touch "$service_touch_file_dir"
-
-    echo "$service_entry" >> $service_touch_file_dir
+    
+    echo "$service_entry" > $service_touch_file_dir
 
 }
 
