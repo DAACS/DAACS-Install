@@ -122,7 +122,10 @@ create_ldap_helper(){
 
 echo "WOOF"
 
-    folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"
+    # todo - copy ldif folder into $install_root/new-env-setups/$install_folder_destination/ldif/
+    folder_start_ldif_dir="FOLDER_START_LDIF=$install_root/new-env-setups/$install_folder_destination/ldif/" # new 
+    # folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"   # old 
+
     env_dir="ENV_DIR=$absolute_dir"
     env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name} ${folder_start_ldif_dir}"
 
@@ -190,7 +193,8 @@ update_ldap_instance_helper(){
     esac
     
     ldap_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
-    folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"
+    folder_start_ldif_dir="FOLDER_START_LDIF=$install_root/new-env-setups/$install_folder_destination/ldif/" # new 
+    # folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"   # old 
     env_dir="ENV_DIR=$absolute_dir"
     folder_start_env="FOLDER_START=$instance_home_folder"
 

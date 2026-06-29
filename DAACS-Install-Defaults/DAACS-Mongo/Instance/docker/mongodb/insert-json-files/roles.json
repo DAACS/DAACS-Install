@@ -293,7 +293,8 @@
     "can_view_classrooms_case_manager",
     "can_add_new_case_manager_to_classroom",
     "can_search_for_users",
-    "can_make_classroom_decisions"
+    "can_make_classroom_decisions",
+    "can_update_assessment"
   ],
   "users": [ ],
   "slug": "instructor-basic",
@@ -321,9 +322,11 @@
     "can_search_for_students",
     "can_create_classroom",
     "can_delete_classroom",
-    "can_make_classroom_decisions"
+    "can_make_classroom_decisions",
+    "can_update_assessment"
   ],
-  "users": [  ],
+  "users": [
+  ],
   "slug": "instructor-full",
   "title": "Instructor Full",
   "__v": 0,
