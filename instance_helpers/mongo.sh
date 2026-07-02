@@ -255,7 +255,7 @@ create_admin_user_in_db(){
 
     admin_root_ok="docker exec  ${mongo_service_name} bash -c "
      
-    if [ -n $should_mongo_ssl ]; then
+    if [ $should_mongo_ssl == "true" ]; then
         mongo_tls=" --tls --tlsCertificateKeyFile /home/mongodb.pem --tlsCAFile /home/mongodb.crt --tlsAllowInvalidHostnames"
     fi 
     
