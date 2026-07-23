@@ -632,4 +632,12 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
+},{
+  "_id": "can_update_site_settings",
+  "permission": "can_update_site_settings",
+  "description": "This allows you to update site settings",
+  "title": "Can update site settings",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
 }]

@@ -90,7 +90,16 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
                     <label for="password">#springMessageText("idp.login.password", "Password")</label>
                     <input type="password" id="password" name="j_password" value="" />
+                    
+                    #set($reset_domain = $environment.getProperty("idp.ldapreset"))
+                    #if ($reset_domain != "")
 
+                       #set ( $reset_domain_url  = "https://" +  $reset_domain + "/get-new-password" )
+
+                         <div><a href="$reset_domain_url" />Reset password</a></div>
+                    #end
+
+                    
                     ## You may need to modify this to taste, such as changing the flow name checked to authn/MFA.
                     #if (!$authenticationContext.getActiveResults().containsKey('authn/Password'))
                         <input type="checkbox" name="donotcache" value="1" id="donotcache" />

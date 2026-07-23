@@ -1,0 +1,47 @@
+services:
+  ldapresest:
+    command: >
+        /bin/sh -c "cd /usr/src/app && npm run-script start-dev"
+    expose:
+      - 80
+      - 443
+    restart: unless-stopped
+    networks:
+      - myNetwork
+    # env_file: 
+      # - ${ENV_DIR}webserver
+      # # - ${ENV_DIR}memcached
+      # - ${ENV_DIR}email
+    environment:
+    #VIRTUAL_HOST=ldapreset.victor.com(Will need to use a different name so we dont have conflicts)
+    # ldap_url="ldap\:\/\/${LDAP_CONTAINER_NAME=comes from env-dev}:3890"
+    # ldap_bind_dn="cn=admin,${OPENLDAP_BOOTSTRAP_SUFFIX=comes from env-dev}"
+    #LDAP_PASSWORD=comes from env-dev file
+    #LDAP_ROOT=ou=Development
+    #SEARCH_DN=LDAP_ROOT,(OPENLDAP_BOOTSTRAP_SUFFIX=comes from env-dev file)
+    # EMAIL_HOST - HELP_EMAIL_INBOX comes from env-dev
+    #SUPPORT_EMAIL = i will make
+    #FOLDER_START = i will make
+      - VIRTUAL_HOST=ldapreset.victor.com
+      - LDAP_URL=ldap://ldaplysol:3890
+      - BIND_DN=cn=admin,dc=daacs,dc=net
+      - LDAP_PASSWORD=YtkR3cN7PO3cJjf4
+      - SEARCH_DN=ou=Development,dc=daacs,dc=net
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=465
+      - EMAIL_USER_NAME=mrgraze@moomoodev.com
+      - EMAIL_PASSWORD=xsqtcaxkpaivcujw
+      - EMAIL_FROM=noreply@moomoodev.com
+      - HELP_EMAIL_INBOX=mrgraze@moomoodev.com
+      - SUPPORT_EMAIL=supoprt@moomoodev.com
+      - SERVER_TIMEZONE=America/New_York
+      - DEVELOPMENT=true
+    volumes:
+      - "${FOLDER_START}:/usr/src/app"
+    image: node
+
+networks:
+  myNetwork:
+    external: true
+
+#FOLDER_START=/home/moo/ldapreset docker compose -f /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/ldapreset/docker/Docker-Webserver-dev.docker.yml up -d 

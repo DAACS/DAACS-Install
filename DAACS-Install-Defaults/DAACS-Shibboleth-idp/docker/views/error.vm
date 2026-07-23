@@ -73,9 +73,8 @@ $response.addHeader("Content-Security-Policy", "script-src 'none'")
         </main>
         <footer class="footer">
             <div class="cc">
-                        <p>Do not share your password.</p>
-
-        </div>
+                <p>Do not share your password.</p>
+            </div>
         </footer>
     </body>
 </html>

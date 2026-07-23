@@ -126,6 +126,10 @@
         unique: true
     })
 
+    /* DAACS SETTINGS */
+    db.createCollection("site_settings");
+
+
     const util = require('util');
     const exec = util.promisify(require('child_process').exec);
 

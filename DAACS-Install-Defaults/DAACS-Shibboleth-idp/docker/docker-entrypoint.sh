@@ -44,7 +44,9 @@ fi
 if [ ! -f "/installed" ]; then
 
 	# Add real SLO url - todo its adding SLO but removing SOAP.. do we need SOAP ?
-	sed -i -e "s/<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/>/\<md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\> \r\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" 
+	sed -i -e "s/\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/>/\md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\>\ \<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" $IDP_HOME/metadata/idp-metadata.xml
+	
+	# sed -i -e "s/\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/>/\<md\:SingleLogoutService Binding\=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/Redirect\/SLO\" \/\> \r\<md\:SingleLogoutService Binding=\"urn\:oasis\:names\:tc\:SAML\:2\.0\:bindings\:HTTP\-Redirect\" Location\=\"https\:\/\/idp3\.victor\.com\/idp\/profile\/SAML2\/SOAP\/Redirect\/SLO\" \/\>/g" 
 
 	# Update default URL to entity ID URL
 	sed -i -e "s/idp3.victor.com/${ENTITY_ID}/g" $IDP_HOME/metadata/idp-metadata.xml
@@ -57,6 +59,11 @@ if [ ! -f "/installed" ]; then
 
 	# We have to update idp.properties with set and replace idp.scope=victor.com with idp.scope=${SHIBBOLETH_SCOPE}
 	sed -i -e "s/idp.scope=victor.com/idp.scope=${SHIBBOLETH_SCOPE}/g" $IDP_HOME/conf/idp.properties
+
+	# We have to update idp.properties with set and replace idp.scope=victor.com with idp.scope=${SHIBBOLETH_SCOPE}
+	# sed -i -e "s/idp.ldapreset=victor.com/idp.ldapreset=${ENV_LDAP_RESTART_VIRTUAL_HOST}/g" $IDP_HOME/conf/idp.properties
+
+	echo  "idp.ldapreset=${ENV_LDAP_RESTART_VIRTUAL_HOST}" >>  $IDP_HOME/conf/idp.properties
 
 	# We have to rebuild the war file so it has the proper properties
 	$IDP_HOME/bin/build.sh -Didp.target.dir="$IDP_HOME"

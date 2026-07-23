@@ -83,6 +83,9 @@ get_instance_type_definition(){
         "9") 
             echo "DAACS-OpenLDAP"
         ;;
+        "10") 
+            echo "DAACS-Shibboleth-idp/shibreset"
+        ;;
         *)
             echo "Invalid instance option"
             exit -1
@@ -207,6 +210,9 @@ get_env_files_for_editing(){
     # 5 - DAACS-Memcached
     # 6 - DAACS-Mongo
     # 7 - DAACS-Webserver
+    # 8 - DAACS-Shibboleth-idp
+    # 9 - DAACS-OpenLDAP
+    # 10 - DAACS-OpenLDAP/ldapreset
 
     instance_type=$(get_instance_type_definition "$1")
     e_type=$(get_env_type_definition "$3")

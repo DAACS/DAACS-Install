@@ -71,7 +71,8 @@
     "can_update_classroom_owner",
     "can_update_classroom_enrollment_limit",
     "can_search_for_classrooms",
-    "can_upload_files"
+    "can_upload_files",
+    "can_update_site_settings"
   ],
   "users": [ ],
   "slug": "admin",

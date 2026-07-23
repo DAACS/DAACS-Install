@@ -9,6 +9,8 @@ services:
     env_file: 
       - ${ENV_DIR}shibboleth
       - ${ENV_LDAP_DIR}ldap
+    environment:
+      - ENV_LDAP_RESTART_VIRTUAL_HOST=$ENV_LDAP_RESTART_VIRTUAL_HOST
     image: shibbolethreal
 
 networks:
