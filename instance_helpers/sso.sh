@@ -61,27 +61,19 @@ create_web_idp_helper(){
 
     printf "\nCREATING Shibboleth instance....\n"
  
-    # env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
-    # environment_type_defintion=$(get_env_type_definition "$environment_type")
-    # shibboleth_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth service : " )
-    # ldap_service_directory=$(ask_read_question_or_try_again "Enter folder directory for LDAP envs: " true)
-    # should_create_reset_server=$(ask_read_question_or_try_again "Should create reset password server (y) : " true)
-
-
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    shibboleth_service_name="shib9"
-    ldap_service_directory="ldaplysol"
-    should_create_reset_server="y"
-
+    shibboleth_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth service : " )
+    ldap_service_directory=$(ask_read_question_or_try_again "Enter folder directory for LDAP envs: " true)
+    should_create_reset_server=$(ask_read_question_or_try_again "Should create reset password server (y) : " true)
 
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
     instance_home_folder="$root_dest/$install_folder_destination"
         
     # Create env files for install
-    printf "\n ENV for SHIBBOLETH Shibboleth instance....\n"
-    # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
+    printf "\n ENV for SHIBBOLETH Webserver instance....\n"
+    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
@@ -97,7 +89,7 @@ create_web_idp_helper(){
     env_shib_reset_virtual_host=""
     if [ "$should_create_reset_server" = "y" ]; then
 
-        printf "\n ENV for SHIBBOLETH Shibboleth instance....\n"
+        printf "\n ENV for SHIBBOLETH RESET instance....\n"
         env_shib_reset_virtual_host_value=$(do_ldap_reset_service "$install_folder_destination") 
         env_shib_reset_virtual_host_value=$(get_env_value "$env_shib_reset_virtual_host_value")
         env_shib_reset_virtual_host="ENV_LDAP_RESTART_VIRTUAL_HOST=$env_shib_reset_virtual_host_value"
@@ -141,14 +133,11 @@ do_ldap_reset_service(){
 
     base_shib="${1}"
     root_dest="$install_root/new-env-setups"
-    # shibboleth_reset_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth reset service : " )
-    shibboleth_reset_service_name="shib9reset"
+    shibboleth_reset_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth reset service : " )
     resetshib_instance_type_defintion=$(get_instance_type_definition "10")    
-    
-    # create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     env_to_create_for_reset_server=$(get_env_files_for_editing "10" $install_env_path $environment_type)
-    # run_fillout_program_new "$env_to_create_for_reset_server" "$instance_home_folder/$SHIB_FOLDER_SERVICE_NAME" "$environment_type_defintion"
+    run_fillout_program_new "$env_to_create_for_reset_server" "$instance_home_folder/$SHIB_FOLDER_SERVICE_NAME" "$environment_type_defintion"
 
     docker_shib_reset_file=""
 
