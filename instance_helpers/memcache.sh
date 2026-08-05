@@ -97,6 +97,10 @@ create_memcached_instance_helper(){
 
     memcached_mapped_port=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_MAPPED_PORT")
     memcached_container_name=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_CONTAINER_NAME")
+    
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    env_dir="ENV_DIR=$absolute_dir"
+    
     env_string="${memcached_mapped_port} ${env_dir} ${memcached_container_name} "
 
     run_docker_with_envs "$memcached_docker_file_to" "$env_string"

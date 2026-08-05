@@ -70,7 +70,7 @@ create_web_idp_helper(){
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    shibboleth_service_name="shibwithreset2"
+    shibboleth_service_name="shib9"
     ldap_service_directory="ldaplysol"
     should_create_reset_server="y"
 
@@ -79,10 +79,11 @@ create_web_idp_helper(){
     absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
     instance_home_folder="$root_dest/$install_folder_destination"
         
-#     # Create env files for install
+    # Create env files for install
+    printf "\n ENV for SHIBBOLETH Shibboleth instance....\n"
     # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
-    # create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
+    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
     # # filename - enviroment variables for webserver
     env_shibboleth_file="${absolute_dir}shibboleth"
@@ -96,15 +97,13 @@ create_web_idp_helper(){
     env_shib_reset_virtual_host=""
     if [ "$should_create_reset_server" = "y" ]; then
 
-        env_shib_reset_virtual_host_value=$(do_ldap_reset_service )
+        printf "\n ENV for SHIBBOLETH Shibboleth instance....\n"
+        env_shib_reset_virtual_host_value=$(do_ldap_reset_service "$install_folder_destination") 
         env_shib_reset_virtual_host_value=$(get_env_value "$env_shib_reset_virtual_host_value")
         env_shib_reset_virtual_host="ENV_LDAP_RESTART_VIRTUAL_HOST=$env_shib_reset_virtual_host_value"
         echo $env_shib_reset_virtual_host
     fi
 
-# echo $env_shib_reset_virtual_host
-# echo $(get_env_value "$env_shib_reset_virtual_host")
-# exit 1
 
     docker_file=""
 
@@ -123,13 +122,12 @@ create_web_idp_helper(){
 
     shibboleth_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#shibboleth_service_name/$shibboleth_service_name/g ;" $docker_file)
 
+
     absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
     env_dir="ENV_DIR=$absolute_dir"
     env_ldap_file="ENV_LDAP_DIR=$absolute_dir_for_ldap"
     env_string="${env_dir} ${env_ldap_file} ${env_shib_reset_virtual_host}"
 
-# echo $env_string 
-# exit 1
     run_docker_with_envs "$shibboleth_docker_file_to" "$env_string"
 
     services_file_dir="$root_dest/$install_folder_destination/services"
@@ -138,6 +136,85 @@ create_web_idp_helper(){
     write_ldap_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
 
 }
+
+do_ldap_reset_service(){
+
+    base_shib="${1}"
+    root_dest="$install_root/new-env-setups"
+    # shibboleth_reset_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth reset service : " )
+    shibboleth_reset_service_name="shib9reset"
+    resetshib_instance_type_defintion=$(get_instance_type_definition "10")    
+    
+    # create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
+
+    env_to_create_for_reset_server=$(get_env_files_for_editing "10" $install_env_path $environment_type)
+    # run_fillout_program_new "$env_to_create_for_reset_server" "$instance_home_folder/$SHIB_FOLDER_SERVICE_NAME" "$environment_type_defintion"
+
+    docker_shib_reset_file=""
+
+    case "$environment_type_defintion" in
+        "env-dev") 
+            docker_shib_reset_file="Docker-ShibResetserver-dev.docker.yml"
+        ;;
+        "env-prod") 
+            docker_shib_reset_file="Docker-ShibResetserver-prod.docker.yml"
+        ;;
+        *)
+            echo "Invalid instance option"
+            exit -1
+        ;;
+    esac
+
+    # works dont touch
+    run_clone_repo_for_shib_reset "$environment_type" "$base_path_folder_destination" "$shibboleth_reset_service_name" "main"
+
+    # install node modules for reset shib server
+    get_node_modules "$base_path_folder_destination/$shibboleth_reset_service_name/" 
+
+    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$shibboleth_reset_service_name"
+    install_folder_destination_for_shib_reset=""
+    
+    #i need to make this work for sso reset only
+    shibboleth_docker_file_to=$(write_service_subsititions_to_docker_file "$resetshib_instance_type_defintion" "$base_shib/" "$install_env_path" "$environment_type_defintion" "s/#shibreset_service_name/$shibboleth_reset_service_name/g ;" $docker_shib_reset_file)
+    
+
+    absolute_dir_for_shib_reset="$root_dest/$base_shib/$SHIB_FOLDER_SERVICE_NAME/$environment_type_defintion/$environment_type_defintion-"
+    absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
+    folder_shib_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+    env_shibreset_dir="ENV_DIR=$absolute_dir_for_shib_reset"
+    env_shib_ldap_file="ENV_DIR_TO_LDAP=$absolute_dir_for_ldap"
+
+    env_ldap_root=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_shib_reset}sso-reset" "LDAP_ROOT")
+    env_open_ldap_bootstrap_suffix=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_ldap}ldap" "OPENLDAP_BOOTSTRAP_SUFFIX")
+    env_string="${env_shibreset_dir} ${env_shib_ldap_file} ${folder_shib_start_env} ${env_ldap_root} ${env_open_ldap_bootstrap_suffix}"
+
+    run_docker_with_envs "$shibboleth_docker_file_to" "$env_string"
+
+    # services_file_dir="$root_dest/$install_folder_destination/services"
+    # mkdir -p "$services_file_dir"
+    # add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
+    # write_ldap_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
+    env_virtual_host=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_shib_reset}sso-reset" "VIRTUAL_HOST")
+    echo "$env_virtual_host"
+}
+
+run_clone_repo_for_shib_reset(){
+
+    # ${1}=environment_type
+    # ${2}=base_path_folder_destination
+    # ${3}=install_folder_destination
+    # ${4}=branch
+
+        # # # # get code from repo
+    if [ "${1}" = "prod" ]; then
+        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACSLDAPWebserver.git" "${4}"
+    fi
+
+    if [ "${1}" = "dev" ]; then
+        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACSLDAPWebserver.git" "${4}"
+    fi
+}
+
 
 update_web_idp_helper(){
 
@@ -203,79 +280,3 @@ write_ldap_config_file(){
     write_to_file "$database_config_env" "$destdir/$"
 }
 
-
-do_ldap_reset_service(){
-
-    root_dest="$install_root/new-env-setups"
-    # shibboleth_reset_service_name=$(ask_for_docker_service_and_check "Enter name for shibboleth reset service : " )
-    shibboleth_reset_service_name="ldapresetreal"
-    resetshib_instance_type_defintion=$(get_instance_type_definition "10")    
-    
-    create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
-
-    # env_to_create_for_reset_server=$(get_env_files_for_editing "10" $install_env_path $environment_type)
-    # run_fillout_program_new "$env_to_create_for_reset_server" "$instance_home_folder/$SHIB_FOLDER_SERVICE_NAME" "$environment_type_defintion"
-
-    docker_file=""
-
-    case "$environment_type_defintion" in
-        "env-dev") 
-            docker_file="Docker-ShibResetserver-dev.docker.yml"
-        ;;
-        "env-prod") 
-            docker_file="Docker-ShibResetserver-prod.docker.yml"
-        ;;
-        *)
-            echo "Invalid instance option"
-            exit -1
-        ;;
-    esac
-
-    # # works dont touch
-    # run_clone_repo_for_shib_reset "$environment_type" "$base_path_folder_destination" "$shibboleth_reset_service_name" "main"
-
-    # # install node modules for reset shib server
-    # get_node_modules "$base_path_folder_destination/$shibboleth_reset_service_name/" 
-
-
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$shibboleth_reset_service_name"
-
-    shibboleth_docker_file_to=$(write_service_subsititions_to_docker_file "$resetshib_instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#shibreset_service_name/$shibboleth_reset_service_name/g ;" $docker_file)
-    
-
-    absolute_dir_for_shib_reset="$root_dest/$install_folder_destination/$SHIB_FOLDER_SERVICE_NAME/$environment_type_defintion/$environment_type_defintion-"
-    # absolute_dir_for_ldap="$root_dest/$ldap_service_directory/$environment_type_defintion/$environment_type_defintion-"
-    # folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
-    # env_dir="ENV_DIR=$absolute_dir_for_shib_reset"
-    # env_ldap_file="ENV_DIR_TO_LDAP=$absolute_dir_for_ldap"
-
-    # env_ldap_root=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_shib_reset}sso-reset" "LDAP_ROOT")
-    # env_open_ldap_bootstrap_suffix=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_ldap}ldap" "OPENLDAP_BOOTSTRAP_SUFFIX")
-    # env_string="${env_dir} ${env_ldap_file} ${folder_start_env} ${env_ldap_root} ${env_open_ldap_bootstrap_suffix}"
-
-    # run_docker_with_envs "$shibboleth_docker_file_to" "$env_string"
-
-    # services_file_dir="$root_dest/$install_folder_destination/services"
-    # mkdir -p "$services_file_dir"
-    # add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
-    # write_ldap_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
-    env_virtual_host=$(get_environment_value_from_file_by_env_name "${absolute_dir_for_shib_reset}sso-reset" "VIRTUAL_HOST")
-    echo "$env_virtual_host"
-}
-
-run_clone_repo_for_shib_reset(){
-
-    # ${1}=environment_type
-    # ${2}=base_path_folder_destination
-    # ${3}=install_folder_destination
-    # ${4}=branch
-
-        # # # # get code from repo
-    if [ "${1}" = "prod" ]; then
-        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACSLDAPWebserver.git" "${4}"
-    fi
-
-    if [ "${1}" = "dev" ]; then
-        clone_repo "${2}" "${3}" "git@github.com:DAACS/DAACSLDAPWebserver.git" "${4}"
-    fi
-}
