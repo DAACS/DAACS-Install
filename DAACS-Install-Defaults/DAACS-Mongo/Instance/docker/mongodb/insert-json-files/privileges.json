@@ -528,7 +528,35 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
+  "_id": "can_update_classroom_owner",
+  "permission": "can_update_classroom_owner",
+  "description": "This allows you update who the classroom owner is.",
+  "title": "Can update classroom owner",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_update_classroom_enrollment_limit",
+  "permission": "can_update_classroom_enrollment_limit",
+  "description": "This allows you update classroom limit.",
+  "title": "Can update classroom limit",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
+  "_id": "can_search_for_classrooms",
+  "permission": "can_search_for_classrooms",
+  "description": "This allows you search for classrooms.",
+  "title": "Can search for classrooms",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
   "_id": "can_view_all_classrooms",
   "permission": "can_view_all_classrooms",
   "description": "This allows you to see all classrooms in classroom listing",
@@ -536,23 +564,17 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
-  "_id": "can_create_assessments_in_classroom",
-  "permission": "can_create_assessments_in_classroom",
-  "description": "This allows you to create assessment in classroom",
-  "title": "Can create assessment in classroom",
-  "created_date": {
-    "$date": "2025-09-24T16:42:56.000Z"
-  }
-},{
+},
+{
   "_id": "can_view_classroom_student_assessment_progress",
   "permission": "can_view_classroom_student_assessment_progress",
-  "description": "This allows you to view user assessment progress in classroom",
-  "title": "Can view user assessment progress in classroom",
+  "description": "This allows you track student user assesment progress in classroom",
+  "title": "Can track classroom user assessment progress",
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_view_classrooms_case_manager",
   "permission": "can_view_classrooms_case_manager",
   "description": "This allows you to use and see case manager",
@@ -560,7 +582,8 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_add_new_case_manager_to_classroom",
   "permission": "can_add_new_case_manager_to_classroom",
   "description": "This allows you to add case manager",
@@ -568,15 +591,26 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
-  "_id": "can_generate_download_pdf",
-  "permission": "can_generate_download_pdf",
+},
+{
+  "_id": "can_view_case_manager",
+  "permission": "can_view_case_manager",
   "description": "This allows you to be case manager",
   "title": "Can be case manager to classroom",
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
+  "_id": "can_view_logged_in_users",
+  "permission": "can_view_logged_in_users",
+  "description": "This allows you to view logged in users page",
+  "title": "Can view logged in users ",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
   "_id": "can_add_roles_to_user",
   "permission": "can_add_roles_to_user",
   "description": "This allows you to view logged in users page",
@@ -584,15 +618,26 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
-  "_id": "can_search_for_permission",
-  "permission": "can_search_for_permission",
+},
+{
+  "_id": "can_generate_download_pdf",
+  "permission": "can_generate_download_pdf",
   "description": "This allows you to be case manager",
   "title": "Can be case manager to classroom",
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
+  "_id": "can_search_for_permission",
+  "permission": "can_search_for_permission",
+  "description": "This allows you to search for permissions",
+  "title": "Can search for permissions",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
   "_id": "can_search_for_role",
   "permission": "can_search_for_role",
   "description": "This allows you to search for role",
@@ -600,15 +645,17 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_search_for_my_classrooms",
   "permission": "can_search_for_my_classrooms",
   "description": "This allows you to search for your classrooms. This will get override by can_search_for_classrooms.",
-  "title": "Can search for roles",
+  "title": "Can search for my classrooms",
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_view_all_assessments",
   "permission": "can_view_all_assessments",
   "description": "This allows you to view all assessments",
@@ -616,7 +663,8 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_create_classroom_assessments",
   "permission": "can_create_classroom_assessments",
   "description": "This allows you to create assessments in classroom",
@@ -624,7 +672,8 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
   "_id": "can_search_for_students",
   "permission": "can_search_for_students",
   "description": "This allows you to search for users with role student",
@@ -632,7 +681,17 @@
   "created_date": {
     "$date": "2025-09-24T16:42:56.000Z"
   }
-},{
+},
+{
+  "_id": "can_update_base_assessments",
+  "permission": "can_update_base_assessments",
+  "description": "This allows you to edit base assessment",
+  "title": "Can edit base assessment",
+  "created_date": {
+    "$date": "2025-09-24T16:42:56.000Z"
+  }
+},
+{
   "_id": "can_update_site_settings",
   "permission": "can_update_site_settings",
   "description": "This allows you to update site settings",

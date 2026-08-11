@@ -33,6 +33,10 @@
     db.user_assessments.createIndex({
         userId: 1
     })
+    
+    db.user_assessments.createIndex({
+        classroomslug: 1
+    })
     /* TOKENS */
 
     db.createCollection("tokens");
@@ -69,6 +73,17 @@
     }, {
         unique: true
     })
+
+    db.classrooms.createIndex({
+        author_id: 1
+    })
+    db.classrooms.createIndex({
+        "students.userId": 1
+    })
+    db.classrooms.createIndex({
+        "assessments.slug": 1
+    })
+
 
     /* CLIENTS */
 
@@ -231,7 +246,9 @@
     db.assessments.createIndex({
         slug: 1
     }, {
-        sparse: true
+        // sparse: true,
+        unique: true
+
     })
 
     db.roles.createIndex({
@@ -274,6 +291,12 @@
 
     db.roles.createIndex({
         slug: 1
+    }, {
+        unique: true
+    })
+
+    db.roles.createIndex({
+        users: 1
     }, {
         unique: true
     })

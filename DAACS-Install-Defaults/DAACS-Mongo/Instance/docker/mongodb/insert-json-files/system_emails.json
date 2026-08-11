@@ -28,7 +28,7 @@
   "title": "Footer",
   "description": "Footer",
   "subject": "",
-  "body": "<br/>Thank you,<br/>The DAACS Team<br/><a href='mailto:support@admin.net'>support@admin.net</a><br/><img crossorigin='anonymous'     width='250px' style='padding-top: .5rem;' src='https://cdn.daacs.net/uploads/daacslogo.png'/><br/>",
+  "body": "<br/>Thank you,<br/>The DAACS Team<br/><a href=\"mailto:support@admin.net\">support@admin.net</a><br/><img crossorigin=\"anonymous\"     width=\"250px\" style=\"padding-top: .5rem;\" src=\"https://cdn.daacs.net/uploads/daacslogo.png\"/><br/>",
   "slug": "footer",
   "keys": []
 },
@@ -118,7 +118,7 @@
     {
       "key": "%get-pdf-url%",
       "label": "Get PDF URL",
-      "real_key": "https://%domain%/s/get-pdf"
+      "real_key": "https://%domain%/get-pdf"
     }
   ]
 },
@@ -187,7 +187,7 @@
   "title": "New Account In Admin",
   "description": "Send email about users new account from admin.",
   "subject": "Your New DAACS Account - %domain%",
-  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS account has been created.</p><p>Click this link to <a href=\"%new-account-url%\">verify your account</a>.</p><p>If you can't open the URL just copy and paste this link into your browser.</p><p>%new-account-url%</p>%userPasswordHtml%",
+  "body": "<p>Hello %user.firstname% %user.lastname%,</p><p>Your DAACS account has been created.</p><p>Click this link to <a href=\"%new-account-url%\">verify your account</a>.</p><p>If you can't open the URL just copy and paste this link into your browser.</p><p>%new-account-url%</p>\n<p>\n%userPasswordHtml%\n</p>\n\n<p>\nRemove this and start typing here\n</p>",
   "slug": "new-account-in-admin",
   "keys": [
     {
@@ -282,7 +282,7 @@
   "title": "Contact Form",
   "description": "labore et dolore magna al",
   "subject": "Send contact message from instance",
-  "body": "%contactForm%\n\n<br/> %user.firstname%  %user.lastname% is have problems with %cSubject% hello. \n<br/><br/>  %cMessage%\n<br/> ",
+  "body": "%contactForm%\n<p><span>Name: </span><span>%user.firstname%  %user.lastname%</span></p>\n<p><span>Subject: </span><span>%cSubject%</span></p>\n<p><span>Email: </span><span>%user.email%</span></p>\n<p><span>Message: </span><span>%cMessage%</span></p>\n<br/> ",
   "slug": "send-contact-form-message",
   "keys": [
     {
@@ -311,7 +311,8 @@
       "real_key": "message"
     }
   ]
-},{
+},
+{
   "_id": "315e5692-972e-489d-b0b1-d607fe120410",
   "title": "Accepted Enrollment into classroom",
   "description": "Send email to student about instructor accepting enrollment into classroom.",
