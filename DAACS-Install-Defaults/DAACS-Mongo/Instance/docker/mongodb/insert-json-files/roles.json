@@ -69,35 +69,11 @@
     "can_view_classrooms_case_manager"
   ],
   "users": [
-   
   ],
   "slug": "admin",
   "title": "Admin",
   "__v": 1,
-  "history": [
-    [
-      {
-        "_id": "9b080fb1-bb29-4544-b2f3-4cd2648200aa",
-        "userId": "868a976e-de82-405e-b8d3-b03c9d00e27d",
-        "change_id": "0a9c386e-1f3d-4094-87c3-73c37f1ca90f",
-        "type": "ADD",
-        "date_change": {
-          "$date": "2026-05-21T19:45:32.363Z"
-        },
-        "change": "User (/add-user-to-role-by-role-id) added user (victor) to role"
-      }
-    ],
-    {
-      "_id": "f948e5de-80f2-4328-b5ec-5bc9562811c2",
-      "userId": "868a976e-de82-405e-b8d3-b03c9d00e27d",
-      "change_id": "0a9c386e-1f3d-4094-87c3-73c37f1ca90f",
-      "type": "REMOVE",
-      "date_change": {
-        "$date": "2026-05-21T19:45:38.080Z"
-      },
-      "change": "User (admin) removed user (victor) from role"
-    }
-  ]
+  "history": [ ]
 },
 {
   "_id": "fb517143-5b72-4f36-a41c-131cf19a5b83",
@@ -105,8 +81,46 @@
     "can_view_student"
   ],
   "users": [
+
   ],
   "history": [],
+  "title": "Student",
+  "slug": "student",
+  "__v": 0,
+  "description": "student only "
+},
+{
+  "_id": "503b5039-55ac-4c94-a0cf-5b415db529df",
+  "permissions": [
+    "can_accept_q_lightside_grades",
+    "can_accept_pdf"
+  ],
+  "users": [
+  ],
+  "history": [],
+  "title": "Q Server Communication",
+  "slug": "q-server",
+  "__v": 0,
+  "description": "Q server communication users "
+},
+{
+  "_id": "912f5c6e-55a1-4209-9d28-237343b59e56",
+  "permissions": [
+    "can_view_brightspace_admin"
+  ],
+  "users": [],
+  "history": [ ],
+  "title": "Brightspace Admin",
+  "slug": "brightspace-admin",
+  "__v": 0
+},
+{
+  "_id": "4c3739dd-84b1-4e7d-ac6d-239b8d20ded6",
+  "permissions": [
+    "can_view_brightspace_instructor"
+  ],
+  "users": [],
+  "history": [ ],
   "title": "Brightspace Instructor",
   "slug": "brightspace-instructor",
   "__v": 5
@@ -142,9 +156,7 @@
     "can_view_classrooms_case_manager",
     "can_search_for_users"
   ],
-  "users": [ 
-
-  ],
+  "users": [ ],
   "slug": "instructor",
   "title": "Instructor ( Going to delete for Instructor - Limited and Instructor - Full",
   "__v": 3,
@@ -360,7 +372,8 @@
     "can_create_classroom",
     "can_delete_classroom",
     "can_make_classroom_decisions",
-    "can_update_assessment"
+    "can_update_assessment",
+    "can_view_users"
   ],
   "users": [
   ],

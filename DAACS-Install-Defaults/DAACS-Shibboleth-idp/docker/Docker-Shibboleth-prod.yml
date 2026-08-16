@@ -5,14 +5,19 @@ services:
       - 443
     restart: unless-stopped
     networks:
+      - nginx-proxy
       - myNetwork
     env_file: 
       - ${ENV_DIR}shibboleth
       - ${ENV_LDAP_DIR}ldap
-    volumes:
-      - "${ENV_LDAP_SSL_DIR}:/opt/shibboleth-idp/credentials/ldap/"
+    environment:
+      - ENV_LDAP_RESTART_VIRTUAL_HOST=$ENV_LDAP_RESTART_VIRTUAL_HOST
+    # volumes:
+      # - "${ENV_LDAP_SSL_DIR}:/opt/shibboleth-idp/credentials/ldap/"
     image: shibbolethreal
 
 networks:
+  nginx-proxy:
+    external: true
   myNetwork:
     external: true

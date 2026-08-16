@@ -6,12 +6,14 @@ MY_DOCKER_NETWORK_NAME="myNetwork"
 
 
 : '
+Notes: 
 
+Add this code to creation function for LDAP.. could even scrape log for password and append autmoatiically 
 
-ldapsearch -x -H ldap://172.16.215.134:3897 -b "dc=daacs,dc=net" -D "cn=admin,dc=daacs,dc=net"  -w admin "uid=vmckenzie.admin"
-ldapsearch -x -H ldap://172.16.215.134:3897 -b "dc=daacs,dc=net" -D "cn=admin,dc=daacs,dc=net"  -w admin "uid=vmckenzie.admin"
-ldapsearch -x -H ldaps://172.16.215.134:6363 -b "dc=daacs,dc=net" -D "cn=admin,dc=daacs,dc=net"  -w gOCbKyFW304U9MZV  -o TLS_CACERT=/home/moo/DAACS-Install/new-env-setups/lpadcomplete/mine/ca.crt -o TLS_REQCERT=allow -o TLS_CERT=/home/moo/DAACS-Install/new-env-setups/lpadcomplete/mine/cert.crt -o TLS_KEY=/home/moo/DAACS-Install/new-env-setups/lpadcomplete/mine/cert.key -v   objectclass=*
-
+            # if [ "$password" == "" ]; then 
+            #     ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)
+            #     append_to_file "LDAP_ADMIN_PASSWORD=${ldap_admin_password}\r" "${env_ldap_file}"
+            # fi 
 
 '
 
@@ -70,7 +72,7 @@ create_ldap_helper(){
 
     # Create env files for install
     instance_home_folder="$root_dest/$install_folder_destination"
-    run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
+    # run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
@@ -115,15 +117,23 @@ create_ldap_helper(){
             save_file_directory_mine="${instance_home_folder}/mine"
             generate_ssl_for_ldap $save_file_directory_ldap $save_file_directory_mine
             
-            folder_start_env="FOLDER_START=$instance_home_folder"
             
         ;;
     esac
 
-echo "WOOF"
+    does_dir_exist=$(does_dir_exsist "${instance_home_folder}/ldif")
+    if [[ $does_dir_exist == false ]]; then
+        # copy ssl directory to mine that works for me
+        sudo cp -R ${install_env_path}/${instance_type_defintion}/ldif  ${instance_home_folder}/
+        sudo chown $who_ami_i:$who_ami_i ${instance_home_folder}/ldif/*
 
-    # todo - copy ldif folder into $install_root/new-env-setups/$install_folder_destination/ldif/
-    folder_start_ldif_dir="FOLDER_START_LDIF=$install_root/new-env-setups/$install_folder_destination/ldif/" # new 
+        # # change owner:group to 911:911
+        sudo chown 911:911 ${instance_home_folder}/ldif/*
+
+    fi
+
+    folder_start_env="FOLDER_START=$instance_home_folder"
+    folder_start_ldif_dir="FOLDER_START_LDIF=$instance_home_folder/ldif/" # new 
     # folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"   # old 
 
     env_dir="ENV_DIR=$absolute_dir"
@@ -131,11 +141,10 @@ echo "WOOF"
 
 
     run_docker_with_envs "$ldap_docker_file_to" "$env_string"
-echo "bark"
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
-    add_services_service_file "$ldap_service_name" "$services_file_dir/$ldap_service_name"
+    # add_services_service_file "$ldap_service_name" "$services_file_dir/$ldap_service_name"
 
 }
 
@@ -197,8 +206,20 @@ update_ldap_instance_helper(){
     # folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"   # old 
     env_dir="ENV_DIR=$absolute_dir"
     folder_start_env="FOLDER_START=$instance_home_folder"
+    # dc_suffix=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_BASE_DN"))
 
     env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name} ${folder_start_ldif_dir}"
+
+    #         folder_start_env="FOLDER_START=$instance_home_folder"
+
+    # # todo - copy ldif folder into $install_root/new-env-setups/$install_folder_destination/ldif/
+    # folder_start_ldif_dir="FOLDER_START_LDIF=$install_root/new-env-setups/$install_folder_destination/ldif/" # new 
+    # # folder_start_ldif_dir="FOLDER_START_LDIF=$install_env_path/${instance_type_defintion}/ldif/"   # old 
+
+    # env_dir="ENV_DIR=$absolute_dir"
+    # env_string="${env_dir} ${open_ldap_port} ${open_ldap_ssl_port} ${folder_start_env} ${ldap_base_dn} ${ldap_container_name} ${folder_start_ldif_dir}"
+
+
 
 echo $env_string
     run_docker_with_envs "$ldap_docker_file_to" "$env_string ${folder_start_ldif_dir}"
@@ -256,7 +277,7 @@ seed_ldap_database(){
     should_write_env_passwords="false"
 
     dc_suffix=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "OPENLDAP_BOOTSTRAP_SUFFIX"))
-    ldap_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD"))
+    ldap_admin_password=$(get_env_value $(get_environment_value_from_file_by_env_name "${env_ldap_file}" "LDAP_ADMIN_PASSWORD")) # todo - need to add password to env after install some how
     
     if [ "$ldap_admin_password" == "" ]; then 
         ldap_admin_password=$(ask_read_question_or_try_again "What LDAP admin password?: " true)

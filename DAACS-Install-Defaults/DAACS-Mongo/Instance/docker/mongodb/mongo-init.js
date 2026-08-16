@@ -143,6 +143,11 @@
 
     /* DAACS SETTINGS */
     db.createCollection("site_settings");
+    db.site_settings.insertOne({
+    "_id": "pdf-tips-generation-setting",
+    "__v": 0,
+    "value": "Results for each assessment and domain are listed on the left-hand side of this page. You can access your complete results at\n\\url{daacs.base.url}, or click on any domain for more detailed feedback. Below are some resources and tips that can help you be more prepared for college. "
+    });
 
 
     const util = require('util');
@@ -303,7 +308,7 @@
 
     const folderPathRoles = '/docker-entrypoint-initdb.d/insert-json-files/roles.json';
 
-    if (folderPathSystemEmails.length > 0) {
+    if (folderPathRoles.length > 0) {
         db.roles.insertMany(JSON.parse(fs.readFileSync(`${folderPathRoles}`)));
     }
 

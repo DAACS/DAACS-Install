@@ -203,7 +203,7 @@ create_mongo_instance_helper(){
     services_file_dir="$root_dest/$install_folder_destination/services"
     create_directory_if_it_does_exsist "$services_file_dir"
 
-    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+    # add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 
     # going to remove for now to make functions simpler. It's its own call
@@ -360,7 +360,7 @@ create_replica_mongo_instance_helper(){
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
 
-    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+    # add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
     mongo_container_val=$(get_env_value "${mongo_container_name}")  
     mongo_port_val=$(get_env_value "${mongo_port}")  
     replica_set_id_val=$(get_env_value "${replica_set_id}")

@@ -108,7 +108,7 @@ create_memcached_instance_helper(){
     services_file_dir="$root_dest/$install_folder_destination/services"
     create_directory_if_it_does_exsist "$services_file_dir"
 
-    add_services_service_file "$memcached_service_name" "$services_file_dir/$memcached_service_name"
+    # add_services_service_file "$memcached_service_name" "$services_file_dir/$memcached_service_name"
 
 }
 

@@ -913,6 +913,26 @@ create_image(){
 
 }
 
+#install_file=1, image_name=2, envs=3, build_directory=4
+update_image(){
+
+    if [ $(does_docker_image_exsist "${2}") == false ]; then
+        printf "\nCreating ${2} image....\n"
+
+        build_args=""
+        length=$(echo "${4}" | xargs | wc -m) 
+
+        if [ $(( $length - 1)) -gt 0 ]; then
+            build_args="--build-arg ${4}"
+        fi
+
+        command="cd ${3} && docker build --pull -t ${2} -f ${1}  ."
+        # command="cd ${3} && docker build ${build_args} -t ${2} -f ${1} ."
+        eval "$command"
+    fi
+
+}
+
 get_system_archtechture(){
 
     echo $(lscpu | grep Architecture: | cut -f2 -d ":" | awk '{$1=$1};1')

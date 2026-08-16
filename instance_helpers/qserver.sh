@@ -157,8 +157,8 @@ create_qserver_instance_helper(){
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
 
-    add_services_service_file "$qserver_service_name" "$services_file_dir/$qserver_service_name"
-    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+    # add_services_service_file "$qserver_service_name" "$services_file_dir/$qserver_service_name"
+    # add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 }
 

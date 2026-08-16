@@ -118,7 +118,7 @@
     {
       "key": "%get-pdf-url%",
       "label": "Get PDF URL",
-      "real_key": "https://%domain%/get-pdf"
+      "real_key": "https://%domain%/s/get-pdf"
     }
   ]
 },
@@ -238,17 +238,17 @@
     {
       "key": "%new-account-url%",
       "label": "New Acount URL",
-      "real_key": "https://%domain%/verify-account?token=%verify-account-token%"
+      "real_key": "%domain%/verify-account?token=%verify-account-token%"
     },
     {
       "key": "%descision-option%",
       "label": "Descision",
-      "real_key": "This student needs you to accept or decline thier enrollment. <a href=\"//%classroom-link%\">Click here</a>"
+      "real_key": "This student needs you to accept or decline thier enrollment. <a href=\"//%classroom-link%/students\">Click here</a>"
     },
     {
       "key": "%classroom-link%",
       "label": "Classroom URL",
-      "real_key": "%domain%/meow/admin/classroom/edit/%classroom.ID%"
+      "real_key": "%domain%/admin/classroom/edit/%classroom.slug%"
     },
     {
       "key": "%classroom.slug%",

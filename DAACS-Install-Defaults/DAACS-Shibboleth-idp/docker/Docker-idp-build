@@ -25,7 +25,8 @@ RUN mkdir -p $JETTY_BASE/modules $JETTY_BASE/lib/ext $JETTY_BASE/lib/logging $JE
     --approve-all-licenses
 
 # Shibboleth IdP - Download, verify hash and install
-RUN curl -sO https://shibboleth.net/downloads/identity-provider/$idp_version/shibboleth-identity-provider-$idp_version.tar.gz \
+#RUN curl -sO https://shibboleth.net/downloads/identity-provider/$idp_version/shibboleth-identity-provider-$idp_version.tar.gz \
+RUN curl -sO https://shibboleth.net/downloads/identity-provider/archive/$idp_version/shibboleth-identity-provider-$idp_version.tar.gz \
     && echo "$idp_hash shibboleth-identity-provider-$idp_version.tar.gz" | sha256sum -c - \
     && gzip -d shibboleth-identity-provider-$idp_version.tar.gz \
     && tar -xvf "shibboleth-identity-provider-${idp_version}.tar" -C /opt

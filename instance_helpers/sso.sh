@@ -124,7 +124,7 @@ create_web_idp_helper(){
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
-    add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
+    # add_services_service_file "$shibboleth_service_name" "$services_file_dir/$shibboleth_service_name"
     write_ldap_config_file "$absolute_dir" "$ldap_service_directory" "$shibboleth_service_name"
 
 }

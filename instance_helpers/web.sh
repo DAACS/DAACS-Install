@@ -171,8 +171,8 @@ create_web_instance_helper(){
 
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
-    add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
-    add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
+    # add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
+    # add_services_service_file "$mongo_service_name" "$services_file_dir/$mongo_service_name"
 
 }
 
@@ -485,7 +485,7 @@ create_webserver_instance_helper(){
     run_docker_with_envs "$webserver_docker_file_to" "$env_string" true
     services_file_dir="$root_dest/$install_folder_destination/services"
     mkdir -p "$services_file_dir"
-    add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
+    # add_services_service_file "$webserver_service_name" "$services_file_dir/$webserver_service_name"
 
 }
 
