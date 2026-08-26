@@ -66,13 +66,15 @@
     "can_export_assessments",
     "can_view_help",
     "can_administer_help",
-    "can_view_classrooms_case_manager"
+    "can_view_classrooms_case_manager",
+    "can_update_assessments_pdf_generation_settings",
+    "can_view_site_settings",
+    "can_update_base_assessments"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "admin",
   "title": "Admin",
-  "__v": 1,
+  "__v": 0,
   "history": [ ]
 },
 {
@@ -80,10 +82,8 @@
   "permissions": [
     "can_view_student"
   ],
-  "users": [
-
-  ],
-  "history": [],
+  "users": [ ],
+  "history": [ ],
   "title": "Student",
   "slug": "student",
   "__v": 0,
@@ -95,9 +95,8 @@
     "can_accept_q_lightside_grades",
     "can_accept_pdf"
   ],
-  "users": [
-  ],
-  "history": [],
+  "users": [ ],
+  "history": [ ],
   "title": "Q Server Communication",
   "slug": "q-server",
   "__v": 0,
@@ -108,7 +107,7 @@
   "permissions": [
     "can_view_brightspace_admin"
   ],
-  "users": [],
+  "users": [ ],
   "history": [ ],
   "title": "Brightspace Admin",
   "slug": "brightspace-admin",
@@ -120,7 +119,7 @@
     "can_view_brightspace_instructor"
   ],
   "users": [],
-  "history": [ ],
+  "history": [],
   "title": "Brightspace Instructor",
   "slug": "brightspace-instructor",
   "__v": 5
@@ -137,43 +136,16 @@
   "__v": 2
 },
 {
-  "_id": "064b4c5b-dbea-404b-9eea-57aaec9ea5b0",
-  "description": "I can do anything I want mode as instructor. (Can only see classrooms I created. Need to test this again)",
-  "permissions": [
-    "can_view_admin",
-    "can_view_classrooms",
-    "can_update_classroom",
-    "can_update_students_in_classroom",
-    "can_view_classroom_student_assessment_progress",
-    "can_view_assessments",
-    "can_search_for_assessments",
-    "can_update_assessments_in_classroom",
-    "can_make_classroom_decisions",
-    "can_delete_classroom",
-    "can_view_student_results",
-    "can_create_assessment",
-    "can_add_new_case_manager_to_classroom",
-    "can_view_classrooms_case_manager",
-    "can_search_for_users"
-  ],
-  "users": [ ],
-  "slug": "instructor",
-  "title": "Instructor ( Going to delete for Instructor - Limited and Instructor - Full",
-  "__v": 3,
-  "history": [ ]
-},
-{
   "_id": "0547cded-d89d-458e-a393-46ccb13bd578",
   "description": "I can do anything I want mode as case manager.",
   "permissions": [
     "can_view_admin",
     "can_view_case_manager"
   ],
-  "users": [
-  ],
+  "users": [],
   "slug": "case-manager",
   "title": "Case Manager",
-  "__v": 3,
+  "__v": 0,
   "history": []
 },
 {
@@ -192,18 +164,17 @@
     "can_add_roles_to_user",
     "can_disable_user",
     "can_delete_user_session",
-    "can_view_student_results",
     "can_view_logged_in_users",
     "can_bulk_update_user",
     "can_update_user",
-    "can_delete_user"
+    "can_delete_user",
+    "can_view_saml_properties"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "user-manager",
   "title": "User Manager",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "3fe34122-e059-4007-a182-cdebf301986c",
@@ -216,12 +187,11 @@
     "can_update_email",
     "can_send_back_up_email"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "system-email-manager",
   "title": "System Email Manager",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "f05294f9-37b2-4a9a-aec4-49ca4b24bb3f",
@@ -236,11 +206,10 @@
     "can_create_role",
     "can_delete_role"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "role-manager",
   "title": "Role Manager",
-  "__v": 6,
+  "__v": 0,
   "history": [ ]
 },
 {
@@ -255,11 +224,10 @@
     "can_search_for_my_assessments",
     "can_view_assessments"
   ],
-  "users": [
-  ],
+  "users": [],
   "slug": "admin-my-search-dialog",
   "title": "Admin My Search Dialog",
-  "__v": 3,
+  "__v": 0,
   "history": []
 },
 {
@@ -274,11 +242,10 @@
     "can_search_for_assessments",
     "can_view_assessments"
   ],
-  "users": [
-  ],
+  "users": [],
   "slug": "admin-search-dialog",
   "title": "Admin Search Dialog",
-  "__v": 3,
+  "__v": 0,
   "history": []
 },
 {
@@ -290,12 +257,11 @@
     "can_administer_help",
     "can_update_help_status"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "help-manager",
   "title": "Help Manager",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "15db99f7-35dd-4a3e-ab04-cd9bda585bcd",
@@ -316,12 +282,11 @@
     "can_update_students_in_classroom",
     "can_search_for_students"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "classroom-manager",
   "title": "Classroom Manager",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "80f56d48-9559-4a7a-82e9-d5ee1551d3c1",
@@ -343,12 +308,11 @@
     "can_make_classroom_decisions",
     "can_update_assessment"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "instructor-basic",
   "title": "Instructor Basic",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "bc573b34-5325-471a-ab8e-478cc0f00f5c",
@@ -375,8 +339,7 @@
     "can_update_assessment",
     "can_view_users"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "instructor-full",
   "title": "Instructor Full",
   "__v": 0,
@@ -396,27 +359,73 @@
     "can_update_assessment_domains",
     "can_update_assessment_item_group_settings",
     "can_update_assessment_questions",
-    "can_take_assessment_as_admin"
+    "can_take_assessment_as_admin",
+    "can_update_assessments_pdf_generation_settings"
   ],
-  "users": [
-  ],
+  "users": [ ],
   "slug": "assessment-manager",
   "title": "Assessment Manager",
   "__v": 0,
-  "history": []
+  "history": [ ]
 },
 {
   "_id": "02ae949e-6eb6-47fc-bf55-de83ea1ee0be",
   "permissions": [
     "can_view_assessment_help_questions",
     "can_view_assessment_analytics",
-    "can_update_base_assessments"
+    "can_update_base_assessments",
+         "can_update_classroom_owner",
+     "can_update_classroom_enrollment_limit",
+     "can_update_site_settings",
+     "can_add_new_case_manager_to_classroom",
+     "can_export_assessments"
   ],
-  "users": [
-  ],
-  "history": [],
+  "users": [ ],
+  "history": [ ],
   "title": "Business Only",
   "slug": "business-only",
-  "__v": 23,
+  "__v": 0,
   "description": "This routes are for business only "
+},
+{
+  "_id": "55ab74c7-aecc-4073-ae2c-a9b4d62b3ae9",
+  "description": "I can do almost anything I want mode",
+  "permissions": [
+    "can_view_admin",
+    "can_search_for_permission",
+    "can_search_for_students",
+    "can_view_all_assessments",
+    "can_search_for_role",
+    "can_generate_download_pdf",
+    "can_view_logged_in_users",
+    "can_view_role",
+    "can_view_all_classrooms",
+    "can_view_users",
+    "can_disable_user",
+    "can_search_for_classrooms",
+    "can_send_user_new_password",
+    "can_delete_user_session",
+    "can_view_other_properties",
+    "can_view_saml_properties",
+    "can_view_user_roles",
+    "can_view_classrooms",
+    "can_view_design",
+    "can_update_help_status",
+    "can_view_assessments",
+    "can_view_emails",
+    "can_view_search_dialog",
+    "can_search_for_assessments",
+    "can_view_email_preview",
+    "can_take_assessment_as_admin",
+    "can_search_for_users",
+    "can_view_student_results",
+    "can_view_help",
+    "can_administer_help",
+    "can_view_site_settings"
+  ],
+  "users": [ ],
+  "slug": "basic-admin",
+  "title": "Regular Admin",
+  "__v": 0,
+  "history": []
 }]

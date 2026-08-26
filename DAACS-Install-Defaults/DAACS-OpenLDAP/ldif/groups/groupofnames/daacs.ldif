@@ -7,3 +7,4 @@ objectClass: top
 member: uid=alui.admin,ou=Development,dc=daacs,dc=net
 member: uid=vmckenzie.admin,ou=Development,dc=daacs,dc=net
 member: uid=eyu.admin,ou=Development,dc=daacs,dc=net
+member: uid=jbyrer.admin,ou=Development,dc=daacs,dc=net

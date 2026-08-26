@@ -1,0 +1,173 @@
+[{
+  "_id": "159a1c8b-84b5-470b-a0df-dbb666954d40",
+  "username": "assessmentmanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "assessment",
+  "lastName": "manager",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vi.c.t.or.l.m.c.ke.nzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "gn83984g3n94g3",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},
+{
+  "_id": "ca603733-aedf-41f0-8dfd-dd8f6994d3e9",
+  "username": "instructorfull",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "instructor",
+  "lastName": "full",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vi.c.t.or.l.m.cke.nzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "3b983bg9489g3g",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "2bb0a32d-32d3-477b-beb4-7b96a01c8e40",
+  "username": "instructorbasic",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "instructor",
+  "lastName": "basic",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vi.c.tor.l.m.cke.nzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "3n4g3n4goni",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "bd712d38-1b08-4d30-b790-07aec528b999",
+  "username": "classroommanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "classroom",
+  "lastName": "manager",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vic.tor.l.m.ckenzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "nadssgnas8dng9as",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "b8100d06-e965-41e5-b31a-81d53866d597",
+  "username": "helpmanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "help",
+  "lastName": "manager",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vict.or.l.m.cke.nzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "GfeD32mcg4CaNdni326zewa",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "28e0e613-3e2d-43b7-bc4e-1488a6971c16",
+  "username": "rolemanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "role",
+  "lastName": "manager",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "victor.l.m.cke.nzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "GfeDllcg4CWV5U26zewa",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "5824d96c-821d-438b-ad67-203027cef872",
+  "username": "systememailmanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "system",
+  "lastName": "email",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "victor.l.m.ckenzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "A3eDllc41CWV5U26zewa",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0
+},{
+  "_id": "28ba2d28-5094-4514-b00a-0a2c76b1faf8",
+  "username": "usermanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "coffee",
+  "lastName": "cup",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-10T04:07:27.473Z"
+  },
+  "email": "vic.tor.l.mckenzie@gmail.com",
+  "pdfFileURL": "",
+  "isSamlAccount": false,
+  "verifyAccountToken": "L3eDllc41CWV5U26zewa",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "q_status": "",
+  "__v": 0,
+  "resetPasswordCode": ""
+},{
+  "_id": "6540a0fe-451f-43e6-8d90-236f34a99393",
+  "username": "casemanager",
+  "password": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+  "firstName": "victor",
+  "lastName": "casemanagermckenzie",
+  "roles": [],
+  "createdDate": {
+    "$date": "2026-06-09T05:13:08.561Z"
+  },
+  "email": "d.j.coderedpro@gmail.com",
+  "isSamlAccount": false,
+  "verifyAccountToken": "Ru5PP4QiG4eFl7UYLppX",
+  "verifiedAccount": true,
+  "isUserDisabled": false,
+  "other_properties": [],
+  "saml_properties": [],
+  "__v": 0
+}]

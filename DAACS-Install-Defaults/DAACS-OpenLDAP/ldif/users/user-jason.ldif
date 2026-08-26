@@ -6,7 +6,7 @@ objectclass: inetOrgPerson
 uid: jbyrer.admin
 sn: Byrer
 cn: Jason Byrer
-mail: 
+mail: jason.bryer@cuny.edu
 employeeNumber: 746e6445-7bbe-426d-9c6f-4161fb59b930
 employeeType: admin
 givenName: Jason 
