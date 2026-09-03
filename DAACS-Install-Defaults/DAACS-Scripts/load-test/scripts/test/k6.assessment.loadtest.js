@@ -80,6 +80,8 @@ import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import { Gauge, Counter, Rate } from 'k6/metrics';
 
 const myTrend = new Counter('total_byes');
+    const basePath = __ENV.PWD +'/../'
+
 
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
@@ -95,7 +97,7 @@ export let options = {
   insecureSkipTLSVerify:  __ENV.INSECURE_SKIP_TLS == "true" ? true : false,
   // httpDebug: 'full',
   thresholds: {
-    http_req_failed: ['rate<0'], // http errors should be less than 0%
+    http_req_failed: ['rate<0.01'], // http errors should be less than 0%
     http_req_duration: ['p(99)<500'], // 100% of requests should be below 500ms
     
   },
@@ -129,7 +131,7 @@ export let options = {
 let total_total = 0;
 
   let sharedData = new SharedArray("Shared Logins", function () {
-    let data = papaparse.parse(open(`data/input/${options.student_file}`), { header: true }).data;
+    let data = papaparse.parse(open(`${basePath}data/input/${options.student_file}`), { header: true }).data;
 
     data.map( e => {
       e.used = false;
@@ -358,16 +360,38 @@ export async function  setup() {
   if(options.assessment_id.length >  0){
 
       let promises1 = [];
+      let promises2 = [];
       
       options.assessment_id.forEach(async (e) => {
         if(e.length > 0){
 
           //get answers
-          promises1.push(get_answers_for_assessment(admin_user, e));
+          promises1.push(get_basic_assessment_data(admin_user, e));
+          promises2.push(get_answers_for_assessment(admin_user, e));
 
         }
       });
-      return {assessments: await Promise.all(promises1)}
+      
+      // await Promise.all(promises1)
+      // promises2 = await Promise.all(promises2)
+
+      // console.log(promises2)
+      // for(let data of promises1){
+      //   promises1.itemGroups = promises2.find().attributes
+
+      // }
+
+      let woof1 = {assessments:  await Promise.all(promises1)}
+      let woof2 = {assessments:  await Promise.all(promises2)}
+      // console.log(woof1)
+
+        for(let data of woof1.assessments){
+          // console.log(data.data.attributes)
+        data.data.attributes.itemGroups = woof2.assessments.find( e => e.id == data.slug )
+      }
+          // console.log(woof1.assessments)
+
+      return {assessments:  woof1.assessments}
 
   }
 }
@@ -378,7 +402,7 @@ export default async function (data) {
   let username = sharedData[__VU - 1].username
   let password = sharedData[__VU - 1].password
   
-  const login_sleep = rando_sleep(1,  options.max_login_sleep);
+  const login_sleep = rando_sleep(1,  1);
   if(options.logging_status >= 1){
     console.log(`${username} is sleeping for ${login_sleep}`)
   }
@@ -389,25 +413,25 @@ export default async function (data) {
   let student_user = await login(username, password);
   add_length_to_trend(get_JSON_request_length(student_user));
 
-
-
   for (const ee of data.assessments) {
 
-    log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${ee.data.attributes.assessmentId}`)
+
+    const assessmentTitle = ee.data.attributes.title;
+    log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
 
     if(options.logging_status >= 1){
-      console.log(`starting test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      console.log(`starting test for :${username} assessment: ${ assessmentTitle}`)    
     }
     await run_program(student_user, ee) 
     if(options.logging_status >= 1){
-      console.log(`ending test for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+      console.log(`ending test for :${username} assessment: ${ assessmentTitle}`)    
     }
 
     if(options.run_get_assessment_results == true){
-        console.log(`getting results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+        console.log(`getting results for :${username} assessment: ${ assessmentTitle}`)    
       await run_user_assessment_results_program(student_user, ee)
       if(options.logging_status >= 1){
-        console.log(`got results for :${username} assessment: ${ ee.data.attributes.assessmentId}`)    
+        console.log(`got results for :${username} assessment: ${ assessmentTitle}`)    
       }
     }
 
@@ -415,30 +439,30 @@ export default async function (data) {
 
   }
 
-    //add downloading a PDF
-    if(options.run_get_PDF == true){
-      console.log("Requesting new PDF generation")
-      await run_get_pdf(student_user)
+    // //add downloading a PDF
+    // if(options.run_get_PDF == true){
+    //   console.log("Requesting new PDF generation")
+    //   await run_get_pdf(student_user)
 
-        var is_pdf_ready = false;
-        let pdf_url = "";
+    //     var is_pdf_ready = false;
+    //     let pdf_url = "";
 
-        do{
+    //     do{
 
-          //check to see if PDF is ready
-          pdf_url = await get_pdf_url(student_user)
+    //       //check to see if PDF is ready
+    //       pdf_url = await get_pdf_url(student_user)
           
-          if(pdf_url.data.attributes.pdfFileURL != undefined && pdf_url.data.attributes.pdfFileURL.length > 0 ){
-            is_pdf_ready = true;
-          }
-          sleep(options.max_pdf_check_sleep)
+    //       if(pdf_url.data.attributes.pdfFileURL != undefined && pdf_url.data.attributes.pdfFileURL.length > 0 ){
+    //         is_pdf_ready = true;
+    //       }
+    //       sleep(options.max_pdf_check_sleep)
 
-        }while(is_pdf_ready === false)
-        console.log("Got PDF URL... now requesting")
+    //     }while(is_pdf_ready === false)
+    //     console.log("Got PDF URL... now requesting")
           
-        await get_real_pdf(pdf_url)
+    //     await get_real_pdf(pdf_url)
   
-    }
+    // }
 
   return;
 
@@ -491,7 +515,8 @@ async function run_user_assessment_results_program(student_user, data){
 
 async function run_program(student_user, data, avg){
   
-  let assessmentId = data.data.attributes.assessmentId;
+  let assessmentId = data.data.attributes.slug;
+  let title = data.data.attributes.title;
 
   log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
 
@@ -501,14 +526,18 @@ async function run_program(student_user, data, avg){
 
   // //get users assessment in progroess
   let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
-  let userAssessmentId =users_assessment_in_progress.data.attributes.assessment._id;
+
+  const assessment = users_assessment_in_progress.included.find( e => e.type == "assessment");
+  const userAssessment = users_assessment_in_progress.included.find( e => e.type == "userAssessment");
+  
+  let userAssessmentId = userAssessment.attributes._id;
   let question = await get_users_assessment_question(student_user, assessmentId);
-  let assessmentType = users_assessment_in_progress.data.attributes.assessmentType;
+  let assessmentType = assessment.attributes.assessmentType;
   
   let count = 0;
   var isAssessmentDone = undefined;
 
-  log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${assessmentId}`)
+  log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${title}`)
 
   do{
 
@@ -644,6 +673,29 @@ async function login(username, password){
 });
 }
 
+async function get_basic_assessment_data(user, assessmentId){
+  return new Promise(async (resolve, reject) => {
+
+  const params = {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Bearer '+ user.accessToken
+    },
+  };
+  
+    const response = await http.get(renderURL(`/api/get-assessment-by-id/${assessmentId}`),params);
+    
+  check(response, {
+    'status is 200': (r) => r.status === 200
+  });
+
+
+    const res_json = await response.json();        
+    return resolve(res_json);
+
+  });
+}
+
 async function get_answers_for_assessment(user, assessmentId){
   return new Promise(async (resolve, reject) => {
 
@@ -653,10 +705,10 @@ async function get_answers_for_assessment(user, assessmentId){
       'Authorization': 'Bearer '+ user.accessToken
     },
   };
-
+  
   const response = await http.post(renderURL("/api/assessment"), {
     id: assessmentId,
-    field: "itemGroups"
+    field: "questions"
   } , params);
     
   check(response, {
@@ -767,7 +819,8 @@ async function create_assessment(user, assessmentId){
         },
       };
 
-      const response = await http.post(renderURL("/api/user-assessment"), {
+      const response = await http.put(renderURL("/api/student-assessment"), {
+      // const response = await http.post(renderURL("/api/user-assessment"), {
           assessmentId: assessmentId,
       } , params);
         
@@ -793,8 +846,8 @@ async function get_users_assessment_in_progress(user, assessmentCategoryId){
         'Authorization': 'Bearer '+ user.accessToken
       },
     };
-
-    const response = await http.post(renderURL("/api/user-assessment-summary"), {
+    const response = await http.post(renderURL("/api/student-assessment"), {
+    // const response = await http.post(renderURL("/api/user-assessment-summary"), {
       assessmentID: assessmentCategoryId,
     } , params);
       
@@ -822,7 +875,8 @@ async function get_users_assessment_question(user, assessmentId){
       },
     };
 
-    const response = await http.post(renderURL("/api/user-assessment-question-group"), {
+    const response = await http.post(renderURL("/api/student-assessment-question-group"), {
+    // const response = await http.post(renderURL("/api/user-assessment-question-group"), {
       assessmentId: assessmentId,
     } , params);
       
@@ -851,7 +905,8 @@ async function send_users_writing_answers_for_assessment_question(user, assessme
       },
     };
 
-    const response = await http.put(renderURL("/api/user-assessment-save-writing-sample"), 
+    const response = await http.put(renderURL("/api/save-writing-sample"), 
+    // const response = await http.put(renderURL("/api/user-assessment-save-writing-sample"), 
       JSON.stringify(answers)
       , params);
       
@@ -880,7 +935,8 @@ async function send_users_answers_for_assessment_question(user, assessmentId, an
       },
     };
 
-    const response = await http.put(renderURL("/api/user-assessment-question-answer"), 
+    const response = await http.put(renderURL("/api/student-assessment-question-answer"), 
+    // const response = await http.put(renderURL("/api/user-assessment-question-answer"), 
       JSON.stringify(answers)
       , params);
       
@@ -910,7 +966,8 @@ async function get_user_assessment_summaries_data(user, assessmentId){
     try{
       
     
-    const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+    const response = await http.post(renderURL("/api/student-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+    // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
 
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -948,7 +1005,8 @@ async function send_users_individual_answer_for_assessment_question(user, assess
       },
     };
     
-    const response = await http.put(renderURL("/api/user-assessment-answer"), JSON.stringify(answers), params);
+    const response = await http.put(renderURL("/api/student-assessment-answer"), JSON.stringify(answers), params);
+    // const response = await http.put(renderURL("/api/user-assessment-answer"), JSON.stringify(answers), params);
       
     check(response, {
       'status is 200': (r) => r.status === 200

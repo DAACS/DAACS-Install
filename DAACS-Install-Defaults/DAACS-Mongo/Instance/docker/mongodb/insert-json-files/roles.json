@@ -69,7 +69,8 @@
     "can_view_classrooms_case_manager",
     "can_update_assessments_pdf_generation_settings",
     "can_view_site_settings",
-    "can_update_base_assessments"
+    "can_update_base_assessments",
+    "can_view_student_classroom_data"
   ],
   "users": [ ],
   "slug": "admin",
@@ -421,7 +422,8 @@
     "can_view_student_results",
     "can_view_help",
     "can_administer_help",
-    "can_view_site_settings"
+    "can_view_site_settings",
+    "can_view_student_classroom_data"
   ],
   "users": [ ],
   "slug": "basic-admin",
