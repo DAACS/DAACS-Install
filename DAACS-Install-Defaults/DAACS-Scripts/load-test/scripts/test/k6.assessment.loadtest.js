@@ -86,6 +86,7 @@ const myTrend = new Counter('total_byes');
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
   max_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
+  max_view_start_page_sleep: __ENV.MAX_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MAX_VIEW_START_PAGE_SLEEP,
   max_pdf_check_sleep: __ENV.MAX_PDF_CHECK_SLEEP == undefined ? 5 : __ENV.MAX_PDF_CHECK_SLEEP,
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
@@ -191,6 +192,9 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep =  15;
       options.assessmentTypeOptions.likert.min_sleep = 30;
       options.assessmentTypeOptions.likert.max_sleep =  45;
+      options.maxDuration = "1h";
+      options.duration = "1h";
+      options.iterations = 1
     break;
 
 
@@ -353,6 +357,8 @@ function map_stages(stages){
 }
 
 export async function  setup() {
+
+  // console.log(options)
   let [admin_username, admin_password] = options.admin_credentials.split(",")
   let admin_user = await login(admin_username, admin_password);
   options.assessment_id = options.assessment_id.split(",")
@@ -371,26 +377,12 @@ export async function  setup() {
 
         }
       });
-      
-      // await Promise.all(promises1)
-      // promises2 = await Promise.all(promises2)
-
-      // console.log(promises2)
-      // for(let data of promises1){
-      //   promises1.itemGroups = promises2.find().attributes
-
-      // }
 
       let woof1 = {assessments:  await Promise.all(promises1)}
       let woof2 = {assessments:  await Promise.all(promises2)}
-      // console.log(woof1)
-
-        for(let data of woof1.assessments){
-          // console.log(data.data.attributes)
+      for(let data of woof1.assessments){
         data.data.attributes.itemGroups = woof2.assessments.find( e => e.id == data.slug )
       }
-          // console.log(woof1.assessments)
-
       return {assessments:  woof1.assessments}
 
   }
@@ -402,9 +394,10 @@ export default async function (data) {
   let username = sharedData[__VU - 1].username
   let password = sharedData[__VU - 1].password
   
-  const login_sleep = rando_sleep(1,  1);
+  const login_sleep = rando_sleep(1,  options.max_login_sleep);
+
   if(options.logging_status >= 1){
-    console.log(`${username} is sleeping for ${login_sleep}`)
+    console.log(`${username} is sleeping for ${login_sleep} seconds.`)
   }
 
   sleep(login_sleep);
@@ -415,23 +408,20 @@ export default async function (data) {
 
   for (const ee of data.assessments) {
 
-
     const assessmentTitle = ee.data.attributes.title;
     log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
 
-    if(options.logging_status >= 1){
-      console.log(`starting test for :${username} assessment: ${ assessmentTitle}`)    
-    }
     await run_program(student_user, ee) 
     if(options.logging_status >= 1){
-      console.log(`ending test for :${username} assessment: ${ assessmentTitle}`)    
+      console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
     }
 
     if(options.run_get_assessment_results == true){
-        console.log(`getting results for :${username} assessment: ${ assessmentTitle}`)    
+      console.log(`${username} is getting results for ${ assessmentTitle} assessment.`)    
       await run_user_assessment_results_program(student_user, ee)
+      
       if(options.logging_status >= 1){
-        console.log(`got results for :${username} assessment: ${ assessmentTitle}`)    
+        console.log(`${username} finished viewing ${ assessmentTitle} results.`)    
       }
     }
 
@@ -439,30 +429,6 @@ export default async function (data) {
 
   }
 
-    // //add downloading a PDF
-    // if(options.run_get_PDF == true){
-    //   console.log("Requesting new PDF generation")
-    //   await run_get_pdf(student_user)
-
-    //     var is_pdf_ready = false;
-    //     let pdf_url = "";
-
-    //     do{
-
-    //       //check to see if PDF is ready
-    //       pdf_url = await get_pdf_url(student_user)
-          
-    //       if(pdf_url.data.attributes.pdfFileURL != undefined && pdf_url.data.attributes.pdfFileURL.length > 0 ){
-    //         is_pdf_ready = true;
-    //       }
-    //       sleep(options.max_pdf_check_sleep)
-
-    //     }while(is_pdf_ready === false)
-    //     console.log("Got PDF URL... now requesting")
-          
-    //     await get_real_pdf(pdf_url)
-  
-    // }
 
   return;
 
@@ -490,10 +456,10 @@ async function get_real_pdf(pdf_url){
 
 async function run_user_assessment_results_program(student_user, data){
 
-  let assessment_id = data.data.attributes.assessmentId;
-
+  let assessment_id = data.data.attributes.slug;
   let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id);
-    log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
+
+  log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
 
   let count = user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.map((d) => {
         return d.subDomainScores
@@ -504,27 +470,73 @@ async function run_user_assessment_results_program(student_user, data){
     count = count.length + user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.length;
     
     let range_ = range(1, count)
+    let is_pdf_ready = false;
+
+    //no longer need to keep getting summary data since we don't do that anymore
     for (const index of range_) {
+      log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
 
-    log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
+      // await get_user_assessment_summaries_data(student_user, assessment_id);
+      const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
+      console.log(`${student_user.user.username} viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`)
+      if(options.run_get_PDF == true && is_pdf_ready === false){
+        console.log(`${student_user.user.username} is checking for PDF URL`)
 
-      await get_user_assessment_summaries_data(student_user, assessment_id);
-      sleep(rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep));
+        is_pdf_ready = await do_pdf_check(student_user);
+
+        if(is_pdf_ready === true){
+          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}`)
+        }
+      }
+      sleep(view_results_page_sleep);
     }
+}
+
+
+async function do_pdf_check(student_user){
+
+  var is_pdf_ready = false;
+  let pdf_url = "";
+
+    //check to see if PDF is ready
+    pdf_url = await get_pdf_url(student_user)
+
+    if (pdf_url.length == 0 || pdf_url == "IN_PROGRESS") {
+      is_pdf_ready = false;
+    }else{
+      student_user.pdf_url = pdf_url
+      is_pdf_ready = true;
+    }
+
+    //commented out the sleep for now because the viewing domain page is handling sleep
+    // sleep(options.max_pdf_check_sleep)
+
+    return is_pdf_ready;
+
 }
 
 async function run_program(student_user, data, avg){
   
   let assessmentId = data.data.attributes.slug;
   let title = data.data.attributes.title;
+  let username = student_user.user.username;
 
   log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
 
+  const view_start_page_sleep = rando_sleep(1,  options.max_view_start_page_sleep);
+  if(options.logging_status >= 1){
+      console.log(`${username} is viewing ${title} start page for: ${view_start_page_sleep} seconds`)    
+  }
 
-  // //create assessment  
+  sleep(view_start_page_sleep);
+
+  //create assessment  
   await create_assessment(student_user, assessmentId);
-
-  // //get users assessment in progroess
+  if(options.logging_status >= 1){
+      console.log(`${username} created ${title} user assessment for: ${username}`)    
+  }
+  
+  //get users assessment in progroess
   let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
 
   const assessment = users_assessment_in_progress.included.find( e => e.type == "assessment");
@@ -539,10 +551,16 @@ async function run_program(student_user, data, avg){
 
   log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${title}`)
 
+    if(options.logging_status >= 1){
+      console.log(`${username} is on ${title} take page.`)    
+    }
+  
   do{
 
       let questionId = question.data.attributes.questions._id;
       let answer_response = {};
+
+      let sl = 0;
 
       switch(assessmentType){
 
@@ -563,7 +581,16 @@ async function run_program(student_user, data, avg){
               answers: output
             }
             question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
-              sleep(rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep));
+
+
+                sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
+
+                  if(options.logging_status >= 2){
+                      console.log(`${username} is sleep for ${sl} seconds.`)
+                    }
+                sleep(sl);
+
+
             }
             
             question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
@@ -584,8 +611,12 @@ async function run_program(student_user, data, avg){
                 question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                 isAssessmentDone = question.data.attributes.isAssessmentDone;
                 if(!isAssessmentDone){
-                
-                sleep(rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep));
+                  sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
+
+                  if(options.logging_status >= 2){
+                      console.log(`${username} is sleep for ${sl} seconds.`)
+                    }
+                sleep(sl);
 
                 } 
           break;
@@ -621,10 +652,10 @@ async function run_program(student_user, data, avg){
                   if(count != index ){
                     
                       await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
-                      const sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
+                      sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
 
                       if(options.logging_status >= 2){
-                        console.log(`Sleep for ${sl} seconds.`)
+                        console.log(`${username} is sleep for ${sl} seconds.`)
                       }
                       sleep(sl);
 
@@ -734,7 +765,7 @@ async function get_pdf_url(user){
         },
       };
 
-      const response = await http.get(renderURL("/api/get-assessment-report-url"), params);        
+      const response = await http.get(renderURL("/api/get-student-pdf-report-url"), params);        
       check(response, {
         'status is 200': (r) => r.status === 200
       });
