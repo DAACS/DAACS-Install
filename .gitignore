@@ -1,3 +1,7 @@
 new-env-setups/*
 user-data/*
 DAACS-Install-Defaults/DAACS-Website/docker/mongodb/assessments/*
+DAACS-Install-Defaults/DAACS-Website/docker/mongodb/assessments/*
+DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/k6.j
+DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/k6.json
+DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/html-report.html

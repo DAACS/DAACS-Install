@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -165,7 +165,12 @@ do
       d ) parameterD="$OPTARG" ;; #install_folder_destination
       t ) parameterT="$OPTARG" ;; #instance_type
       i ) parameterI="$OPTARG" ;; #not used at all
+      c ) parameterC="$OPTARG" ;; #not used at all
+      g ) parameterG="$OPTARG" ;; #not used at all
+      h ) parameterH="$OPTARG" ;; #not used at all
+      j ) parameterJ="$OPTARG" ;; #not used at all
       e ) parameterE="$OPTARG" ;; #environment_type
+      k ) parameterK="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -173,25 +178,14 @@ done
 #daacs -f refresh -s testweb -a 2
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
 #daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
+#daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents1.csv -e "self-regulated-learning" -j 2 -g human  -h true -i true 
 
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
     main
 else
 
-    if [[ "$parameterA" == "" ]]; then
-        parameterA=1
-    fi
-
-
-    if [[ "$parameterQ" == "true" ]]; then
-        parameterQ=true
-    elif [[ "$parameterQ" == "false" ]]; then
-        parameterQ=false
-    else
-        parameterQ=false
-    fi
-
+   
     # Begin script in case all parameters are correct
     if [[ "$parameterS" == "help" ]]  ; then
         helpFunction
@@ -200,11 +194,37 @@ else
         case "$parameterF" in
             
             "refresh") 
+
+                if [[ "$parameterA" == "" ]]; then
+                    parameterA=1
+                fi
+
+                if [[ "$parameterQ" == "true" ]]; then
+                    parameterQ=true
+                elif [[ "$parameterQ" == "false" ]]; then
+                    parameterQ=false
+                else
+                    parameterQ=false
+                fi
+
                 printf "Running refresh on ${parameterS} \n"
                 restart_services_with_stagger_by_service_name "$parameterS" "$parameterA" $parameterQ
             ;;
 
             "recreate") 
+
+                if [[ "$parameterA" == "" ]]; then
+                    parameterA=1
+                fi
+
+                if [[ "$parameterQ" == "true" ]]; then
+                    parameterQ=true
+                elif [[ "$parameterQ" == "false" ]]; then
+                    parameterQ=false
+                else
+                    parameterQ=false
+                fi
+
 
                 printf "Running recreate on ${parameterS} \n"
                 recreate_service "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
@@ -241,6 +261,12 @@ else
                 get_container_logs "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
             ;;
 
+            "runk6") 
+    
+                run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} k6 run ./test/k6.assessment.loadtest.js --out json=k6.json"
+                eval "$cmd"
+            ;;
         esac
     fi
 fi

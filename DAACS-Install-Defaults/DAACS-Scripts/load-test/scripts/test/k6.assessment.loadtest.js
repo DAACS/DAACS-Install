@@ -485,7 +485,10 @@ async function run_user_assessment_results_program(student_user, data){
         is_pdf_ready = await do_pdf_check(student_user);
 
         if(is_pdf_ready === true){
-          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}`)
+          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
+        }else{
+          console.log(`${student_user.user.username} pdf URL is not ready. Will check again`)
+
         }
       }
       sleep(view_results_page_sleep);
@@ -552,7 +555,7 @@ async function run_program(student_user, data, avg){
   log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${title}`)
 
     if(options.logging_status >= 1){
-      console.log(`${username} is on ${title} take page.`)    
+      console.log(`${username} is on ${title} take page, and taking assessment.`)    
     }
   
   do{
