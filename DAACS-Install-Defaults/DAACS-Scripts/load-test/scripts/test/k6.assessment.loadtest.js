@@ -94,7 +94,7 @@ export let options = {
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
   run_get_PDF: __ENV.RUN_GET_PDF == "true" ? true : false,
   run_get_assessment_results: __ENV.RUN_GET_ASSESSMENT_RESULTS == "true" ? true : false,
-  
+  load_test_type_speed: __ENV.LOAD_TEST_TYPE_SPEED,
   insecureSkipTLSVerify:  __ENV.INSECURE_SKIP_TLS == "true" ? true : false,
   // httpDebug: 'full',
   thresholds: {
@@ -142,7 +142,7 @@ let total_total = 0;
 
 
 
-  switch(__ENV.LOAD_TEST_TYPE_SPEED){
+  switch(options.load_test_type_speed){
 
     //fast 
     case "fast": 
@@ -192,9 +192,9 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep =  15;
       options.assessmentTypeOptions.likert.min_sleep = 30;
       options.assessmentTypeOptions.likert.max_sleep =  45;
-      options.maxDuration = "1h";
-      options.duration = "1h";
-      options.iterations = 1
+      // options.maxDuration = "1h";
+      // options.duration = "1h";
+      // options.iterations = 1
     break;
 
 
@@ -209,6 +209,11 @@ let total_total = 0;
       options.assessmentTypeOptions.likert.max_sleep =  60;
     break;
   }
+
+      options.maxDuration = "1h";
+      options.duration = "1h";
+      options.iterations = 1;
+
 
   let stages, vus, duration, preAllocatedVUs, timeUnit, iterations = undefined;
   switch(__ENV.LOAD_TEST_TYPE_SCENRIO){
@@ -382,6 +387,7 @@ export async function  setup() {
       let woof2 = {assessments:  await Promise.all(promises2)}
       for(let data of woof1.assessments){
         data.data.attributes.itemGroups = woof2.assessments.find( e => e.id == data.slug )
+
       }
       return {assessments:  woof1.assessments}
 
@@ -394,10 +400,10 @@ export default async function (data) {
   let username = sharedData[__VU - 1].username
   let password = sharedData[__VU - 1].password
   
-  const login_sleep = rando_sleep(1,  options.max_login_sleep);
+  const login_sleep = rando_sleep(1,  1);
 
   if(options.logging_status >= 1){
-    console.log(`${username} is sleeping for ${login_sleep} seconds.`)
+    console.log(`${username} has logged in and is reading dashboard page for ${login_sleep} seconds.`)
   }
 
   sleep(login_sleep);
@@ -405,6 +411,12 @@ export default async function (data) {
   //login  
   let student_user = await login(username, password);
   add_length_to_trend(get_JSON_request_length(student_user));
+
+  //Do assessments in order that was passed in command line
+
+
+  //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
+
 
   for (const ee of data.assessments) {
 
@@ -457,6 +469,23 @@ async function get_real_pdf(pdf_url){
 async function run_user_assessment_results_program(student_user, data){
 
   let assessment_id = data.data.attributes.slug;
+
+  //If we are writing then we have to check if grade is available and if not keep checking until it is... then get user assessment summary
+  if(data.data.attributes.assessmentType == "WRITING_PROMPT"){
+
+    let is_writing_graded = "WAITING_FOR_WRITING_GRADE";
+
+    do{
+
+      is_writing_graded = await get_student_q_status(student_user);
+      console.log(`${student_user.user.username} writing assessment is not graded yet. Checking in 10 seconds STATUS: ${is_writing_graded}`);
+      sleep(10)
+
+    }while(is_writing_graded == "WAITING_FOR_WRITING_GRADE" );
+
+    
+  }
+
   let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id);
 
   log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
@@ -493,6 +522,22 @@ async function run_user_assessment_results_program(student_user, data){
       }
       sleep(view_results_page_sleep);
     }
+
+
+    // if(is_pdf_ready && options.load_test_type_speed == "FAST"){
+
+
+
+    //     // is_pdf_ready = await do_pdf_check(student_user);
+
+    //     // if(is_pdf_ready === true){
+    //     //   console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
+    //     // }else{
+    //     //   console.log(`${student_user.user.username} pdf URL is not ready. Will check again`)
+
+    //     // }
+
+    // }
 }
 
 
@@ -520,6 +565,7 @@ async function do_pdf_check(student_user){
 
 async function run_program(student_user, data, avg){
   
+
   let assessmentId = data.data.attributes.slug;
   let title = data.data.attributes.title;
   let username = student_user.user.username;
@@ -536,7 +582,7 @@ async function run_program(student_user, data, avg){
   //create assessment  
   await create_assessment(student_user, assessmentId);
   if(options.logging_status >= 1){
-      console.log(`${username} created ${title} user assessment for: ${username}`)    
+      console.log(`${username} created ${title} user assessment.`)    
   }
   
   //get users assessment in progroess
@@ -568,38 +614,45 @@ async function run_program(student_user, data, avg){
       switch(assessmentType){
 
           case "WRITING_PROMPT":
-            let length = get_whole_writing_sample().length
+          
+            let writing_sample = get_whole_writing_sample()
             let i = 0;
+            let start = 0;
+            let end = 0;
             let output = "";
+            let writing_for_user = [];
 
-            while(i < length ){
+            //todo change to - do while
+            while(i < writing_sample.length ){
+              let yo = range(i, i + 120, 1)
+
+              output = yo.map(x=>writing_sample[x]).join("");
+
+              writing_for_user.push({"id":makeid_no_special_characteres(10),"type":"paragraph","data":{"text":output}})
+                answer_response = {
+                  assessmentId: assessmentId,
+                  userAssessmentId: userAssessmentId,
+                  answers: writing_for_user
+                }
+
+              
+              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
+
+
+              sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
+
+              if(options.logging_status >= 2){
+                console.log(`${username} is thinking about what to write for ${sl} seconds.`)
+              }
+              sleep(sl);
               i += 120;
-            
-              output = [...Array(i).keys()].map(x=>get_whole_writing_sample()[x]).join("")
-
-
-            answer_response = {
-              assessmentId: assessmentId,
-              userAssessmentId: userAssessmentId,
-              answers: output
-            }
-            question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
-
-
-                sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
-
-                  if(options.logging_status >= 2){
-                      console.log(`${username} is sleep for ${sl} seconds.`)
-                    }
-                sleep(sl);
 
 
             }
             
             question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
             isAssessmentDone = question.data.attributes.isAssessmentDone;
-          
-
+        
           break;
 
           case "LIKERT":
@@ -617,7 +670,7 @@ async function run_program(student_user, data, avg){
                   sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
 
                   if(options.logging_status >= 2){
-                      console.log(`${username} is sleep for ${sl} seconds.`)
+                      console.log(`${username} is thinking for ${sl} seconds about the answer for question.`)
                     }
                 sleep(sl);
 
@@ -625,7 +678,8 @@ async function run_program(student_user, data, avg){
           break;
 
           case "CAT":
-            let answerGroup = data.data.attributes.questions.find(d => d._id === questionId);
+
+            let answerGroup = data.data.attributes.itemGroups.data.attributes.itemGroups.find(d => d._id === questionId);
           
               answer_response = {
                   assessmentId: assessmentId,
@@ -658,7 +712,7 @@ async function run_program(student_user, data, avg){
                       sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
 
                       if(options.logging_status >= 2){
-                        console.log(`${username} is sleep for ${sl} seconds.`)
+                      console.log(`${username} is thinking for ${sl} seconds about the answer for question.`)
                       }
                       sleep(sl);
 
@@ -817,6 +871,10 @@ async function run_get_pdf(user){
 async function log_user_events(user, url, time, title){
   return new Promise(async (resolve, reject) => {
 
+      if(options.logging_status >= 2){
+        console.log(`${user.user.username} is logging page view for ${title}.`)
+      }
+
       const params = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -927,6 +985,33 @@ async function get_users_assessment_question(user, assessmentId){
 
   });
 }
+
+async function get_student_q_status(user){
+
+  return new Promise(async (resolve, reject) => {
+
+    const params = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer '+ user.accessToken
+      },
+    };
+
+    const response = await http.get(renderURL("/api/get-student-q-status"), params);
+      
+    check(response, {
+      'status is 200': (r) => r.status === 200
+    });
+    
+  
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+        user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(res_json);
+  });
+}
+
 
 async function send_users_writing_answers_for_assessment_question(user, assessmentId, answers){
 
@@ -1164,3 +1249,16 @@ function rando_sleep(min, max){
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+
+function makeid_no_special_characteres(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+  }
