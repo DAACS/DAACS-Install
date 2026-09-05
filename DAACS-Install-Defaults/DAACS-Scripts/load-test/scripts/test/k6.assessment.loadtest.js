@@ -415,9 +415,8 @@ export default async function (data) {
   //Do assessments in order that was passed in command line
 
 
+  //Dashboard
   //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
-
-
   for (const ee of data.assessments) {
 
     const assessmentTitle = ee.data.attributes.title;
@@ -440,6 +439,48 @@ export default async function (data) {
     total_total += student_user.total_kb;
 
   }
+
+
+
+  //Classroom
+
+/*
+Need to add a call to get dashboard stuff so we can get classroom
+
+
+  // for now only add one
+  for (const ee of data.classroom) {
+
+  //Do assessments in order that was passed in command line
+  for (const gg of ee.assessments) {
+
+
+      const assessmentTitle = ee.data.attributes.title;
+      log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
+
+      await run_program_classroom(student_user, ee) 
+      if(options.logging_status >= 1){
+        console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
+      }
+
+      if(options.run_get_assessment_results == true){
+        console.log(`${username} is getting results for ${ assessmentTitle} assessment.`)    
+        await run_user_assessment_results_program(student_user, ee)
+        
+        if(options.logging_status >= 1){
+          console.log(`${username} finished viewing ${ assessmentTitle} results.`)    
+        }
+      }
+
+      total_total += student_user.total_kb;
+      
+  }
+
+
+  }
+
+
+*/ 
 
 
   return;
@@ -563,7 +604,7 @@ async function do_pdf_check(student_user){
 
 }
 
-async function run_program(student_user, data, avg){
+async function run_program(student_user, data, classroomSlug){
   
 
   let assessmentId = data.data.attributes.slug;
