@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -171,6 +171,7 @@ do
       j ) parameterJ="$OPTARG" ;; #not used at all
       e ) parameterE="$OPTARG" ;; #environment_type
       k ) parameterK="$OPTARG" ;; #environment_type
+      r ) parameterR="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -178,7 +179,7 @@ done
 #daacs -f refresh -s testweb -a 2
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
 #daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
-#daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents1.csv -e "self-regulated-learning" -j 2 -g human  -h true -i true 
+#daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents1.csv -e "self-regulated-learning" -j 2 -g human  -h true -i true -k true -r true
 
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
@@ -262,10 +263,26 @@ else
             ;;
 
             "runk6") 
-    # --console-output="test_errors.log"
-    # --console-output="test_output.log" 
+
+                #put console output into file
+                if [[ "$parameterQ" == "true" ]]; then
+                    parameterQ="--console-output="test_output.log" "
+                else
+                    parameterQ=""
+                fi
+
+                #put k6 logs into file
+                if [[ "$parameterR" == "true" ]]; then
+                    parameterR="--out json=k6.json  "
+                else
+                    parameterR=""
+                fi
+
+
+                
+
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} k6 run --log-format raw  ./test/k6.assessment.loadtest.js --out json=k6.json "
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ}"
                 eval "$cmd"
             ;;
         esac
