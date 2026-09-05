@@ -482,7 +482,6 @@ async function run_user_assessment_results_program(student_user, data){
       sleep(10)
 
     }while(is_writing_graded == "WAITING_FOR_WRITING_GRADE" );
-
     
   }
 
@@ -505,7 +504,6 @@ async function run_user_assessment_results_program(student_user, data){
     for (const index of range_) {
       log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
 
-      // await get_user_assessment_summaries_data(student_user, assessment_id);
       const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
       console.log(`${student_user.user.username} viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`)
       if(options.run_get_PDF == true && is_pdf_ready === false){
@@ -517,27 +515,29 @@ async function run_user_assessment_results_program(student_user, data){
           console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
         }else{
           console.log(`${student_user.user.username} pdf URL is not ready. Will check again`)
-
         }
       }
       sleep(view_results_page_sleep);
     }
 
+    //force get PDF if we never got it.
+    if(options.run_get_PDF == true && is_pdf_ready === false){
 
-    // if(is_pdf_ready && options.load_test_type_speed == "FAST"){
+      do{
 
+        is_pdf_ready = await do_pdf_check(student_user);
 
+        if(is_pdf_ready === true){
+          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
+        }else{
+          console.log(`${student_user.user.username} pdf URL is not ready. Will check again in 10 seconds`)
+        }
 
-    //     // is_pdf_ready = await do_pdf_check(student_user);
+        sleep(10);
 
-    //     // if(is_pdf_ready === true){
-    //     //   console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
-    //     // }else{
-    //     //   console.log(`${student_user.user.username} pdf URL is not ready. Will check again`)
-
-    //     // }
-
-    // }
+      }while(is_pdf_ready == false)
+    
+    }
 }
 
 
@@ -871,7 +871,7 @@ async function run_get_pdf(user){
 async function log_user_events(user, url, time, title){
   return new Promise(async (resolve, reject) => {
 
-      if(options.logging_status >= 2){
+      if(options.logging_status >= 3){
         console.log(`${user.user.username} is logging page view for ${title}.`)
       }
 
