@@ -416,13 +416,16 @@ export default async function (data) {
 
 
   //Dashboard
-  //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
-  for (const ee of data.assessments) {
+  let dashboard_data = await my_dashboard(student_user)
 
-    const assessmentTitle = ee.data.attributes.title;
+  // console.log(dashboard_data.data.attributes.assessments)
+  total_total += student_user.total_kb;
+  // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
+  for (const ee of dashboard_data.data.attributes.assessments) {
+    const assessmentTitle = ee.title;
     log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
 
-    await run_program(student_user, ee) 
+    await run_program(student_user, data.assessments,  ee.slug, ) 
     if(options.logging_status >= 1){
       console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
     }
@@ -441,9 +444,11 @@ export default async function (data) {
   }
 
 
-
   //Classroom
 
+  // console.log(dashboard_data.data.attributes.classrooms)
+
+  // student-classroom-by-id/newest-class
 /*
 Need to add a call to get dashboard stuff so we can get classroom
 
@@ -458,7 +463,8 @@ Need to add a call to get dashboard stuff so we can get classroom
       const assessmentTitle = ee.data.attributes.title;
       log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
 
-      await run_program_classroom(student_user, ee) 
+      await run_program(student_user, gg, ee.slug) 
+      // await run_program_classroom(student_user, ee) 
       if(options.logging_status >= 1){
         console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
       }
@@ -485,6 +491,120 @@ Need to add a call to get dashboard stuff so we can get classroom
 
   return;
 
+}
+
+
+
+async function get_assessment_start_data(user,assessmentId, classroomSlug){
+  return new Promise(async (resolve, reject) => {
+
+
+    const params = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer '+ user.accessToken
+      },
+    };
+    try{
+      
+      let response;
+
+      if(classroomSlug != undefined){
+        // response = await http.get(renderURL(`/api/s/classroom/${classroomSlug}/assessment/${assessmentId}/start`), params);
+        response = await http.post(renderURL("/api/classroom-assessment-start"), JSON.stringify({assessmentID: assessmentId, classroomslug: classroomSlug}), params);
+
+      }else{
+        response = await http.post(renderURL("/api/assessment-start"), JSON.stringify({assessmentID: assessmentId}), params);
+
+      }
+
+    check(response, {
+      'status is 200': (r) => r.status === 200
+    });
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+        user.total_kb += get_JSON_request_length(res_json);
+
+        return resolve(res_json);
+
+      }catch(e){
+        console.log(e)
+        throw new Error("SDFSDF")
+      }
+
+  });
+}
+
+
+
+async function get_student_classroom_data(user, classroomSlug){
+  return new Promise(async (resolve, reject) => {
+
+
+    const params = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer '+ user.accessToken
+      },
+    };
+    try{
+      
+    
+    const response = await http.get(renderURL(`/api/student-classroom-by-id/${classroomSlug}`), params);
+    // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+
+    check(response, {
+      'status is 200': (r) => r.status === 200
+    });
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+        user.total_kb += get_JSON_request_length(res_json);
+
+        return resolve(res_json);
+
+      }catch(e){
+        console.log(e)
+        throw new Error("SDFSDF")
+      }
+
+  });
+}
+
+
+async function my_dashboard(user){
+  return new Promise(async (resolve, reject) => {
+
+
+    const params = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer '+ user.accessToken
+      },
+    };
+    try{
+      
+    
+    const response = await http.get(renderURL("/api/my-dashboard"), params);
+    // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+
+    check(response, {
+      'status is 200': (r) => r.status === 200
+    });
+      const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+        user.total_kb += get_JSON_request_length(res_json);
+
+        return resolve(res_json);
+
+      }catch(e){
+        console.log(e)
+        throw new Error("SDFSDF")
+      }
+
+  });
 }
 
 const range = (start, end, step = 1) => {
@@ -604,20 +724,31 @@ async function do_pdf_check(student_user){
 
 }
 
-async function run_program(student_user, data, classroomSlug){
+async function run_program(student_user, assessments, assessmentSlug, classroomSlug){
   
-
+  const data = assessments.find(e => e.data.attributes.slug == assessmentSlug);
   let assessmentId = data.data.attributes.slug;
   let title = data.data.attributes.title;
   let username = student_user.user.username;
 
-  log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
+  let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
+
+  // return console.log(start_data);
+
+
 
   const view_start_page_sleep = rando_sleep(1,  options.max_view_start_page_sleep);
   if(options.logging_status >= 1){
       console.log(`${username} is viewing ${title} start page for: ${view_start_page_sleep} seconds`)    
   }
 
+     if(classroomSlug != undefined){
+        log_user_events(student_user,  `${options.host}/s/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
+
+    }else{
+      log_user_events(student_user,  `${options.host}/s/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
+
+    }
   sleep(view_start_page_sleep);
 
   //create assessment  
@@ -629,12 +760,11 @@ async function run_program(student_user, data, classroomSlug){
   //get users assessment in progroess
   let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
 
-  const assessment = users_assessment_in_progress.included.find( e => e.type == "assessment");
   const userAssessment = users_assessment_in_progress.included.find( e => e.type == "userAssessment");
   
   let userAssessmentId = userAssessment.attributes._id;
   let question = await get_users_assessment_question(student_user, assessmentId);
-  let assessmentType = assessment.attributes.assessmentType;
+  let assessmentType = data.data.attributes.assessmentType;
   
   let count = 0;
   var isAssessmentDone = undefined;
