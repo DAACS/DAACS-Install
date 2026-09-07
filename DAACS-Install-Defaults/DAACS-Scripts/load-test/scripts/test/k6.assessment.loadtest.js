@@ -71,6 +71,14 @@ ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE=
 
  *  */ 
 
+//  const metrics = {
+//   getUserResponseTime: new Trend("get_user_response_time", true),
+//   updateUserResponseTime: new Trend("update_user_response_time", true),
+//   deleteUserResponseTime: new Trend("delete_user_response_time", true),
+// };
+
+// https://www.google.com/search?q=k6+metrics+per+vu&rlz=1C5OZZY_enUS1152US1152&oq=k6+metrics+per+vu&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRiPAjIHCAIQIRiPAtIBCDM0MjFqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
+
 import { check, sleep } from 'k6';
 import http from 'k6/http';
 import exec from 'k6/execution';
@@ -438,7 +446,8 @@ export default async function (data) {
 
     
     case "random":
-
+// https://grafana.com/docs/k6/latest/examples/distribute-workloads/
+// https://grafana.com/docs/k6/latest/examples/track-transmitted-data-per-url/
 
     break;
 
