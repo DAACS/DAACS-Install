@@ -90,6 +90,7 @@ export let options = {
   max_pdf_check_sleep: __ENV.MAX_PDF_CHECK_SLEEP == undefined ? 5 : __ENV.MAX_PDF_CHECK_SLEEP,
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
+  test: __ENV.TEST,
   student_file: __ENV.STUDENT_FILE,
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
   run_get_PDF: __ENV.RUN_GET_PDF == "true" ? true : false,
@@ -363,7 +364,6 @@ function map_stages(stages){
 
 export async function  setup() {
 
-  // console.log(options)
   let [admin_username, admin_password] = options.admin_credentials.split(",")
   let admin_user = await login(admin_username, admin_password);
   options.assessment_id = options.assessment_id.split(",")
@@ -403,7 +403,7 @@ export default async function (data) {
   const login_sleep = rando_sleep(1,  1);
 
   if(options.logging_status >= 1){
-    console.log(`${username} has logged in and is reading dashboard page for ${login_sleep} seconds.`)
+    log_student_data_to_console(username, `has logged in and is viewing dashboard page for ${login_sleep} seconds.`)
   }
 
   sleep(login_sleep);
@@ -417,83 +417,115 @@ export default async function (data) {
 
   //Dashboard
   let dashboard_data = await my_dashboard(student_user)
+  // log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
 
-  // console.log(dashboard_data.data.attributes.assessments)
-  total_total += student_user.total_kb;
-  // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
-  for (const ee of dashboard_data.data.attributes.assessments) {
-    const assessmentTitle = ee.title;
-    log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
+  // total_total += student_user.total_kb;
 
-    await run_program(student_user, data.assessments,  ee.slug, ) 
-    if(options.logging_status >= 1){
-      console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
-    }
+  // // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
+  // for (const ee of dashboard_data.data.attributes.assessments) {
 
-    if(options.run_get_assessment_results == true){
-      console.log(`${username} is getting results for ${ assessmentTitle} assessment.`)    
-      await run_user_assessment_results_program(student_user, ee)
-      
-      if(options.logging_status >= 1){
-        console.log(`${username} finished viewing ${ assessmentTitle} results.`)    
-      }
-    }
+  //   await run_program(student_user, data.assessments,  ee.slug ) 
 
-    total_total += student_user.total_kb;
+  //   if(options.run_get_assessment_results == true){
+  //     await run_user_assessment_results_program(student_user, ee)
+  //   }
 
-  }
+  //   total_total += student_user.total_kb;
+
+  // }
 
 
   //Classroom
 
-  // console.log(dashboard_data.data.attributes.classrooms)
+  // for (const cc of dashboard_data.data.attributes.classrooms) {
+  //     const classroomSlug = cc.slug 
 
-  // student-classroom-by-id/newest-class
-/*
-Need to add a call to get dashboard stuff so we can get classroom
+  //   const student_classroom_data = await get_student_classroom_data(student_user, classroomSlug)
+  //   log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
 
+  //   //Do assessments in order that was passed in command line
+  //   for (const gg of student_classroom_data.data.attributes.classrooms.assessments) {
+  //     const assessmentSlug = gg.slug 
+  //     await run_program(student_user, data.assessments, assessmentSlug, classroomSlug ) 
 
-  // for now only add one
-  for (const ee of data.classroom) {
+  //     if(options.run_get_assessment_results == true){ 
+  //       await run_user_assessment_results_program(student_user, data.assessments.find(e => e.data.attributes.slug == assessmentSlug), classroomSlug )
+  //     }
 
-  //Do assessments in order that was passed in command line
-  for (const gg of ee.assessments) {
-
-
-      const assessmentTitle = ee.data.attributes.title;
-      log_user_events(student_user,  options.host + "/dashboard", new Date() , `Assessment - ${assessmentTitle}`)
-
-      await run_program(student_user, gg, ee.slug) 
-      // await run_program_classroom(student_user, ee) 
-      if(options.logging_status >= 1){
-        console.log(`${username} is ending ${ assessmentTitle} assessment.`)    
-      }
-
-      if(options.run_get_assessment_results == true){
-        console.log(`${username} is getting results for ${ assessmentTitle} assessment.`)    
-        await run_user_assessment_results_program(student_user, ee)
+  //     total_total += student_user.total_kb;
         
-        if(options.logging_status >= 1){
-          console.log(`${username} finished viewing ${ assessmentTitle} results.`)    
-        }
-      }
+  //   }
+  // }
 
-      total_total += student_user.total_kb;
-      
+
+  switch(options.test){
+
+    case "classroom":
+      await run_classroom_program(student_user, options, dashboard_data, data)
+    break;
+
+    
+    case "random":
+
+
+    break;
+
+    case "dashboard":
+    default:
+      await run_dashboard_program(student_user, options, dashboard_data, data)
+
+    break;
+
+    
   }
-
-
-  }
-
-
-*/ 
 
 
   return;
 
 }
 
+async function run_dashboard_program(student_user, options, dashboard_data, data){
 
+  log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
+
+  total_total += student_user.total_kb;
+
+  // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
+  for (const ee of dashboard_data.data.attributes.assessments) {
+
+    await run_program(student_user, data.assessments,  ee.slug ) 
+
+    if(options.run_get_assessment_results == true){
+      await run_user_assessment_results_program(student_user, {data: {attributes:  ee }})
+    }
+
+    total_total += student_user.total_kb;
+
+  }
+}
+
+async function run_classroom_program(student_user, options,  dashboard_data, data ){
+
+    for (const cc of dashboard_data.data.attributes.classrooms) {
+      const classroomSlug = cc.slug 
+      const student_classroom_data = await get_student_classroom_data(student_user, classroomSlug)
+      log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
+
+      //Do assessments in order that was passed in command line
+      for (const gg of student_classroom_data.data.attributes.classrooms.assessments) {
+        const assessmentSlug = gg.slug 
+        await run_program(student_user, data.assessments, assessmentSlug, classroomSlug ) 
+
+        if(options.run_get_assessment_results == true){ 
+          await run_user_assessment_results_program(student_user, data.assessments.find(e => e.data.attributes.slug == assessmentSlug), classroomSlug )
+        }
+
+        total_total += student_user.total_kb;
+          
+      }
+    }
+
+}
 
 async function get_assessment_start_data(user,assessmentId, classroomSlug){
   return new Promise(async (resolve, reject) => {
@@ -627,7 +659,13 @@ async function get_real_pdf(pdf_url){
 }
 
 
-async function run_user_assessment_results_program(student_user, data){
+async function run_user_assessment_results_program(student_user, data, classroomSlug){
+  const assessmentTitle = data.data.attributes.title;
+  const username = student_user.user.username;
+
+  if(options.logging_status >= 1){
+    log_student_data_to_console(username, `is getting results for ${ assessmentTitle} assessment.`)
+  }
 
   let assessment_id = data.data.attributes.slug;
 
@@ -639,14 +677,14 @@ async function run_user_assessment_results_program(student_user, data){
     do{
 
       is_writing_graded = await get_student_q_status(student_user);
-      console.log(`${student_user.user.username} writing assessment is not graded yet. Checking in 10 seconds STATUS: ${is_writing_graded}`);
+      log_student_data_to_console(username, `writing assessment is not graded yet. Checking in 10 seconds STATUS: ${is_writing_graded}`)
       sleep(10)
 
     }while(is_writing_graded == "WAITING_FOR_WRITING_GRADE" );
     
   }
 
-  let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id);
+  let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id, classroomSlug);
 
   log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
 
@@ -666,16 +704,17 @@ async function run_user_assessment_results_program(student_user, data){
       log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
 
       const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
-      console.log(`${student_user.user.username} viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`)
-      if(options.run_get_PDF == true && is_pdf_ready === false){
-        console.log(`${student_user.user.username} is checking for PDF URL`)
+      log_student_data_to_console(username, `viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`);
 
-        is_pdf_ready = await do_pdf_check(student_user);
+      if(options.run_get_PDF == true && is_pdf_ready === false){
+      log_student_data_to_console(username, `is checking for PDF URL`);
+
+        is_pdf_ready = await do_pdf_check(student_user, classroomSlug);
 
         if(is_pdf_ready === true){
-          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
+          log_student_data_to_console(username, `pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`);
         }else{
-          console.log(`${student_user.user.username} pdf URL is not ready. Will check again`)
+          log_student_data_to_console(username, `pdf URL is not ready. Will check again`);
         }
       }
       sleep(view_results_page_sleep);
@@ -686,12 +725,12 @@ async function run_user_assessment_results_program(student_user, data){
 
       do{
 
-        is_pdf_ready = await do_pdf_check(student_user);
+        is_pdf_ready = await do_pdf_check(student_user, classroomSlug);
 
         if(is_pdf_ready === true){
-          console.log(`${student_user.user.username} pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`)
+          log_student_data_to_console(username, `pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`);
         }else{
-          console.log(`${student_user.user.username} pdf URL is not ready. Will check again in 10 seconds`)
+          log_student_data_to_console(username, `pdf URL is not ready. Will check again in 10 seconds`);
         }
 
         sleep(10);
@@ -699,16 +738,20 @@ async function run_user_assessment_results_program(student_user, data){
       }while(is_pdf_ready == false)
     
     }
+
+    if(options.logging_status >= 1){
+      log_student_data_to_console(student_user.user.username, `finished viewing ${ assessmentTitle} results.`)
+    }
 }
 
 
-async function do_pdf_check(student_user){
+async function do_pdf_check(student_user, classroomSlug){
 
   var is_pdf_ready = false;
   let pdf_url = "";
 
     //check to see if PDF is ready
-    pdf_url = await get_pdf_url(student_user)
+    pdf_url = await get_pdf_url(student_user, classroomSlug)
 
     if (pdf_url.length == 0 || pdf_url == "IN_PROGRESS") {
       is_pdf_ready = false;
@@ -717,33 +760,35 @@ async function do_pdf_check(student_user){
       is_pdf_ready = true;
     }
 
-    //commented out the sleep for now because the viewing domain page is handling sleep
-    // sleep(options.max_pdf_check_sleep)
-
     return is_pdf_ready;
 
 }
 
 async function run_program(student_user, assessments, assessmentSlug, classroomSlug){
-  
+
+  if(assessments == undefined){
+    throw new Error("COULD NOT FIND ASSESSMENT LIST!! PLEASE LOAD THEM IN COMMAND LINE")
+  }
+
   const data = assessments.find(e => e.data.attributes.slug == assessmentSlug);
+
+  if(data == undefined){
+    throw new Error("COULD NOT FIND ASSESSMENT!! PLEASE LOAD IT IN COMMAND LINE")
+  }
+  
   let assessmentId = data.data.attributes.slug;
   let title = data.data.attributes.title;
   let username = student_user.user.username;
 
   let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
-
-  // return console.log(start_data);
-
-
-
-  const view_start_page_sleep = rando_sleep(1,  options.max_view_start_page_sleep);
+  const view_start_page_sleep = rando_sleep(1,  1);
+  // options.max_view_start_page_sleep
   if(options.logging_status >= 1){
-      console.log(`${username} is viewing ${title} start page for: ${view_start_page_sleep} seconds`)    
+      log_student_data_to_console(username, `is viewing ${title} start page for: ${view_start_page_sleep} seconds`) 
   }
 
      if(classroomSlug != undefined){
-        log_user_events(student_user,  `${options.host}/s/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
+      log_user_events(student_user,  `${options.host}/s/classroom/${classroomSlug}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${title}`)
 
     }else{
       log_user_events(student_user,  `${options.host}/s/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
@@ -752,27 +797,32 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   sleep(view_start_page_sleep);
 
   //create assessment  
-  await create_assessment(student_user, assessmentId);
+  let create_assessment_data = await create_assessment(student_user, assessmentId, classroomSlug);
   if(options.logging_status >= 1){
-      console.log(`${username} created ${title} user assessment.`)    
+      log_student_data_to_console(username, `created ${title} user assessment.`) 
   }
-  
-  //get users assessment in progroess
-  let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId);
 
+  //get users assessment in progroess
+  let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId, classroomSlug);
   const userAssessment = users_assessment_in_progress.included.find( e => e.type == "userAssessment");
-  
   let userAssessmentId = userAssessment.attributes._id;
-  let question = await get_users_assessment_question(student_user, assessmentId);
+  let question = await get_users_assessment_question(student_user, assessmentId, classroomSlug);
   let assessmentType = data.data.attributes.assessmentType;
   
   let count = 0;
   var isAssessmentDone = undefined;
 
+      if(classroomSlug != undefined){
+  log_user_events(student_user,  `${options.host}/s/classroom/${classroomSlug}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${title}`)
+
+    }else{
   log_user_events(student_user,  `${options.host}/assessments/${assessmentId}/take`, new Date() , `Assessment - ${title}`)
 
+    }
+
+
     if(options.logging_status >= 1){
-      console.log(`${username} is on ${title} take page, and taking assessment.`)    
+      log_student_data_to_console(username, `is on ${title} take page, and taking assessment.`) 
     }
   
   do{
@@ -803,17 +853,18 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                 answer_response = {
                   assessmentId: assessmentId,
                   userAssessmentId: userAssessmentId,
-                  answers: writing_for_user
+                  answers: writing_for_user,
+                  classroomslug: classroomSlug
                 }
 
               
-              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response);
+              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomslug);
 
 
               sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
 
               if(options.logging_status >= 2){
-                console.log(`${username} is thinking about what to write for ${sl} seconds.`)
+                log_student_data_to_console(username, `is thinking about what to write for ${sl} seconds.`) 
               }
               sleep(sl);
               i += 120;
@@ -821,7 +872,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
 
             }
             
-            question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
+            question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response,);
             isAssessmentDone = question.data.attributes.isAssessmentDone;
         
           break;
@@ -832,7 +883,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   assessmentId: assessmentId,
                   userAssessmentId: userAssessmentId,
                   questionId:questionId, 
-                  answers: answers
+                  answers: answers,
+                  classroomslug: classroomSlug
               }
 
                 question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
@@ -841,8 +893,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
 
                   if(options.logging_status >= 2){
-                      console.log(`${username} is thinking for ${sl} seconds about the answer for question.`)
-                    }
+                    log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
+                  }
                 sleep(sl);
 
                 } 
@@ -856,7 +908,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   assessmentId: assessmentId,
                   userAssessmentId: userAssessmentId,
                   questionId:questionId, 
-                  answers: []
+                  answers: [],
+                  classroomslug: classroomSlug,
               }
             
               let count = question.data.attributes.questions.items.length - 1;
@@ -871,6 +924,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                       assessmentId: assessmentId,
                       userAssessmentId: userAssessmentId,
                       questionId:questionId, 
+                      classroomSlug: classroomSlug,
                       answer: []
                   }
                   indiviual_answer.answer.push(answer[0])
@@ -883,7 +937,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                       sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
 
                       if(options.logging_status >= 2){
-                      console.log(`${username} is thinking for ${sl} seconds about the answer for question.`)
+                        log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
                       }
                       sleep(sl);
 
@@ -891,7 +945,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
 
                   index++;
               }
-              question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
+              question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
           break;
@@ -899,9 +953,17 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
       }
       
   }while(isAssessmentDone === false)
+
+    if(options.logging_status >= 1){
+      log_student_data_to_console(username, `is ending ${ title} assessment.`) 
+    }
+
   return
 }
+function log_student_data_to_console(username, sentence){
+      console.log(`${username} ${sentence}`)    
 
+}
 async function login(username, password){
   return new Promise(async (resolve, reject) => {
     const params = {
@@ -982,7 +1044,7 @@ async function get_answers_for_assessment(user, assessmentId){
 }
 
 
-async function get_pdf_url(user){
+async function get_pdf_url(user, classroomSlug){
 
   return new Promise(async (resolve, reject) => {
           
@@ -993,7 +1055,18 @@ async function get_pdf_url(user){
         },
       };
 
-      const response = await http.get(renderURL("/api/get-student-pdf-report-url"), params);        
+      let response;
+
+      if(classroomSlug != undefined){
+        response = await http.get(renderURL(`/api/get-student-pdf-report-url/${classroomSlug}`), params);
+
+      }else{
+        response = await http.get(renderURL("/api/get-student-pdf-report-url"), params);
+
+      }
+      
+
+      // const response = await http.get(renderURL("/api/get-student-pdf-report-url"), params);        
       check(response, {
         'status is 200': (r) => r.status === 200
       });
@@ -1043,7 +1116,7 @@ async function log_user_events(user, url, time, title){
   return new Promise(async (resolve, reject) => {
 
       if(options.logging_status >= 3){
-        console.log(`${user.user.username} is logging page view for ${title}.`)
+        log_student_data_to_console(user.user.username, `is logging page view for ${title}.`)
       }
 
       const params = {
@@ -1072,20 +1145,28 @@ async function log_user_events(user, url, time, title){
   });
 }
 
-async function create_assessment(user, assessmentId){
+async function create_assessment(user, assessmentId, classroomSlug){
   return new Promise(async (resolve, reject) => {
 
       const params = {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
+          
           'Authorization': 'Bearer '+ user.accessToken
         },
       };
 
-      const response = await http.put(renderURL("/api/student-assessment"), {
-      // const response = await http.post(renderURL("/api/user-assessment"), {
-          assessmentId: assessmentId,
-      } , params);
+            let response;
+   
+      if(classroomSlug != undefined){
+     
+        response = await http.put(renderURL("/api/classroom-student-assessment"), JSON.stringify({assessmentId: assessmentId, classroomslug: classroomSlug}), params);
+
+      }else{
+        response = await http.put(renderURL("/api/student-assessment"), JSON.stringify({assessmentId: assessmentId}), params);
+
+      }
+
         
       check(response, {
         'status is 200': (r) => r.status === 200
@@ -1101,18 +1182,25 @@ async function create_assessment(user, assessmentId){
   });
 }
 
-async function get_users_assessment_in_progress(user, assessmentCategoryId){
+async function get_users_assessment_in_progress(user, assessmentId, classroomSlug){
   return new Promise(async (resolve, reject) => {
     const params = {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
     };
-    const response = await http.post(renderURL("/api/student-assessment"), {
-    // const response = await http.post(renderURL("/api/user-assessment-summary"), {
-      assessmentID: assessmentCategoryId,
-    } , params);
+
+       let response;
+
+      if(classroomSlug != undefined){
+        // response = await http.get(renderURL(`/api/s/classroom/${classroomSlug}/assessment/${assessmentId}/start`), params);
+        response = await http.post(renderURL("/api/classroom-student-assessment"), JSON.stringify({assessmentID: assessmentId, classroomslug: classroomSlug}), params);
+
+      }else{
+        response = await http.post(renderURL("/api/student-assessment"), JSON.stringify({assessmentID: assessmentId}), params);
+
+      }
       
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -1128,20 +1216,20 @@ async function get_users_assessment_in_progress(user, assessmentCategoryId){
   });
 }
 
-async function get_users_assessment_question(user, assessmentId){
+async function get_users_assessment_question(user, assessmentId, classroomSlug){
   return new Promise(async (resolve, reject) => {
 
     const params = {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
     };
 
-    const response = await http.post(renderURL("/api/student-assessment-question-group"), {
-    // const response = await http.post(renderURL("/api/user-assessment-question-group"), {
+    const response = await http.post(renderURL("/api/student-assessment-question-group"), JSON.stringify({
       assessmentId: assessmentId,
-    } , params);
+      classroomslug: classroomSlug,
+    }) , params);
       
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -1214,7 +1302,7 @@ async function send_users_writing_answers_for_assessment_question(user, assessme
 }
 
 
-async function send_users_answers_for_assessment_question(user, assessmentId, answers){
+async function send_users_answers_for_assessment_question(user, assessmentId, answers, classroomSlug){
 
   return new Promise(async (resolve, reject) => {
 
@@ -1227,8 +1315,7 @@ async function send_users_answers_for_assessment_question(user, assessmentId, an
 
     const response = await http.put(renderURL("/api/student-assessment-question-answer"), 
     // const response = await http.put(renderURL("/api/user-assessment-question-answer"), 
-      JSON.stringify(answers)
-      , params);
+      JSON.stringify(answers),  params);
       
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -1243,7 +1330,7 @@ async function send_users_answers_for_assessment_question(user, assessmentId, an
   });
 }
 
-async function get_user_assessment_summaries_data(user, assessmentId){
+async function get_user_assessment_summaries_data(user, assessmentId, classroomSlug){
   return new Promise(async (resolve, reject) => {
 
 
@@ -1255,8 +1342,19 @@ async function get_user_assessment_summaries_data(user, assessmentId){
     };
     try{
       
-    
-    const response = await http.post(renderURL("/api/student-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+        let response;
+
+      if(classroomSlug != undefined){
+        // response = await http.get(renderURL(`/api/s/classroom/${classroomSlug}/assessment/${assessmentId}/start`), params);
+        response = await http.post(renderURL("/api/classroom-student-assessment-summaries"), JSON.stringify({assessmentID: assessmentId, classroomslug: classroomSlug}), params);
+
+      }else{
+        response = await http.post(renderURL("/api/student-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
+
+      }
+      
+
+    // const response = await http.post(renderURL("/api/student-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
     // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
 
     check(response, {

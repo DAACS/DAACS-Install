@@ -278,11 +278,16 @@ else
                     parameterR=""
                 fi
 
+                #put k6 logs into file
+                if [[ "$parameterS" == "" ]]; then
+                    parameterS="dashboard"
+                fi
+
 
                 
 
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ}"
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterS} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} "
                 eval "$cmd"
             ;;
         esac
