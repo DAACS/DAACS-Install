@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -172,6 +172,8 @@ do
       e ) parameterE="$OPTARG" ;; #environment_type
       k ) parameterK="$OPTARG" ;; #environment_type
       r ) parameterR="$OPTARG" ;; #environment_type
+      u ) parameterU="$OPTARG" ;; #environment_type
+      w ) parameterW="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -278,16 +280,25 @@ else
                     parameterR=""
                 fi
 
+                # #put k6 logs into file
+                # if [[ "$parameterS" == "" ]]; then
+                #     parameterS="1"
+                # fi
+
                 #put k6 logs into file
-                if [[ "$parameterS" == "" ]]; then
-                    parameterS="dashboard"
+                if [[ "$parameterT" == "" ]]; then
+                    parameterT="dashboard"
                 fi
 
-
-                
+                #put k6 logs into file
+                if [[ "$parameterW" == "" ]]; then
+                    parameterW="1"
+                fi
 
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterS} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} "
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} MAX_LOGIN_SLEEP=${parameterS} TEST=${parameterT} MAX_VIEW_START_PAGE_SLEEP=${parameterU} VUS=${parameterU} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} "
+
+                 echo $cmd
                 eval "$cmd"
             ;;
         esac

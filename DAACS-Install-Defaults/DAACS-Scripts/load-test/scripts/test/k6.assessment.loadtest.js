@@ -211,9 +211,6 @@ let total_total = 0;
     break;
   }
 
-      options.maxDuration = "1h";
-      options.duration = "1h";
-      options.iterations = 1;
 
 
   let stages, vus, duration, preAllocatedVUs, timeUnit, iterations = undefined;
@@ -328,12 +325,27 @@ let total_total = 0;
 
     break;
 
-    
-    case "vus":
+    case "per-vu-iterations":
+      default:
 
-      options.vus = vus;
-      options.iterations =iterations; 
 
+        options.scenarios =  { scenarios: {
+        // single_interaction: {
+          executor: 'per-vu-iterations',
+          vus: parseInt(__ENV.VUS),
+          iterations: 1, // Exactly 1 interaction/iteration per VU
+          maxDuration: '1h',
+        // },
+      }
+    }
+
+      // options.vus = parseInt(__ENV.VUS);
+
+      // options.iterations =iterations; 
+
+      // options.maxDuration = "1h";
+      // options.duration = "1h";
+      // options.iterations = 1;
     break;
 
   }
@@ -363,7 +375,7 @@ function map_stages(stages){
 }
 
 export async function  setup() {
-
+  // console.log(options)
   let [admin_username, admin_password] = options.admin_credentials.split(",")
   let admin_user = await login(admin_username, admin_password);
   options.assessment_id = options.assessment_id.split(",")
@@ -399,8 +411,7 @@ export default async function (data) {
 
   let username = sharedData[__VU - 1].username
   let password = sharedData[__VU - 1].password
-  
-  const login_sleep = rando_sleep(1,  1);
+  const login_sleep = rando_sleep(1,  options.max_login_sleep);
 
   if(options.logging_status >= 1){
     log_student_data_to_console(username, `has logged in and is viewing dashboard page for ${login_sleep} seconds.`)
@@ -417,46 +428,7 @@ export default async function (data) {
 
   //Dashboard
   let dashboard_data = await my_dashboard(student_user)
-  // log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
-
-  // total_total += student_user.total_kb;
-
-  // // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
-  // for (const ee of dashboard_data.data.attributes.assessments) {
-
-  //   await run_program(student_user, data.assessments,  ee.slug ) 
-
-  //   if(options.run_get_assessment_results == true){
-  //     await run_user_assessment_results_program(student_user, ee)
-  //   }
-
-  //   total_total += student_user.total_kb;
-
-  // }
-
-
-  //Classroom
-
-  // for (const cc of dashboard_data.data.attributes.classrooms) {
-  //     const classroomSlug = cc.slug 
-
-  //   const student_classroom_data = await get_student_classroom_data(student_user, classroomSlug)
-  //   log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
-
-  //   //Do assessments in order that was passed in command line
-  //   for (const gg of student_classroom_data.data.attributes.classrooms.assessments) {
-  //     const assessmentSlug = gg.slug 
-  //     await run_program(student_user, data.assessments, assessmentSlug, classroomSlug ) 
-
-  //     if(options.run_get_assessment_results == true){ 
-  //       await run_user_assessment_results_program(student_user, data.assessments.find(e => e.data.attributes.slug == assessmentSlug), classroomSlug )
-  //     }
-
-  //     total_total += student_user.total_kb;
-        
-  //   }
-  // }
-
+  log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
 
   switch(options.test){
 
@@ -491,12 +463,14 @@ async function run_dashboard_program(student_user, options, dashboard_data, data
   total_total += student_user.total_kb;
 
   // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
-  for (const ee of dashboard_data.data.attributes.assessments) {
+  for (const ee of   options.assessment_id.split(",")) {
 
-    await run_program(student_user, data.assessments,  ee.slug ) 
+    await run_program(student_user, data.assessments ,  ee ) 
 
     if(options.run_get_assessment_results == true){
-      await run_user_assessment_results_program(student_user, {data: {attributes:  ee }})
+    const assessment = data.assessments.find(e => e.data.attributes.slug == ee)
+
+      await run_user_assessment_results_program(student_user,  data.assessments.find(e => e.data.attributes.slug == ee) )
     }
 
     total_total += student_user.total_kb;
@@ -542,7 +516,6 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
       let response;
 
       if(classroomSlug != undefined){
-        // response = await http.get(renderURL(`/api/s/classroom/${classroomSlug}/assessment/${assessmentId}/start`), params);
         response = await http.post(renderURL("/api/classroom-assessment-start"), JSON.stringify({assessmentID: assessmentId, classroomslug: classroomSlug}), params);
 
       }else{
@@ -705,6 +678,7 @@ async function run_user_assessment_results_program(student_user, data, classroom
 
       const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
       log_student_data_to_console(username, `viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`);
+      sleep(view_results_page_sleep);
 
       if(options.run_get_PDF == true && is_pdf_ready === false){
       log_student_data_to_console(username, `is checking for PDF URL`);
@@ -717,7 +691,6 @@ async function run_user_assessment_results_program(student_user, data, classroom
           log_student_data_to_console(username, `pdf URL is not ready. Will check again`);
         }
       }
-      sleep(view_results_page_sleep);
     }
 
     //force get PDF if we never got it.
@@ -773,7 +746,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   const data = assessments.find(e => e.data.attributes.slug == assessmentSlug);
 
   if(data == undefined){
-    throw new Error("COULD NOT FIND ASSESSMENT!! PLEASE LOAD IT IN COMMAND LINE")
+    throw new Error(`COULD NOT FIND ASSESSMENT!! PLEASE LOAD IT IN COMMAND LINE ${assessmentSlug}`)
   }
   
   let assessmentId = data.data.attributes.slug;
@@ -781,8 +754,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   let username = student_user.user.username;
 
   let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
-  const view_start_page_sleep = rando_sleep(1,  1);
-  // options.max_view_start_page_sleep
+  const view_start_page_sleep = rando_sleep(1, options.max_view_start_page_sleep);
+
   if(options.logging_status >= 1){
       log_student_data_to_console(username, `is viewing ${title} start page for: ${view_start_page_sleep} seconds`) 
   }
