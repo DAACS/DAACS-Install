@@ -98,6 +98,7 @@ if [ ! -f "/installed" ]; then
 
 	cp /default-shibboleth-files/views-default/login.vm $IDP_HOME/views/login.vm
 	cp /default-shibboleth-files/views-default/error.vm $IDP_HOME/views/error.vm 
+	cp /default-shibboleth-files/views-default/logout.vm $IDP_HOME/views/logout.vm 
 
 	cp -R /default-shibboleth-files/jetty-default/root $JETTY_BASE/webapps/root
 	cp -R /default-shibboleth-files/jetty-default/webapps/idp.xml $JETTY_BASE/webapps/idp.xml

@@ -54,16 +54,21 @@ function generateUUID() {
     console.log('Connected successfully to server');
     const db = client.db(dbName);
     const users = db.collection("users");
+    const roles = db.collection("roles");
     //todo - need to update this with newest user object
     
-    
+      let list_of_ids = [];
+
     for(let i = 1; i <= 1000; i++){
+
+      const id = generateUUID();
+
     await users.insertOne(
     {
-        "_id": generateUUID(),
-        "roles": [
-          "ROLE_STUDENT"
-        ],
+        "_id": id,
+        // "roles": [
+        //   "ROLE_STUDENT"
+        // ],
         "isUserDisabled": false,
         "username": "student.test"+ i,
         "firstName": "student",
@@ -77,8 +82,14 @@ function generateUUID() {
         "createdDate": new Date(),
         "pdfFileURL": ""
       })
+
+      list_of_ids.push(id)
+
     }
-    
+    //add ids to student role
+    let student_role = await roles.findOneAndUpdate({_id: "student"},{$set: { users: list_of_ids  }} );
+
+
     await client.close();
 
     console.timeEnd(id);

@@ -301,6 +301,17 @@ else
                  echo $cmd
                 eval "$cmd"
             ;;
+
+
+            "copyRlibraries") 
+            # shibboleth_service_name=""
+
+            # docker exec -it ${shibboleth_service_name} bash
+            # cd /usr/local/lib/R 
+            #  zip -r site-library.zip site-library/
+            # docker cp ${shibboleth_service_name}:/usr/local/lib/R/site-library.zip .
+            # upload to digitalocean rlibraries-new.zip or rlibraries-arm.zip
+            ;;
         esac
     fi
 fi
