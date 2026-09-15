@@ -86,7 +86,7 @@ import { check, sleep } from 'k6';
 import http from 'k6/http';
 import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
-import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
+// import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 
 import { Gauge, Counter, Rate } from 'k6/metrics';
 
@@ -103,6 +103,7 @@ export let options = {
   host: __ENV.HOST,
   test: __ENV.TEST,
   student_file: __ENV.STUDENT_FILE,
+  number_of_users: __ENV.NUMBER_OF_USERS == undefined || isNaN(parseInt(__ENV.NUMBER_OF_USERS)) == true ? 1 : parseInt(__ENV.NUMBER_OF_USERS),
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
   run_get_PDF: __ENV.RUN_GET_PDF == "true" ? true : false,
   run_get_assessment_results: __ENV.RUN_GET_ASSESSMENT_RESULTS == "true" ? true : false,
@@ -144,11 +145,22 @@ export let options = {
 let total_total = 0;
 
   let sharedData = new SharedArray("Shared Logins", function () {
-    let data = papaparse.parse(open(`${basePath}data/input/${options.student_file}`), { header: true }).data;
+    let data = []
 
-    data.map( e => {
-      e.used = false;
-    })
+    for(let index = 1; index <= options.number_of_users; index++){
+
+
+      const username =  "student.test"+ index;
+      const hashed_password = "password";
+
+      data.push({
+         username: username.trim(),
+                password: hashed_password,
+                used: false
+      })
+
+    }
+
     return data;
   });
 
@@ -167,7 +179,7 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep = 2;
       options.assessmentTypeOptions.likert.min_sleep = 1;
       options.assessmentTypeOptions.likert.max_sleep = 2;
-
+      options.max_login_sleep = 1
     break;
 
 
@@ -422,6 +434,8 @@ export default async function (data) {
 
   let username = sharedData[__VU - 1].username
   let password = sharedData[__VU - 1].password
+
+
   const login_sleep = rando_sleep(1,  options.max_login_sleep);
 
   if(options.logging_status >= 1){

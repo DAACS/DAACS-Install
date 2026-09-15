@@ -430,4 +430,20 @@
   "title": "Regular Admin",
   "__v": 0,
   "history": []
+},{
+  "_id": "decc96f7-ec05-4417-9577-6745d7826d78",
+  "permissions": [
+    "can_search_for_users",		
+    "can_view_admin",		
+    "can_view_search_dialog",		
+    "can_view_student_results",		
+    "can_view_users",
+    "can_accept_pdf"
+  ],
+  "users": [ ],
+  "history": [ ],
+  "title": "See student results",
+  "slug": "see-student-results",
+  "__v": 0,
+  "description": "See student results"
 }]

@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w:x" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -174,6 +174,7 @@ do
       r ) parameterR="$OPTARG" ;; #environment_type
       u ) parameterU="$OPTARG" ;; #environment_type
       w ) parameterW="$OPTARG" ;; #environment_type
+      x ) parameterX="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -182,6 +183,7 @@ done
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
 #daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
 #daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents1.csv -e "self-regulated-learning" -j 2 -g human  -h true -i true -k true -r true
+#daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -d "27065" -e teststudents1.csv -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 2
 
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
@@ -296,9 +298,8 @@ else
                 fi
 
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} MAX_LOGIN_SLEEP=${parameterS} TEST=${parameterT} MAX_VIEW_START_PAGE_SLEEP=${parameterU} VUS=${parameterU} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} "
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" STUDENT_FILE="${parameterD}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} MAX_LOGIN_SLEEP=${parameterS} TEST=${parameterT} MAX_VIEW_START_PAGE_SLEEP=${parameterU} VUS=${parameterW} NUMBER_OF_USERS=${parameterX} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} "
 
-                 echo $cmd
                 eval "$cmd"
             ;;
 
@@ -311,6 +312,37 @@ else
             #  zip -r site-library.zip site-library/
             # docker cp ${shibboleth_service_name}:/usr/local/lib/R/site-library.zip .
             # upload to digitalocean rlibraries-new.zip or rlibraries-arm.zip
+            ;;
+
+
+            "resetloadtestdb")
+
+                MONGODB_CRT=""
+                MONDGODB_PEM=""
+                MONGODB_SSL=""
+                NUMBER_TO_UPLOAD=""
+                
+                #put k6 logs into file
+                if [[ "$parameterG" == "true" ]]; then
+                    MONGODB_CRT="$current_dir/new-env-setups/$parameterA/ssl/home/mongodb.crt"
+                    MONDGODB_PEM="$current_dir/new-env-setups/$parameterA/ssl/home/mongodb.pem"
+                    MONGODB_SSL=true
+                fi
+
+                if [[ "$parameterG" == "true" ]]; then
+                    NUMBER_TO_UPLOAD=$parameterH
+                fi
+                woof=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
+
+                export $woof
+                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=192.168.29.235 MONGODB_PORT=27065 node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
+                # daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -d "27065" -e teststudents1.csv -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 2
+                # daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -d "27065" -e teststudents1.csv -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true 
+                
+                #  echo $cmd
+                eval "$cmd"
+                #  -j 2 -g human  -h true -i true -k true -r true
+
             ;;
         esac
     fi
