@@ -104,6 +104,7 @@ export let options = {
   test: __ENV.TEST,
   student_file: __ENV.STUDENT_FILE,
   number_of_users: __ENV.NUMBER_OF_USERS == undefined || isNaN(parseInt(__ENV.NUMBER_OF_USERS)) == true ? 1 : parseInt(__ENV.NUMBER_OF_USERS),
+  answer_type: __ENV.ANSWER_TYPE == undefined  ? "RANDOM" : __ENV.ANSWER_TYPE,
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
   run_get_PDF: __ENV.RUN_GET_PDF == "true" ? true : false,
   run_get_assessment_results: __ENV.RUN_GET_ASSESSMENT_RESULTS == "true" ? true : false,
@@ -179,6 +180,7 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep = 2;
       options.assessmentTypeOptions.likert.min_sleep = 1;
       options.assessmentTypeOptions.likert.max_sleep = 2;
+      
       options.max_login_sleep = 1
     break;
 
@@ -798,7 +800,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   //create assessment  
   let create_assessment_data = await create_assessment(student_user, assessmentId, classroomSlug);
   if(options.logging_status >= 1){
-      log_student_data_to_console(username, `created ${title} user assessment.`) 
+      log_student_data_to_console(username, `created ${title} user assessment. With answer type: ${options.answer_type}`) 
   }
 
   //get users assessment in progroess
@@ -917,7 +919,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   
                   let answersForQuestion = answerGroup.items.find(d=> d._id ==  q._id);
 
-                  let answer = get_answers_by_assessment_type(assessmentType, q, options.assessmentTypeOptions.cat.answerType, answersForQuestion);
+                  let answer = get_answers_by_assessment_type(assessmentType, q, options.answer_type, answersForQuestion);
                 
                   let indiviual_answer = {
                       assessmentId: assessmentId,
@@ -1487,7 +1489,7 @@ function getAnswerChoice(possibleItemAnswers, answerType, answers){
   let answerID = "";
   switch(answerType){
       case "100%":
-          answerID = possibleItemAnswers[answers.possibleItemAnswers.findIndex(d => d.score === 1)]._id;
+          answerID = answers.possibleItemAnswers.find(d => d.score == 1)._id
       break;
       case "RANDOM":
       default:
