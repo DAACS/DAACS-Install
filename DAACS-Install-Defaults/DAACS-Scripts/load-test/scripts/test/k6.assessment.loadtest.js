@@ -104,6 +104,7 @@ export let options = {
   test: __ENV.TEST,
   student_file: __ENV.STUDENT_FILE,
   number_of_users: __ENV.NUMBER_OF_USERS == undefined || isNaN(parseInt(__ENV.NUMBER_OF_USERS)) == true ? 1 : parseInt(__ENV.NUMBER_OF_USERS),
+  number_of_iteration: __ENV.ITERATION == undefined || isNaN(parseInt(__ENV.ITERATION)) == true ? 1 : parseInt(__ENV.ITERATION),
   answer_type: __ENV.ANSWER_TYPE == undefined  ? "RANDOM" : __ENV.ANSWER_TYPE,
   admin_credentials: __ENV.ADMIN_CREDENTIALS,
   run_get_PDF: __ENV.RUN_GET_PDF == "true" ? true : false,
@@ -161,7 +162,6 @@ let total_total = 0;
       })
 
     }
-
     return data;
   });
 
@@ -357,8 +357,8 @@ let total_total = 0;
         options.scenarios =  { scenarios: {
         // single_interaction: {
           executor: 'per-vu-iterations',
-          vus: parseInt(__ENV.VUS),
-          iterations: 1, // Exactly 1 interaction/iteration per VU
+          vus: options.number_of_users,
+          iterations: options.number_of_iteration, // Exactly 1 interaction/iteration per VU
           maxDuration: '1h',
         // },
       }
@@ -678,8 +678,11 @@ async function run_user_assessment_results_program(student_user, data, classroom
     do{
 
       is_writing_graded = await get_student_q_status(student_user);
-      log_student_data_to_console(username, `writing assessment is not graded yet. Checking in 10 seconds STATUS: ${is_writing_graded}`)
-      sleep(10)
+      log_student_data_to_console(username, `writing assessment is not graded yet. Checking in 10 seconds STATUS: ${is_writing_graded}`);
+      
+      if(is_writing_graded == "WAITING_FOR_WRITING_GRADE"){
+        sleep(10)
+      }
 
     }while(is_writing_graded == "WAITING_FOR_WRITING_GRADE" );
     
@@ -732,9 +735,9 @@ async function run_user_assessment_results_program(student_user, data, classroom
           log_student_data_to_console(username, `pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`);
         }else{
           log_student_data_to_console(username, `pdf URL is not ready. Will check again in 10 seconds`);
+          sleep(10);
         }
 
-        sleep(10);
 
       }while(is_pdf_ready == false)
     
@@ -859,7 +862,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                 }
 
               
-              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomslug);
+              question = await send_users_writing_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
 
 
               sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
