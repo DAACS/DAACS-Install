@@ -112,7 +112,7 @@ export let options = {
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
   test: __ENV.TEST,
-  student_file: __ENV.STUDENT_FILE,
+  // student_file: __ENV.STUDENT_FILE,
   number_of_users: __ENV.NUMBER_OF_USERS == undefined || isNaN(parseInt(__ENV.NUMBER_OF_USERS)) == true ? 1 : parseInt(__ENV.NUMBER_OF_USERS),
   number_of_iteration: __ENV.ITERATION == undefined || isNaN(parseInt(__ENV.ITERATION)) == true ? 1 : parseInt(__ENV.ITERATION),
   answer_type: __ENV.ANSWER_TYPE == undefined  ? "RANDOM" : __ENV.ANSWER_TYPE,
@@ -196,6 +196,7 @@ let total_total = 0;
             
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 1
+       options.maxDuration  = '1h'
     break;
 
 
@@ -215,6 +216,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 5
+       options.maxDuration  = '1h'
 
     break;
 
@@ -235,6 +237,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 10
+       options.maxDuration  = '1h'
     break;
 
     case "human":
@@ -244,7 +247,7 @@ let total_total = 0;
       options.assessmentTypeOptions.cat.max_sleep =  45;
       options.assessmentTypeOptions.writing.min_sleep = 5; 
       options.assessmentTypeOptions.writing.max_sleep =  15;
-      options.assessmentTypeOptions.likert.min_sleep = 30;
+      options.assessmentTypeOptions.likert.min_sleep = 25;
       options.assessmentTypeOptions.likert.max_sleep =  45;
       // options.maxDuration = "1h";
       // options.duration = "1h";
@@ -255,6 +258,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 30
       options.max_view_start_page_sleep = 45
+       options.maxDuration  = '10h'
     break;
 
 
@@ -262,10 +266,10 @@ let total_total = 0;
       options.userAssessmentOptions.user_results.min_sleep = 30;
       options.userAssessmentOptions.user_results.max_sleep = 60;
       options.assessmentTypeOptions.cat.min_sleep = 30;
-      options.assessmentTypeOptions.cat.max_sleep =  120;
+      options.assessmentTypeOptions.cat.max_sleep =  100;
       options.assessmentTypeOptions.writing.min_sleep = 10; 
       options.assessmentTypeOptions.writing.max_sleep =  20;
-      options.assessmentTypeOptions.likert.min_sleep = 30;
+      options.assessmentTypeOptions.likert.min_sleep = 25;
       options.assessmentTypeOptions.likert.max_sleep =  60;
 
 
@@ -274,6 +278,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 30
       options.max_view_start_page_sleep = 60
+       options.maxDuration  = '10h'
     break;
   }
 
@@ -395,23 +400,14 @@ let total_total = 0;
       default:
 
 
-        options.scenarios =  { scenarios: {
-        // single_interaction: {
+        options.scenarios =  { 
+          scenarios: {
           executor: 'per-vu-iterations',
           vus: options.number_of_users,
-          iterations: options.number_of_iteration, // Exactly 1 interaction/iteration per VU
-          maxDuration: '1h',
-        // },
+          iterations: options.number_of_iteration,
+          maxDuration: options.maxDuration,
       }
     }
-
-      // options.vus = parseInt(__ENV.VUS);
-
-      // options.iterations =iterations; 
-
-      // options.maxDuration = "1h";
-      // options.duration = "1h";
-      // options.iterations = 1;
     break;
 
   }
@@ -1052,20 +1048,22 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
       
                   answer_response.answers.push(answer[0]);
               
+                  sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
+
+                  if(options.logging_status >= 2){
+                    log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
+                  }
+                  sleep(sl);
+
                   if(count != index ){
                     
                       await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
-                      sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
-
-                      if(options.logging_status >= 2){
-                        log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
-                      }
-                      sleep(sl);
 
                   } 
 
                   index++;
               }
+            
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
