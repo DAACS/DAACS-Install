@@ -97,8 +97,17 @@ const myTrend = new Counter('total_byes');
 
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
-  max_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
-  max_view_start_page_sleep: __ENV.MAX_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MAX_VIEW_START_PAGE_SLEEP,
+  // min_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
+  // max_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
+  // min_view_start_page_sleep: __ENV.MIN_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MIN_VIEW_START_PAGE_SLEEP,
+  // max_view_start_page_sleep: __ENV.MAX_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MAX_VIEW_START_PAGE_SLEEP,
+
+
+  min_login_sleep: 1,
+  max_login_sleep: 1,
+  min_view_start_page_sleep: 1,
+  max_view_start_page_sleep: 1,
+
   max_pdf_check_sleep: __ENV.MAX_PDF_CHECK_SLEEP == undefined ? 5 : __ENV.MAX_PDF_CHECK_SLEEP,
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
@@ -182,7 +191,11 @@ let total_total = 0;
       options.assessmentTypeOptions.likert.min_sleep = 1;
       options.assessmentTypeOptions.likert.max_sleep = 2;
       
+      options.min_login_sleep = 1
       options.max_login_sleep = 1
+            
+      options.min_view_start_page_sleep = 1
+      options.max_view_start_page_sleep = 1
     break;
 
 
@@ -196,6 +209,13 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep = 5;
       options.assessmentTypeOptions.likert.min_sleep = 1;
       options.assessmentTypeOptions.likert.max_sleep = 5;
+      
+      options.min_login_sleep = 4
+      options.max_login_sleep = 10
+
+      options.min_view_start_page_sleep = 1
+      options.max_view_start_page_sleep = 5
+
     break;
 
     case "slow":
@@ -208,6 +228,13 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep =  10;
       options.assessmentTypeOptions.likert.min_sleep = 1;
       options.assessmentTypeOptions.likert.max_sleep =  10;
+
+
+      options.min_login_sleep = 4
+      options.max_login_sleep = 15
+
+      options.min_view_start_page_sleep = 1
+      options.max_view_start_page_sleep = 10
     break;
 
     case "human":
@@ -222,6 +249,12 @@ let total_total = 0;
       // options.maxDuration = "1h";
       // options.duration = "1h";
       // options.iterations = 1
+
+      options.min_login_sleep = 30
+      options.max_login_sleep = 45
+
+      options.min_view_start_page_sleep = 30
+      options.max_view_start_page_sleep = 45
     break;
 
 
@@ -234,6 +267,13 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep =  20;
       options.assessmentTypeOptions.likert.min_sleep = 30;
       options.assessmentTypeOptions.likert.max_sleep =  60;
+
+
+      options.min_login_sleep = 30
+      options.max_login_sleep = 45
+
+      options.min_view_start_page_sleep = 30
+      options.max_view_start_page_sleep = 60
     break;
   }
 
@@ -483,7 +523,7 @@ export default async function (data) {
   let password = sharedData[__VU - 1].password
 
 
-  const login_sleep = rando_sleep(1,  options.max_login_sleep);
+  const login_sleep = rando_sleep(options.min_login_sleep,  options.max_login_sleep);
 
   if(options.logging_status >= 1){
     log_student_data_to_console(username, `has logged in and is viewing dashboard page for ${login_sleep} seconds.`)
@@ -861,7 +901,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   let username = student_user.user.username;
 
   let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
-  const view_start_page_sleep = rando_sleep(1, options.max_view_start_page_sleep);
+  const view_start_page_sleep = rando_sleep(options.min_view_start_page_sleep, options.max_view_start_page_sleep);
 
   if(options.logging_status >= 1){
       log_student_data_to_console(username, `is viewing ${title} start page for: ${view_start_page_sleep} seconds`) 
