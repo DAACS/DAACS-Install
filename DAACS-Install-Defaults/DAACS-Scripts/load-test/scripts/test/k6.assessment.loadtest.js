@@ -400,6 +400,11 @@ function map_stages(stages){
 }
 
 export async function  setup() {
+
+
+  //reset database 
+
+  
   // console.log(options)
   let [admin_username, admin_password] = options.admin_credentials.split(",")
   let admin_user = await login(admin_username, admin_password);
@@ -507,14 +512,30 @@ async function run_dashboard_program(student_user, options, dashboard_data, data
 }
 
 async function run_classroom_program(student_user, options,  dashboard_data, data ){
+      const username = student_user.user.username;
+    if(dashboard_data.data.attributes.classrooms.length == 0){
 
+      return log_student_data_to_console(username, `is not in any classrooms.`)
+      
+    }
     for (const cc of dashboard_data.data.attributes.classrooms) {
       const classroomSlug = cc.slug 
       const student_classroom_data = await get_student_classroom_data(student_user, classroomSlug)
-      log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
 
       //Do assessments in order that was passed in command line
       for (const gg of student_classroom_data.data.attributes.classrooms.assessments) {
+        
+        if(data.assessments.find(e => e.data.attributes.slug == gg.slug) == undefined){
+
+          if(options.logging_status >= 3){
+            console.log("skipping since we didn't load that assessment")
+          }
+          continue;
+        }
+        
+        log_student_data_to_console(username, `is viewing ${cc.title} assessments listing page.`)
+        log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
+
         const assessmentSlug = gg.slug 
         await run_program(student_user, data.assessments, assessmentSlug, classroomSlug ) 
 
@@ -690,7 +711,7 @@ async function run_user_assessment_results_program(student_user, data, classroom
 
   let user_assessment_summaries_data = await get_user_assessment_summaries_data(student_user, assessment_id, classroomSlug);
 
-  log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessment_id}`)
+  log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/0`, new Date() , `Assessment - ${assessmentTitle}`)
 
   let count = user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.map((d) => {
         return d.subDomainScores
@@ -700,15 +721,15 @@ async function run_user_assessment_results_program(student_user, data, classroom
 
     count = count.length + user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.length;
     
-    let range_ = range(1, count)
+    let range_ = range(1, (count + 1))
     let is_pdf_ready = false;
 
     //no longer need to keep getting summary data since we don't do that anymore
     for (const index of range_) {
-      log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessment_id}`)
+      log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessmentTitle}`)
 
       const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
-      log_student_data_to_console(username, `viewing assessment results for - ${assessment_id} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`);
+      log_student_data_to_console(username, `viewing assessment results for - ${assessmentTitle} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`);
       sleep(view_results_page_sleep);
 
       if(options.run_get_PDF == true && is_pdf_ready === false){

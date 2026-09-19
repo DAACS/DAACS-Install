@@ -184,7 +184,8 @@ done
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
 #daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
 #daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents10.csv -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t dashboard -u 10 -w 1 -x 1
-#daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -d "27065" -e teststudents1.csv -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065
+#daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065
+#daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100
 
 if  [[ -z "$parameterF" ]] && [[ -z "$parameterS" ]];
 then
@@ -344,8 +345,8 @@ else
                     NUMBER_TO_UPLOAD=$parameterH
                 fi
 
-                if [[ "$parameterI" != "" ]]; then
-                    MONGODB_HOST=$parameterI
+                if [[ "$parameterC" != "" ]]; then
+                    MONGODB_HOST=$parameterC
                 fi
 
                 if [[ "$parameterK" != "" ]]; then
@@ -354,11 +355,34 @@ else
                 mongo_envs=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
 
                 export $mongo_envs
-                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=192.168.29.235 MONGODB_PORT=$parameterK node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
+                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
                 
                 #  echo $cmd
                 eval "$cmd"
 
+            ;;
+
+
+            "updatejenkins")
+
+
+                # container_id="${1}"
+                # wget -O https://updates.jenkins.io/latest/jenkins.war
+
+                # cp "./jenkins.war $container_id:/usr/share/jenkins/"
+
+                # docker exec -t $container_id sh -c  "chown jenkins:jenkins /usr/share/jenkins/jenkins.war"
+                # chown jenkins:jenkins jenkins.war  
+
+                # docker restart "$container_id"
+
+
+            ;;
+
+
+            "backupjenkins")
+
+                # docker cp 36be06e35971:/var/jenkins_home .
             ;;
         esac
     fi

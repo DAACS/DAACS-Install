@@ -84,11 +84,9 @@ function generateUUID() {
     const users = db.collection("users");
     const user_assessments = db.collection("user_assessments");
     const roles = db.collection("roles");
-    //todo - need to update this with newest user object
-    
 
     await users.deleteMany({"firstName": "student"});
-    await user_assessments.deleteMany({});
+    // await user_assessments.deleteMany({});
 
     
     let list_of_ids = [];
@@ -125,10 +123,78 @@ function generateUUID() {
 
     }
 
-    //add ids to student role
+    // //add ids to student role
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: []  }} );
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: list_of_ids  }} );
 
+    const classrooms = db.collection("classrooms");
+    await classrooms.deleteMany({});
+
+    let students_per_class = 30
+    let classrooms_to_create = Math.ceil(NUMBER_TO_UPLOAD / students_per_class)
+      let student_count = 0
+
+    for(let i = 1; i <= classrooms_to_create; i++){
+
+      // console.log(i)
+        //create classroom
+        let data = {};
+        const author_id = "1"
+        let classroom_id = crypto.randomUUID().toString();
+        data._id = classroom_id;
+        data.title = "Load test "+ i;
+        data.description = "This is a load test classroom";
+        data.slug = "loadtest-" + i;
+        data.createdAt = new Date();
+        data.author_id = author_id;
+        data.createdBy = author_id;
+        data.auto_accept_enroll = true;
+        data.auto_accept_enroll = true;
+        data.invite_link_code = crypto.randomUUID().toString();
+        data.status = 3
+        data.case_manager_limit = 5
+        data.enrolled_student_limit = 40
+        data.send_enrollment_emails_for_student = false;
+        data.send_enrollment_emails_for_instructor = false; 
+        data.lti_classroom = false;
+        data.lti_assessment_settings = [];
+        data.case_manager = []
+        data.assessments = []
+        data.students = []
+        
+        //add students to classroom
+        let up_to_index = ((i- 1) * students_per_class) 
+
+        for(let index = ((i- 1) * students_per_class)  ; index < ( i * students_per_class) ; index ++){
+
+          if(list_of_ids[index] == undefined){
+            break;
+          }
+
+          //enable student
+          let student_insert_data = {userId: list_of_ids[index], id: crypto.randomUUID(), accepted: true, accepted_date: new Date(), added_date: new Date() , addition_apparatus: "load-test"};
+          data.students.push(student_insert_data)
+        }
+        const assessment_list = [{slug: "self-regulated-learning", id: "46997151-21a3-4eef-b657-e7dcdd913481"} , {slug: "writing" , id: "e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"} , {slug: "mathematics" , id: "79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365"} , {slug: "reading" , id:"795c8469-9bdd-439a-9251-34457bd04adc"} ];
+        
+        //add assessment to classroom
+        for(let assessment of assessment_list){
+
+            let new_assessment_obj = {};
+            
+          new_assessment_obj._id = crypto.randomUUID().toString()
+          new_assessment_obj.assessmentId = assessment.id
+          new_assessment_obj.slug = assessment.slug
+          new_assessment_obj.added_date = new Date();
+
+          
+          data.assessments.push(new_assessment_obj)
+        }
+
+        //savew classroom data
+        await classrooms.insertOne(data)
+
+    }
 
     await client.close();
 
