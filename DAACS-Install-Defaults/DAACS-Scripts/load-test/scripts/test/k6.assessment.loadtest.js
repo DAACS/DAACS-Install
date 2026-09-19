@@ -88,6 +88,7 @@ import exec from 'k6/execution';
 import { SharedArray } from 'k6/data';
 // import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 
+import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 import { Gauge, Counter, Rate } from 'k6/metrics';
 
 const myTrend = new Counter('total_byes');
@@ -437,6 +438,45 @@ export async function  setup() {
 }
   
 
+function weightedSwitch(weightedFuncs) {
+    var funcIntervals = new Array(weightedFuncs.length)
+
+    var weightSum = 0;
+    for (var i = 0; i < weightedFuncs.length; i++) {
+        funcIntervals[i] = {
+            start: weightSum,
+            end: weightSum + weightedFuncs[i][0],
+            func: weightedFuncs[i][1],
+        }
+        weightSum += weightedFuncs[i][0];
+    }
+
+    if (Math.abs(weightSum - 1) > 0.0001) {
+        throw new Error('the sum of function weights should be 1 (100%), but is ' + weightSum);
+    }
+
+    return function (val) {
+        var guess, min = 0, max = funcIntervals.length - 1;;
+        while (min <= max) {
+            guess = Math.floor((max + min) / 2);
+
+            if (val >= funcIntervals[guess].end) {
+                min = guess + 1;
+            } else if (val < funcIntervals[guess].start) {
+                max = guess - 1;
+            } else {
+                return funcIntervals[guess].func;
+            }
+        }
+    }
+}
+
+var getFunction = weightedSwitch([
+    [0.5, () => "dashboard"],
+    [0.5, () => "classroom"]
+])
+
+
 export default async function (data) {
 
   let username = sharedData[__VU - 1].username
@@ -470,9 +510,24 @@ export default async function (data) {
 
     
     case "random":
-// https://grafana.com/docs/k6/latest/examples/distribute-workloads/
-// https://grafana.com/docs/k6/latest/examples/track-transmitted-data-per-url/
 
+        var rand = Math.random();
+        var f = getFunction(rand);
+
+        switch(f()){
+
+          case "classroom":
+            await run_classroom_program(student_user, options, dashboard_data, data)
+
+          break;
+          case "dashboard":
+            await run_dashboard_program(student_user, options, dashboard_data, data)
+
+          break;
+
+        }
+
+      
     break;
 
     case "dashboard":
@@ -533,7 +588,7 @@ async function run_classroom_program(student_user, options,  dashboard_data, dat
           continue;
         }
         
-        log_student_data_to_console(username, `is viewing ${cc.title} assessments listing page.`)
+        log_student_data_to_console(username, `is viewing ${cc.title} classroom assessments listing page.`)
         log_user_events(student_user,  options.host + `/s/classroom/${classroomSlug}`, new Date() , `Classroom - ${student_classroom_data.data.attributes.classrooms.title}`)
 
         const assessmentSlug = gg.slug 
@@ -911,15 +966,16 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   answers: answers,
                   classroomslug: classroomSlug
               }
-
+          
+                  sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
+              
+                if(options.logging_status >= 2){
+                  log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for SRL question #${(data.data.attributes.itemGroups.data.attributes.itemGroups.findIndex(d => d._id === questionId)) + 1}.`) 
+                }
                 question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                 isAssessmentDone = question.data.attributes.isAssessmentDone;
                 if(!isAssessmentDone){
-                  sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
 
-                  if(options.logging_status >= 2){
-                    log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
-                  }
                 sleep(sl);
 
                 } 

@@ -179,11 +179,18 @@ do
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
-#example
+
+#examples
+
 #daacs -f refresh -s testweb -a 2
 #daacs -f recreate -s devweb -b /home/vagrant -d daacsdev -t 1 -e dev
+
 #daacs -f getlogs -s yogurtweb -b /home/moo -d yogurt -t 1 -e dev
+
 #daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -d teststudents10.csv -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t dashboard -u 10 -w 1 -x 1
+#daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t classroom -u 1 -w 1 -x 1 -y "100%"
+#daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t classroom -u 1 -w 1 -x 1 -y "100%"
+
 #daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065
 #daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100
 
