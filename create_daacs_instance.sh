@@ -7,7 +7,8 @@ source "$current_dir/instance_helpers/mongo.sh"
 source "$current_dir/instance_helpers/qserver.sh"
 source "$current_dir/instance_helpers/nginx.sh"
 source "$current_dir/instance_helpers/backup.sh"
-source "$current_dir/instance_helpers/memcache.sh"
+source "$current_dir/instance_helpers/redis.sh"
+# source "$current_dir/instance_helpers/memcache.sh"
 source "$current_dir/instance_helpers/basic.sh"
 source "$current_dir/instance_helpers/sso.sh"
 source "$current_dir/instance_helpers/ldap.sh"
@@ -19,11 +20,12 @@ source "$current_dir/instance_helpers/ldap.sh"
     2: DAACS-Qserver
     3: DAACS-Nginx
     4: DAACS-Backup 
-    5: DAACS-Memcached
+    5: DAACS-Redis
     6: DAACS-Mongo
     7: DAACS-Webserver
     8: DAACS-Shibboleth
     9: DAACS-OpenLDAP
+    10: DAACS-Memcached
 
 2 - Type envirmoment type to create
 3 - Enter base path for install of DAACS
@@ -36,11 +38,12 @@ Pick instance type to create
     2 - DAACS-Qserver
     3 - DAACS-Nginx
     4 - DAACS-Backup 
-    5 - DAACS-Memcached
+    5 - DAACS-Redis
     6 - DAACS-Mongo
     7 - Create MongoDB 
     8 - Create Shibboleth IDP
     9 - Create OpenLDAP
+    10 - DAACS-Memcached
 
 Select instance type to create: " instance_type
 environment_type=$(ask_read_question_or_try_again "Environment type (dev, qa, prod, etc, etc): " true)
@@ -90,7 +93,7 @@ case "$instance_type" in
 
 "5") 
 
-    memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+    redis_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
 ;;
 
 "6") 
@@ -114,6 +117,11 @@ case "$instance_type" in
 
 ;;
 
+
+"10") 
+
+    memcached_instance_helper "$instance_type" "$install_env_path" "$environment_type" "$install_root"
+;;
 *)
     echo "Invalid option"
 ;;

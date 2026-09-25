@@ -7,7 +7,7 @@ services:
       - ${ENV_DIR}memcached
     networks:
       - myNetwork
-    command: ["-m", "512m", "-I", "2m"]
+    command: ["-m", "512m", "--max-item-size", "1m", "-vvv"]
     ports:
       - ${MEMCACHED_MAPPED_PORT}:11211
     container_name:

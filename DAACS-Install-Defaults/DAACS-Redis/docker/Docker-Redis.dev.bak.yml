@@ -1,0 +1,27 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    restart: unless-stopped
+    # env_file: 
+    #   - /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Redis/env-dev/env-dev-redis
+    networks:
+      - myNetwork
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass victor --appendonly no
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "victor", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  myNetwork:
+    external: true
