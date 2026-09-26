@@ -89,7 +89,10 @@ import { SharedArray } from 'k6/data';
 // import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
-import { Gauge, Counter, Rate } from 'k6/metrics';
+import { Gauge, Counter, Rate, Trend } from 'k6/metrics';
+
+// const slowEndpointTrend = new Trend('slow_endpoint_duration');
+
 
 const myTrend = new Counter('total_byes');
     const basePath = __ENV.PWD +'/../'
@@ -124,8 +127,19 @@ export let options = {
   // httpDebug: 'full',
   thresholds: {
     http_req_failed: ['rate<0.01'], // http errors should be less than 0%
-    http_req_duration: ['p(99)<500'], // 100% of requests should be below 500ms
-    
+    'http_req_duration{scenario:scenarios}': ['p(99)<500'], // 100% of requests should be below 500ms
+    'http_req_duration{name:login()}': [],
+    'http_req_duration{name:get_pdf_url()}': [],
+    'http_req_duration{name:run_get_pdf()}': [],
+    'http_req_duration{name:log_user_events()}': [],
+    'http_req_duration{name:create_assessment()}': [],
+    'http_req_duration{name:get_users_assessment_in_progress()}': [],
+    'http_req_duration{name:get_users_assessment_question()}': [],
+    'http_req_duration{name:get_student_q_status()}': [],
+    'http_req_duration{name:send_users_writing_answers_for_assessment_question()}': [],
+    'http_req_duration{name:send_users_answers_for_assessment_question()}': [],
+    'http_req_duration{name:get_user_assessment_summaries_data()}': [],
+    'http_req_duration{name:send_users_individual_answer_for_assessment_question()}': [],
   },
   assessmentTypeOptions: {
     "cat": {
@@ -474,6 +488,7 @@ export async function  setup() {
 }
   
 
+
 function weightedSwitch(weightedFuncs) {
     var funcIntervals = new Array(weightedFuncs.length)
 
@@ -650,6 +665,7 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_assessment_start_data()' }, 
     };
     try{
       
@@ -692,12 +708,13 @@ async function get_student_classroom_data(user, classroomSlug){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_student_classroom_data()' }, 
+
     };
     try{
       
     
     const response = await http.get(renderURL(`/api/student-classroom-by-id/${classroomSlug}`), params);
-    // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
 
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -727,12 +744,12 @@ async function my_dashboard(user){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'my_dashboard()' }, 
     };
     try{
       
     
     const response = await http.get(renderURL("/api/my-dashboard"), params);
-    // const response = await http.post(renderURL("/api/user-assessment-summaries"), JSON.stringify({assessmentID: assessmentId}), params);
 
     check(response, {
       'status is 200': (r) => r.status === 200
@@ -761,7 +778,11 @@ const range = (start, end, step = 1) => {
 async function get_real_pdf(pdf_url){
   return new Promise(async (resolve, reject) => {
 
-    const response = await http.file(renderURL(`https:${pdf_url}`));        
+    const response = await http.file(renderURL(`https:${pdf_url}`), 
+  {
+        tags: { name: 'get_real_pdf()' }, 
+
+  });        
     check(response, {
       'status is 200': (r) => r.status === 200
     });
@@ -1089,6 +1110,7 @@ async function login(username, password){
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+        tags: { name: 'login()' }, 
     };
   try{
     const response = await http.post(renderURL("/token"), {
@@ -1101,6 +1123,7 @@ async function login(username, password){
   check(response, {
     'status is 200': (r) => r.status === 200
   });
+  // slowEndpointTrend.add(response.timings.duration);
 
       const res_json = await response.json();     
       const total_kb = get_JSON_request_length(res_json);     
@@ -1121,6 +1144,7 @@ async function get_basic_assessment_data(user, assessmentId){
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Bearer '+ user.accessToken
     },
+        tags: { name: 'get_basic_assessment_data()' }, 
   };
   
     const response = await http.get(renderURL(`/api/get-assessment-by-id/${assessmentId}`),params);
@@ -1144,6 +1168,7 @@ async function get_answers_for_assessment(user, assessmentId){
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Bearer '+ user.accessToken
     },
+        tags: { name: 'get_answers_for_assessment()' }, 
   };
   
   const response = await http.post(renderURL("/api/assessment"), {
@@ -1172,6 +1197,7 @@ async function get_pdf_url(user, classroomSlug){
           'Content-Type': 'application/json; charset=utf-8',
           'Authorization': 'Bearer '+ user.accessToken
         },
+        tags: { name: 'get_pdf_url()' }, 
       };
 
       let response;
@@ -1185,7 +1211,6 @@ async function get_pdf_url(user, classroomSlug){
       }
       
 
-      // const response = await http.get(renderURL("/api/get-student-pdf-report-url"), params);        
       check(response, {
         'status is 200': (r) => r.status === 200
       });
@@ -1212,6 +1237,7 @@ async function run_get_pdf(user){
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer '+ user.accessToken
         },
+        tags: { name: 'run_get_pdf()' }, 
       };
 
       const response = await http.get(renderURL("/api/download-assessment-report") , params);
@@ -1243,6 +1269,7 @@ async function log_user_events(user, url, time, title){
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer '+ user.accessToken
         },
+        tags: { name: 'log_user_events()' }, 
       };
 
       const response = await http.post(renderURL("/api/user-events"), {"log_type":"PAGE_VIEW","url":url,  "title":title, "userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36", "timestamp": time} , params);
@@ -1273,6 +1300,7 @@ async function create_assessment(user, assessmentId, classroomSlug){
           
           'Authorization': 'Bearer '+ user.accessToken
         },
+        tags: { name: 'create_assessment()' }, 
       };
 
             let response;
@@ -1308,6 +1336,7 @@ async function get_users_assessment_in_progress(user, assessmentId, classroomSlu
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_users_assessment_in_progress()' }, 
     };
 
        let response;
@@ -1343,6 +1372,7 @@ async function get_users_assessment_question(user, assessmentId, classroomSlug){
           'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_users_assessment_question()' }, 
     };
 
     const response = await http.post(renderURL("/api/student-assessment-question-group"), JSON.stringify({
@@ -1373,6 +1403,7 @@ async function get_student_q_status(user){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_student_q_status()' }, 
     };
 
     const response = await http.get(renderURL("/api/get-student-q-status"), params);
@@ -1400,6 +1431,7 @@ async function send_users_writing_answers_for_assessment_question(user, assessme
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'send_users_writing_answers_for_assessment_question()' }, 
     };
 
     const response = await http.put(renderURL("/api/save-writing-sample"), 
@@ -1430,10 +1462,10 @@ async function send_users_answers_for_assessment_question(user, assessmentId, an
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'send_users_answers_for_assessment_question()' }, 
     };
 
     const response = await http.put(renderURL("/api/student-assessment-question-answer"), 
-    // const response = await http.put(renderURL("/api/user-assessment-question-answer"), 
       JSON.stringify(answers),  params);
       
     check(response, {
@@ -1458,6 +1490,7 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_user_assessment_summaries_data()' }, 
     };
     try{
       
@@ -1510,6 +1543,7 @@ async function send_users_individual_answer_for_assessment_question(user, assess
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'send_users_individual_answer_for_assessment_question()' }, 
     };
     
     const response = await http.put(renderURL("/api/student-assessment-answer"), JSON.stringify(answers), params);
@@ -1536,6 +1570,8 @@ async function get_avg_for_assessment(user, assessmentId,){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer '+ user.accessToken
       },
+        tags: { name: 'get_avg_for_assessment()' }, 
+
     };
     
     const response = await http.post(renderURL("/api/get_user_assessment_answer_avg"), JSON.stringify({id: assessmentId}), params);
