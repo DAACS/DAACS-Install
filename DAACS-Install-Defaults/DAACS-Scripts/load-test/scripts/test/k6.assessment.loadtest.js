@@ -465,9 +465,9 @@ export async function  setup() {
       let woof1 = {assessments:  await Promise.all(promises1)}
       let woof2 = {assessments:  await Promise.all(promises2)}
       for(let data of woof1.assessments){
-        data.data.attributes.itemGroups = woof2.assessments.find( e => e.id == data.slug )
-
+        data.data.attributes.itemGroups = woof2.assessments.find( e => e.data.attributes.slug == data.data.attributes.slug )
       }
+
       return {assessments:  woof1.assessments}
 
   }
