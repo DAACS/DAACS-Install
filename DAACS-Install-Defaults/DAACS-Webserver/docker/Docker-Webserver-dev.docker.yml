@@ -10,7 +10,6 @@ services:
       - myNetwork
     env_file: 
       - ${ENV_DIR}webserver
-      # - ${ENV_DIR}memcached
       - ${ENV_DIR}email
     environment:
       - "MONGO_USERNAME=${MONGO_USERNAME}"
@@ -23,6 +22,10 @@ services:
       - "MONGODB_MAPPED_PORT=${MONGODB_MAPPED_PORT}"
       - "MONGO_REPLICA_HOST_LIST=${MONGO_REPLICA_HOST_LIST}"
       - "MONGODB_REPLICA_SET_ID=${MONGODB_REPLICA_SET_ID}"
+      - "REDIS_PASSWORD=${REDIS_PASSWORD}"
+      - "REDIS_REDIS_CONTAINER_NAME=${REDIS_REDIS_CONTAINER_NAME}"
+      - "REDIS_MAPPED_PORT=${REDIS_MAPPED_PORT}"
+      - "IS_REDIS_ON=${IS_REDIS_ON}"
     volumes:
       - "${FOLDER_START}:/usr/src/app"
     image: node

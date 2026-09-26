@@ -62,7 +62,7 @@ memcached_instance_helper(){
 
 create_memcached_instance_helper(){
 
-    instance_type_defintion=$(get_instance_type_definition "$instance_type")
+    instance_type_defintion=$(get_instance_type_definition "11")
     # qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
     # create_image "$qserver_files_to" "${MONGO_IMAGE_NAME}" "$install_env_path/$instance_type_defintion/docker/" 
  
@@ -116,7 +116,7 @@ update_memcached_instance_helper(){
     printf "\nUPDATING Memcached DB instance....\n"
     echo "cool"
 
-    # instance_type="6-1"
+    # instance_type="11"
 
     # should_update_envs=$(ask_read_question_or_try_again "Should I update envs? (y)es or (n)o: " true)
   

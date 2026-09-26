@@ -285,6 +285,7 @@ create_webserver_instance_helper(){
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
 
+    # TODO - NEED TO ADD REDIS STUFF
     # memcached_on_or_off=$(ask_for_docker_service_and_check "(t)rue : " true)
 
     # if [ "$memcached_on_or_off" = "true" ]; then
@@ -661,6 +662,24 @@ update_webserver_instance_helper(){
     env_webserver_file="${env_absolute_dir}$environment_type_defintion-webserver"
     webserver_replicas_file="${env_absolute_dir}$environment_type_defintion-webserver-replicas"
 
+    redis_config_path=$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-/redis/$install_folder_destination
+    is_redis_on=$(get_environment_value_from_file_by_env_name "${redis_config_path}" "IS_REDIS_ON")
+    
+    redis_envs=""
+
+    if [ $(get_env_value "$is_redis_on" ) = "true" ]; then
+
+        redis_directory_env=$(get_environment_value_from_file_by_env_name "${redis_config_path}" "DATABASE_FOLDER")
+        redis_directory_env=$(get_env_value "$redis_directory_env" )
+        absolute_database_dir="$root_dest/$redis_directory_env/$environment_type_defintion/$environment_type_defintion-"
+
+        env_redis_file="${absolute_database_dir}redis"
+        redis_mapped_port=$(get_environment_value_from_file_by_env_name "${env_redis_file}" "REDIS_MAPPED_PORT")
+        redis_container=$(get_environment_value_from_file_by_env_name "${env_redis_file}" "REDIS_CONTAINER_NAME")
+        redis_password=$(get_environment_value_from_file_by_env_name "${env_redis_file}" "REDIS_PASSWORD")
+
+        redis_envs="${redis_mapped_port} ${redis_container} ${redis_password} ${is_redis_on} "
+    fi    
 
     webserver_replicas=$(get_environment_value_from_file_by_env_name "${webserver_replicas_file}" "REPLICAS")
     webserver_port=$(get_environment_value_from_file_by_env_name "${env_webserver_file}" "PORT")
@@ -680,8 +699,8 @@ update_webserver_instance_helper(){
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$env_absolute_dir$environment_type_defintion-"
 
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_envs} "
-
+    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_envs} ${redis_envs} "
+    echo $env_string
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
     services_file_dir="$root_dest/$install_folder_destination/services"
@@ -830,6 +849,16 @@ generate_webserver_replica_mongo_connection_string(){
 write_mongo_config_file(){
 
     destdir="${1}/database-config/"
+    create_directory_if_it_does_exsist "$destdir"
+    database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}\nIS_SSL=${5}"
+    write_to_file "$database_config_env" "$destdir/$5"
+}
+
+
+#todo - add IS_SSL to this function but we need to add it if we copy SSL 
+write_redis_config_file(){
+
+    destdir="${1}/redis/"
     create_directory_if_it_does_exsist "$destdir"
     database_config_env="DB_TYPE=${2}\nDATABASE_FOLDER=${3}\nDATABASE_NAME=${4}\nIS_SSL=${5}"
     write_to_file "$database_config_env" "$destdir/$5"

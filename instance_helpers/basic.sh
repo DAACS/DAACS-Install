@@ -63,7 +63,7 @@ get_instance_type_definition(){
             echo "DAACS-Backup"
         ;;
         "5") 
-            echo "DAACS-Memcached"
+            echo "DAACS-Redis"
         ;;
         "6-1") 
             echo "DAACS-Mongo/Instance"
@@ -85,6 +85,9 @@ get_instance_type_definition(){
         ;;
         "10") 
             echo "DAACS-Shibboleth-idp/shibreset"
+        ;;
+        "11") 
+            echo "DAACS-Memcached"
         ;;
         *)
             echo "Invalid instance option"

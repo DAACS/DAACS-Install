@@ -25,3 +25,9 @@ volumes:
 networks:
   myNetwork:
     external: true
+
+  #    --tls \
+  # --cacert /etc/redis/tls/ca.crt \
+  # --cert /etc/redis/tls/client.crt \
+  # --key /etc/redis/tls/client.key \
+  # -h your-redis-host -p 6379

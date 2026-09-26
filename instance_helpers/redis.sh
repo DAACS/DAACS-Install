@@ -68,47 +68,47 @@ create_redis_instance_helper(){
  
     printf "\nCREATING Redis server instance....\n"
 
-    memcached_service_name=$(ask_for_docker_service_and_check "Enter name for redis service : " true)
+    redis_service_name=$(ask_for_docker_service_and_check "Enter name for redis service : " true)
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
     root_dest="$install_root/new-env-setups"
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-    memcached_docker_directory="$root_dest/$install_folder_destination"
+    redis_docker_directory="$root_dest/$install_folder_destination"
 
     # Create env files for install
-    create_directory_if_it_does_exsist "$memcached_docker_directory/docker/"
+    create_directory_if_it_does_exsist "$redis_docker_directory/docker/"
 
     instance_home_folder="$root_dest/$install_folder_destination"
     run_fillout_program_new "$env_to_create" "$instance_home_folder" "$environment_type_defintion"
 
     env_memcached_file="${absolute_dir}redis"
-    docker_file=$(get_memcached_docker_filename "$environment_type_defintion")
+    docker_file=$(get_redis_docker_filename "$environment_type_defintion")
 
-    memcached_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#redis_service_name/$memcached_service_name/g ;" $docker_file)
-    # echo "$memcached_docker_file_to"
+    redis_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#redis_service_name/$redis_service_name/g ;" $docker_file)
+    # echo "$redis_docker_file_to"
 
     if [ $(does_docker_network_exsist "$MY_DOCKER_NETWORK_NAME") = false ]; then
         create_docker_network "$MY_DOCKER_NETWORK_NAME"
     fi
 
-
     # Checks to see if port is being used by something else and ask for a different port
-    # check_if_port_is_being_used $(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_MAPPED_PORT") "$env_memcached_file" "memcached"
+    # check_if_port_is_being_used $(get_environment_value_from_file_by_env_name "${env_memcached_file}" "REDIS_MAPPED_PORT") "$env_memcached_file" "memcached"
 
-    memcached_mapped_port=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_MAPPED_PORT")
-    memcached_container_name=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "MEMCACHED_CONTAINER_NAME")
+    redis_mapped_port=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "REDIS_MAPPED_PORT")
+    redis_container_name=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "REDIS_CONTAINER_NAME")
+    redis_password=$(get_environment_value_from_file_by_env_name "${env_memcached_file}" "REDIS_PASSWORD")
     
-#     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
-#     env_dir="ENV_DIR=$absolute_dir"
+    absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
+    env_dir="ENV_DIR=$absolute_dir"
     
-#     env_string="${memcached_mapped_port} ${env_dir} ${memcached_container_name} "
+    env_string="${redis_mapped_port} ${env_dir} ${redis_container_name} ${redis_password} "
 
-#     run_docker_with_envs "$memcached_docker_file_to" "$env_string"
+    run_docker_with_envs "$redis_docker_file_to" "$env_string"
 
-#     services_file_dir="$root_dest/$install_folder_destination/services"
-#     create_directory_if_it_does_exsist "$services_file_dir"
+    services_file_dir="$root_dest/$install_folder_destination/services"
+    create_directory_if_it_does_exsist "$services_file_dir"
 
-#     # add_services_service_file "$memcached_service_name" "$services_file_dir/$memcached_service_name"
+    # add_services_service_file "$redis_service_name" "$services_file_dir/$redis_service_name"
 
 }
 
@@ -139,7 +139,7 @@ create_redis_instance_helper(){
 
 #     # mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_CONTAINER_NAME")
 #     # mongo_port=$(get_environment_value_from_file_by_env_name "${env_webserver_mongo_file}" "MONGODB_MAPPED_PORT")
-#     # docker_file=$(get_memcached_docker_filename "$environment_type_defintion")
+#     # docker_file=$(get_redis_docker_filename "$environment_type_defintion")
 #     # qserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
 #     # absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
 #     # full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
@@ -177,21 +177,20 @@ create_redis_instance_helper(){
 
 # }
 
-# get_memcached_docker_filename(){
-#     return_file=""
-#     case "$environment_type_defintion" in
-#     "env-dev") 
-#         return_file="Docker-Memcached.dev.yml"
-#     ;;
-#     "env-prod") 
-#         return_file="Docker-Memcached.prod.yml"
-#     ;;
-#     *)
-#         echo "Invalid instance option"
-#         exit -1
-#     ;;
-#     esac
-#     echo "$return_file"
-# }
-
+get_redis_docker_filename(){
+    return_file=""
+    case "$environment_type_defintion" in
+    "env-dev") 
+        return_file="Docker-Redis.dev.yml"
+    ;;
+    "env-prod") 
+        return_file="Docker-Redis.prod.yml"
+    ;;
+    *)
+        echo "Invalid instance option"
+        exit -1
+    ;;
+    esac
+    echo "$return_file"
+}
 
