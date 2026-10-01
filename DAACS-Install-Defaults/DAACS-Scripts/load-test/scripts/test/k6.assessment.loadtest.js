@@ -126,7 +126,8 @@ export let options = {
   insecureSkipTLSVerify:  __ENV.INSECURE_SKIP_TLS == "true" ? true : false,
   // httpDebug: 'full',
   thresholds: {
-    http_req_failed: ['rate<0.01'], // http errors should be less than 0%
+    'http_req_failed{scenario:scenarios}': ['rate<0.01'], // http errors should be less than 0%
+    // http_req_failed: ['rate<0.01'], // http errors should be less than 0%
     'http_req_duration{scenario:scenarios}': ['p(99)<500'], // 100% of requests should be below 500ms
     'http_req_duration{name:login()}': [],
     'http_req_duration{name:get_pdf_url()}': [],
@@ -267,10 +268,10 @@ let total_total = 0;
       // options.duration = "1h";
       // options.iterations = 1
 
-      options.min_login_sleep = 30
+      options.min_login_sleep = 20
       options.max_login_sleep = 45
 
-      options.min_view_start_page_sleep = 30
+      options.min_view_start_page_sleep = 20
       options.max_view_start_page_sleep = 45
        options.maxDuration  = '10h'
     break;
@@ -537,15 +538,13 @@ export default async function (data) {
   const login_sleep = rando_sleep(options.min_login_sleep,  options.max_login_sleep);
 
   if(options.logging_status >= 1){
-    log_student_data_to_console(username, `has logged in and is viewing dashboard page for ${login_sleep} seconds.`)
+    log_student_data_to_console(username, `About to login in ${login_sleep} seconds.`)
   }
 
   sleep(login_sleep);
 
   //login  
   let student_user = await login(username, password);
-  add_length_to_trend(get_JSON_request_length(student_user));
-
   //Do assessments in order that was passed in command line
 
 
@@ -553,6 +552,14 @@ export default async function (data) {
   let dashboard_data = await my_dashboard(student_user)
   log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
 
+
+  // if(options.logging_status >= 1){
+  //   log_student_data_to_console(username, `is viewing dashboard for ${login_sleep} seconds.`)
+  // }
+  // sleep(Math.ceil(login_sleep / 2));
+
+  add_length_to_trend(get_JSON_request_length(student_user));
+  
   switch(options.test){
 
     case "classroom":
@@ -691,7 +698,7 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
 
       }catch(e){
         console.log(e)
-        throw new Error("SDFSDF")
+        throw new Error(`get_assessment_start_data(${user.accessToken})`)
       }
 
   });
@@ -728,7 +735,7 @@ async function get_student_classroom_data(user, classroomSlug){
 
       }catch(e){
         console.log(e)
-        throw new Error("SDFSDF")
+        throw new Error(`get_student_classroom_data(${user.accessToken})`)
       }
 
   });
@@ -763,7 +770,7 @@ async function my_dashboard(user){
 
       }catch(e){
         console.log(e)
-        throw new Error("SDFSDF")
+        throw new Error(`my_dashboard(${user.accessToken})`)
       }
 
   });
@@ -833,7 +840,7 @@ async function run_user_assessment_results_program(student_user, data, classroom
 
     count = count.length + user_assessment_summaries_data.data.attributes.lastUserAssessmentSummary.domainScores.length;
     
-    let range_ = range(1, (count + 1))
+    let range_ = range(1, (count))
     let is_pdf_ready = false;
 
     //no longer need to keep getting summary data since we don't do that anymore
@@ -856,7 +863,7 @@ async function run_user_assessment_results_program(student_user, data, classroom
         }
       }
     }
-
+    let max_get = 5
     //force get PDF if we never got it.
     if(options.run_get_PDF == true && is_pdf_ready === false){
 
@@ -868,11 +875,13 @@ async function run_user_assessment_results_program(student_user, data, classroom
           log_student_data_to_console(username, `pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`);
         }else{
           log_student_data_to_console(username, `pdf URL is not ready. Will check again in 10 seconds`);
+          max_get += 1;
           sleep(10);
         }
 
 
       }while(is_pdf_ready == false)
+      // }while(max_get == 5 || is_pdf_ready == false)
     
     }
 
@@ -1086,6 +1095,11 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
               }
             
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
+              if(question == undefined || question.data == undefined ||  question.data.attributes.isAssessmentDone == undefined ){
+                console.log(`userAssessmentId: ${userAssessmentId}`)
+                console.log(question)
+                throw new Error("BAD ")
+              }
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
           break;
@@ -1280,13 +1294,21 @@ async function log_user_events(user, url, time, title){
       check(response, {
         'status is 200': (r) => r.status === 200
       });
-    
-    
-        const res_json = await response.json();      
-        add_length_to_trend(get_JSON_request_length(res_json));
+      
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+
+    // try{
+        const res_json = await response.json();      
+      add_length_to_trend(get_JSON_request_length(res_json));
+
+          user.total_kb += get_JSON_request_length(res_json);      
+          return resolve(res_json);
+    // }catch(e){
+    //     log_student_data_to_console(user.user.username, `is error page view for ${title}.`)
+
+    //   console.log(e)
+    // }
+    
     
   });
 }
@@ -1521,7 +1543,7 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
 
       }catch(e){
         console.log(e)
-        throw new Error("SDFSDF")
+        throw new Error(`get_user_assessment_summaries_data(${user.accessToken})`)
       }
 
   });

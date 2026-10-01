@@ -86,7 +86,7 @@ function generateUUID() {
     const roles = db.collection("roles");
 
     await users.deleteMany({"firstName": "student"});
-    // await user_assessments.deleteMany({});
+    await user_assessments.deleteMany({});
 
     
     let list_of_ids = [];
@@ -129,6 +129,12 @@ function generateUUID() {
 
     const classrooms = db.collection("classrooms");
     await classrooms.deleteMany({});
+
+    const tokens = db.collection("tokens");
+    await tokens.deleteMany({});
+    
+    const event_containers = db.collection("event_containers");
+    await event_containers.deleteMany({});
 
     let students_per_class = 30
     let classrooms_to_create = Math.ceil(NUMBER_TO_UPLOAD / students_per_class)
