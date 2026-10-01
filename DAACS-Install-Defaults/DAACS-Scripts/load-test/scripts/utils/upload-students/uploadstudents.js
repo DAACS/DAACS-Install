@@ -70,6 +70,37 @@ function generateUUID() {
     });
   }
 
+  function create_user(i, prefix){
+
+      const id = generateUUID();
+      const username =  `${prefix}.test`+ i;
+      const firstname = `${prefix}`;
+      const lastname = `test`+i;
+      const hashed_password = `5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8`;
+      const email = `${prefix}.test`+ i+ `@victor.com`;
+
+          var user = {
+                _id:  id,
+                username: username.trim(),
+                password: hashed_password,
+                firstName: firstname,
+                lastName: lastname,
+                email: email.trim(), 
+                createdDate: new Date(),
+                isUserDisabled: false,
+                verifyAccountToken: "asdfasfsf"+ i,
+                verifiedAccount: true,
+                isSamlAccount: false,
+                pdfFileURL:"",
+                q_status: "",
+                classroom_pdf: {}
+            };
+
+
+            return user;
+
+  }
+
   (async () =>{
 
     let id = "test1";
@@ -100,22 +131,24 @@ function generateUUID() {
       const hashed_password = "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8";
       const email = "student.test"+ i+ "@victor.com";
 
-          var user = {
-                _id:  id,
-                username: username.trim(),
-                password: hashed_password,
-                firstName: firstname,
-                lastName: lastname,
-                email: email.trim(), 
-                createdDate: new Date(),
-                isUserDisabled: false,
-                verifyAccountToken: "asdfasfsf"+ i,
-                verifiedAccount: true,
-                isSamlAccount: false,
-                pdfFileURL:"",
-                q_status: "",
-                classroom_pdf: {}
-            };
+          // var user = {
+          //       _id:  id,
+          //       username: username.trim(),
+          //       password: hashed_password,
+          //       firstName: firstname,
+          //       lastName: lastname,
+          //       email: email.trim(), 
+          //       createdDate: new Date(),
+          //       isUserDisabled: false,
+          //       verifyAccountToken: "asdfasfsf"+ i,
+          //       verifiedAccount: true,
+          //       isSamlAccount: false,
+          //       pdfFileURL:"",
+          //       q_status: "",
+          //       classroom_pdf: {}
+          //   };
+
+          let user = create_user(i, prefix)
 
     await users.insertOne(user)
 
@@ -126,6 +159,12 @@ function generateUUID() {
     // //add ids to student role
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: []  }} );
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: list_of_ids  }} );
+
+
+
+
+    //todo -create instructors to login to classrooms
+
 
     const classrooms = db.collection("classrooms");
     await classrooms.deleteMany({});
@@ -142,10 +181,13 @@ function generateUUID() {
 
     for(let i = 1; i <= classrooms_to_create; i++){
 
+          let user = create_user(i, prefix)
+    await users.insertOne(user)
+
       // console.log(i)
         //create classroom
         let data = {};
-        const author_id = "1"
+        const author_id = user._id
         let classroom_id = crypto.randomUUID().toString();
         data._id = classroom_id;
         data.title = "Load test "+ i;
