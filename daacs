@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w:x:y:" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w:x:y:z:p:" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -171,11 +171,13 @@ do
       j ) parameterJ="$OPTARG" ;; #not used at all
       e ) parameterE="$OPTARG" ;; #environment_type
       k ) parameterK="$OPTARG" ;; #environment_type
+      p ) parameterP="$OPTARG" ;; #environment_type
       r ) parameterR="$OPTARG" ;; #environment_type
       u ) parameterU="$OPTARG" ;; #environment_type
       w ) parameterW="$OPTARG" ;; #environment_type
       x ) parameterX="$OPTARG" ;; #environment_type
       y ) parameterY="$OPTARG" ;; #environment_type
+      z ) parameterZ="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -202,13 +204,26 @@ daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self
 
 #K6 RESET LOAD TEST DB
 
-daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065
-daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065 -z 15
+daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -z 15
 
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
+daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -k 27065 
 
 #CLEAR CONTAINER LOGS
 daacs -f clear-docker-logs -a yogurtweb
 
+#FLUSH REDIS
+daacs -f flushredis -a rediscontainername -p google
+
+
+
+
+#LOAD TEST
+
+#restart whole test
+daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -k 27065   &&  daacs -f clear-docker-logs -a yogurtweb && docker restart 4f6a95840bdd  && daacs -f flushredis -a redisdaacs -p google
 
 
 '
@@ -297,6 +312,18 @@ else
 
             ;;
 
+            "flushredis") 
+        
+                 service_name=$parameterA
+                ids=$(get_services_ids_by_service_name $service_name)
+                IFS=" " read -ra ADDR <<< "$ids"
+                # echo $ids
+                
+                cmd="docker exec -it $ids redis-cli -a $parameterP FLUSHALL > /dev/null 2>&1"
+                printf "Running flush on ${parameterA} \n"
+                eval "$cmd"
+            ;;
+
             "restore-mongo-data") 
                 MONGODB_CERT_PATH="" MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_CONTAINER_NAME="" PORT="" MONGODB_DATABASE_NAME="" PATH_TO_DUMP="" 
 
@@ -367,6 +394,43 @@ else
             ;;
 
 
+            "refreshloadtestdb")
+
+                MONGODB_CRT=""
+                MONDGODB_PEM=""
+                MONGODB_SSL=""
+                NUMBER_TO_UPLOAD=""
+                
+                #put k6 logs into file
+                if [[ "$parameterG" == "true" ]]; then
+                    MONGODB_CRT="$current_dir/new-env-setups/$parameterA/ssl/home/mongodb.crt"
+                    MONDGODB_PEM="$current_dir/new-env-setups/$parameterA/ssl/home/mongodb.pem"
+                    MONGODB_SSL=true
+                fi
+
+                if [[ "$parameterH" != "" ]]; then
+                    NUMBER_TO_UPLOAD=$parameterH
+                fi
+
+                if [[ "$parameterC" != "" ]]; then
+                    MONGODB_HOST=$parameterC
+                fi
+
+                if [[ "$parameterK" != "" ]]; then
+                    MONGODB_PORT=$parameterK
+                fi
+
+                mongo_envs=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
+
+                export $mongo_envs
+                cmd="MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/refreshloadtestdb/refreshloadtestdb.js"
+                
+                #  echo $cmd
+                eval "$cmd"
+
+            ;;
+
+
             "resetloadtestdb")
 
                 MONGODB_CRT=""
@@ -392,10 +456,14 @@ else
                 if [[ "$parameterK" != "" ]]; then
                     MONGODB_PORT=$parameterK
                 fi
+
+                if [[ "$parameterZ" != "" ]]; then
+                    STUDENTS_PER_CLASS=$parameterZ
+                fi
                 mongo_envs=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
 
                 export $mongo_envs
-                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
+                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK STUDENTS_PER_CLASS=$STUDENTS_PER_CLASS node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
                 
                 #  echo $cmd
                 eval "$cmd"

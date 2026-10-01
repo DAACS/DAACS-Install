@@ -26,6 +26,7 @@ let replicaSet = "";
 let host = "";
 let mongo_query_string = "?";
 let NUMBER_TO_UPLOAD = 1;
+let STUDENTS_PER_CLASS = 30;
 
 if(process.env.REPLICA_SET != undefined){
   host = process.env.MONGODB_HOST;
@@ -44,6 +45,10 @@ if(process.env.MONGODB_SSL != undefined && process.env.MONGODB_SSL == "true"){
 if(process.env.NUMBER_TO_UPLOAD != undefined && isNaN(parseInt(process.env.NUMBER_TO_UPLOAD)) == false){
 
   NUMBER_TO_UPLOAD =  parseInt(process.env.NUMBER_TO_UPLOAD)
+}
+if(process.env.STUDENTS_PER_CLASS != undefined && isNaN(parseInt(process.env.STUDENTS_PER_CLASS)) == false){
+
+  STUDENTS_PER_CLASS =  parseInt(process.env.STUDENTS_PER_CLASS)
 }
 
 // console.log(process.env)
@@ -117,41 +122,16 @@ function generateUUID() {
     const roles = db.collection("roles");
 
     await users.deleteMany({"firstName": "student"});
+    await users.deleteMany({"firstName": "instructor"});
     await user_assessments.deleteMany({});
 
     
     let list_of_ids = [];
 
     for(let i = 1; i <= NUMBER_TO_UPLOAD; i++){
-
-      const id = generateUUID();
-      const username =  "student.test"+ i;
-      const firstname = "student";
-      const lastname = "test"+i;
-      const hashed_password = "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8";
-      const email = "student.test"+ i+ "@victor.com";
-
-          // var user = {
-          //       _id:  id,
-          //       username: username.trim(),
-          //       password: hashed_password,
-          //       firstName: firstname,
-          //       lastName: lastname,
-          //       email: email.trim(), 
-          //       createdDate: new Date(),
-          //       isUserDisabled: false,
-          //       verifyAccountToken: "asdfasfsf"+ i,
-          //       verifiedAccount: true,
-          //       isSamlAccount: false,
-          //       pdfFileURL:"",
-          //       q_status: "",
-          //       classroom_pdf: {}
-          //   };
-
-          let user = create_user(i, prefix)
-
-    await users.insertOne(user)
-
+      let user = create_user(i, "student")
+      let id = user._id
+      await users.insertOne(user)
       list_of_ids.push(id)
 
     }
@@ -159,9 +139,6 @@ function generateUUID() {
     // //add ids to student role
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: []  }} );
     await roles.findOneAndUpdate({slug: "student"},{$set: { users: list_of_ids  }} );
-
-
-
 
     //todo -create instructors to login to classrooms
 
@@ -175,16 +152,21 @@ function generateUUID() {
     const event_containers = db.collection("event_containers");
     await event_containers.deleteMany({});
 
-    let students_per_class = 30
-    let classrooms_to_create = Math.ceil(NUMBER_TO_UPLOAD / students_per_class)
+    
+    let classrooms_to_create = Math.ceil(NUMBER_TO_UPLOAD / STUDENTS_PER_CLASS)
       let student_count = 0
+
+    let list_of_instructor_ids = [];
 
     for(let i = 1; i <= classrooms_to_create; i++){
 
-          let user = create_user(i, prefix)
-    await users.insertOne(user)
+        let user = create_user(i, "instructor")
+        let id = user._id
 
-      // console.log(i)
+        list_of_instructor_ids.push(id)
+
+        await users.insertOne(user)
+
         //create classroom
         let data = {};
         const author_id = user._id
@@ -201,7 +183,7 @@ function generateUUID() {
         data.invite_link_code = crypto.randomUUID().toString();
         data.status = 3
         data.case_manager_limit = 5
-        data.enrolled_student_limit = 40
+        data.enrolled_student_limit = STUDENTS_PER_CLASS
         data.send_enrollment_emails_for_student = false;
         data.send_enrollment_emails_for_instructor = false; 
         data.lti_classroom = false;
@@ -211,9 +193,9 @@ function generateUUID() {
         data.students = []
         
         //add students to classroom
-        let up_to_index = ((i- 1) * students_per_class) 
+        let up_to_index = ((i- 1) * STUDENTS_PER_CLASS) 
 
-        for(let index = ((i- 1) * students_per_class)  ; index < ( i * students_per_class) ; index ++){
+        for(let index = ((i- 1) * STUDENTS_PER_CLASS)  ; index < ( i * STUDENTS_PER_CLASS) ; index ++){
 
           if(list_of_ids[index] == undefined){
             break;
@@ -243,6 +225,10 @@ function generateUUID() {
         await classrooms.insertOne(data)
 
     }
+
+        // //add ids to student role
+    await roles.findOneAndUpdate({slug: "instructor-full"},{$set: { users: []  }} );
+    await roles.findOneAndUpdate({slug: "instructor-full"},{$set: { users: list_of_instructor_ids  }} );
 
     await client.close();
 
