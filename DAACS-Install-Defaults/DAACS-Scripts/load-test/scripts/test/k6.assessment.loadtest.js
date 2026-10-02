@@ -698,7 +698,6 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
         return resolve(res_json);
 
       }catch(e){
-        console.log(e)
         console.log(`get_assessment_start_data(${user.accessToken})`)
       }
 
@@ -735,7 +734,6 @@ async function get_student_classroom_data(user, classroomSlug){
         return resolve(res_json);
 
       }catch(e){
-        console.log(e)
         console.log(`get_student_classroom_data(${user.accessToken})`)
       }
 
@@ -770,7 +768,6 @@ async function my_dashboard(user){
         return resolve(res_json);
 
       }catch(e){
-        console.log(e)
         console.log(`my_dashboard(${user.accessToken})`)
       }
 
@@ -1157,7 +1154,6 @@ async function login(username, password){
       res_json.total_kb = parseInt(total_kb); 
     return resolve(res_json);
   }catch(e){
-      console.log(e)
       console.log(`login(${username})`)
       
   }
@@ -1557,7 +1553,6 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
         return resolve(res_json);
 
       }catch(e){
-        console.log(e)
         console.log(`get_user_assessment_summaries_data(${user.accessToken})`)
       }
 
