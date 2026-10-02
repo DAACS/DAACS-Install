@@ -699,7 +699,7 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
 
       }catch(e){
         console.log(e)
-        throw new Error(`get_assessment_start_data(${user.accessToken})`)
+        console.log(`get_assessment_start_data(${user.accessToken})`)
       }
 
   });
@@ -736,7 +736,7 @@ async function get_student_classroom_data(user, classroomSlug){
 
       }catch(e){
         console.log(e)
-        throw new Error(`get_student_classroom_data(${user.accessToken})`)
+        console.log(`get_student_classroom_data(${user.accessToken})`)
       }
 
   });
@@ -771,7 +771,7 @@ async function my_dashboard(user){
 
       }catch(e){
         console.log(e)
-        throw new Error(`my_dashboard(${user.accessToken})`)
+        console.log(`my_dashboard(${user.accessToken})`)
       }
 
   });
@@ -930,28 +930,39 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
   const view_start_page_sleep = rando_sleep(options.min_view_start_page_sleep, options.max_view_start_page_sleep);
 
-  if(options.logging_status >= 1){
-      log_student_data_to_console(username, `is viewing ${title} start page for: ${view_start_page_sleep} seconds`) 
-  }
+
 
      if(classroomSlug != undefined){
+        if(options.logging_status >= 1){
+          log_student_data_to_console(username, `is viewing ${title} classroom assessment start page for: ${view_start_page_sleep} seconds`) 
+      }
+
       log_user_events(student_user,  `${options.host}/s/classroom/${classroomSlug}/assessments/${assessmentId}/start`, new Date() , `Assessment - ${title}`)
 
     }else{
+      
+        if(options.logging_status >= 1){
+      log_student_data_to_console(username, `is viewing ${title} assessment start page for: ${view_start_page_sleep} seconds`) 
+  }
       log_user_events(student_user,  `${options.host}/s/assessments/${assessmentId}/start`, new Date() , `Assessment - ${assessmentId}`)
 
     }
   sleep(view_start_page_sleep);
 
   //create assessment  
-  let create_assessment_data = await create_assessment(student_user, assessmentId, classroomSlug);
+  const create_assessment_data = await create_assessment(student_user, assessmentId, classroomSlug);
   if(options.logging_status >= 1){
       log_student_data_to_console(username, `created ${title} user assessment. With answer type: ${options.answer_type}`) 
   }
 
   //get users assessment in progroess
-  let users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId, classroomSlug);
+  const users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId, classroomSlug);
   const userAssessment = users_assessment_in_progress.included.find( e => e.type == "userAssessment");
+
+  if(users_assessment_in_progress == undefined || users_assessment_in_progress.included == undefined || users_assessment_in_progress.included?.find == undefined){
+      console.log(`${username} couldn't find user assessment?`)
+      console.log(create_assessment_data)
+  }
   let userAssessmentId = userAssessment.attributes._id;
   let question = await get_users_assessment_question(student_user, assessmentId, classroomSlug);
   let assessmentType = data.data.attributes.assessmentType;
@@ -1072,7 +1083,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                       assessmentId: assessmentId,
                       userAssessmentId: userAssessmentId,
                       questionId:questionId, 
-                      classroomSlug: classroomSlug,
+                      classroomslug: classroomSlug,
                       answer: []
                   }
                   indiviual_answer.answer.push(answer[0])
@@ -1096,11 +1107,12 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
               }
             
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
-              if(question == undefined || question.data == undefined ||  question.data.attributes.isAssessmentDone == undefined ){
-                console.log(`userAssessmentId: ${userAssessmentId}`)
-                console.log(question)
-                throw new Error("BAD ")
-              }
+              // if(question == undefined || question.data == undefined ||  question.data.attributes.isAssessmentDone == undefined ){
+              //   console.log(`userAssessmentId: ${userAssessmentId}`)
+              //   console.log("question")
+              //   console.log(question)
+              //   throw new Error("BAD ")
+              // }
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
           break;
@@ -1146,6 +1158,8 @@ async function login(username, password){
     return resolve(res_json);
   }catch(e){
       console.log(e)
+      console.log(`login(${username})`)
+      
   }
 
 });
@@ -1544,7 +1558,7 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
 
       }catch(e){
         console.log(e)
-        throw new Error(`get_user_assessment_summaries_data(${user.accessToken})`)
+        console.log(`get_user_assessment_summaries_data(${user.accessToken})`)
       }
 
   });

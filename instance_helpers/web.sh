@@ -700,7 +700,7 @@ update_webserver_instance_helper(){
     env_dir="ENV_DIR=$env_absolute_dir$environment_type_defintion-"
 
     env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${webserver_port} ${webserver_replicas} ${mongo_envs} ${redis_envs} "
-    echo $env_string
+    # echo $env_string
     run_docker_with_envs "$webserver_docker_file_to" "$env_string"
     
     services_file_dir="$root_dest/$install_folder_destination/services"
