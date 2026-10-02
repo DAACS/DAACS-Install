@@ -353,10 +353,11 @@ let total_total = 0;
       // DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=2 MAX_VUS=50
       // ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="fast" LOAD_TEST_TYPE_SCENRIO="stages-constant-arrival-rate" DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=0 MAX_VUS=50 RUN_GET_PDF=true RUN_GET_ASSESSMENT_RESULTS=true k6 run k6.assessment.loadtest.js --out json=k6.json
 
+      // DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=2 MAX_VUS=50
       duration = __ENV.DURATION;
       let rate = parseInt(__ENV.RATE);
       timeUnit = __ENV.TIME_UNIT;
-      preAllocatedVUs = parseInt(__ENV.PRE_ALLOCATED_VUS);
+      preAllocatedVUs = parseInt(0);
       let maxVUs = parseInt(__ENV.MAX_VUS);
 
       options.scenarios = {
@@ -380,7 +381,6 @@ let total_total = 0;
 
         }
       } 
-
     break;
 
     case "stages-ramping-arrival-rate":
@@ -453,6 +453,7 @@ function map_stages(stages){
 
 export async function  setup() {
 
+      console.log(options.scenarios)
 
   //reset database 
 

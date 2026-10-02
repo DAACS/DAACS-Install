@@ -154,7 +154,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w:x:y:z:p:" opt
+while getopts "f:s:a:q:b:d:t:i:e:c:g:h:j:k:r:u:w:x:y:z:p:l:" opt
 do
    case "$opt" in
       f ) parameterF="$OPTARG" ;; #function to run 
@@ -178,6 +178,7 @@ do
       x ) parameterX="$OPTARG" ;; #environment_type
       y ) parameterY="$OPTARG" ;; #environment_type
       z ) parameterZ="$OPTARG" ;; #environment_type
+      l ) parameterL="$OPTARG" ;; #environment_type
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -202,6 +203,9 @@ daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self
 daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t dashboard -u 1 -w 1 -x 1 -y "100%"
 daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t random -u 1 -w 1 -x 1 -y "100%"
 
+ daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -e "self-regulated-learning" -j 2 -g human  -h true -i true -s 10 -t random -u 1 -w 1 -x 1 -y "100%" -l stages-constant-arrival-rate
+ daacs -f runk6 -a admin,password -b https://yogurt.victor.com -c true -e "self-regulated-learning" -j 2 -g medium  -h true -i true -s 10 -t classroom -u 1 -w 1 -x 15 -y "100%" 
+
 #K6 RESET LOAD TEST DB
 
 daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065 -z 15
@@ -209,6 +213,8 @@ daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" 
 
 daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
 daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
+
+#REFRESH LOAD TEST DB
 daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -k 27065 
 
 #CLEAR CONTAINER LOGS
@@ -336,7 +342,7 @@ else
             ;;
 
             "runk6") 
-
+                LOAD_TEST_TYPE_SCENRIO=""
                 #put console output into file
                 if [[ "$parameterQ" == "true" ]]; then
                     parameterQ="--console-output="test_output.log" "
@@ -375,10 +381,35 @@ else
                 if [[ "$parameterY" == "" ]]; then
                     parameterY="RANDOM"
                 fi
+                if [[ "$parameterY" == "" ]]; then
+                    LOAD_TEST_TYPE_SCENRIO="per-vu-iterations"
+                    else
+                    LOAD_TEST_TYPE_SCENRIO=$parameterL
+                fi
+
+                DURATION="" 
+                RATE="" 
+                TIME_UNIT="" 
+                MAX_VUS="" 
+                
+                if [[ "$LOAD_TEST_TYPE_SCENRIO" == "stages-constant-arrival-rate" ]]; then
+
+                    DURATION="10h" 
+                    RATE="100" 
+                    # TIME_UNIT="5m" # this get .33 itersations a second to login
+                    TIME_UNIT="2m"  # this get .83 itersations a second to login
+                    MAX_VUS="1000" 
+                    parameterX=$MAX_VUS
+                fi
 
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
-                # echo $cmd
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} MAX_VUS=${MAX_VUS} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
+
+# daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t random -u 1 -w 1 -x 1 -y "100%" -lt stages-constant-arrival-rate
+
+                #   ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="fast" LOAD_TEST_TYPE_SCENRIO="stages-constant-arrival-rate" DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=0 MAX_VUS=50 RUN_GET_PDF=true RUN_GET_ASSESSMENT_RESULTS=true k6 run k6.assessment.loadtest.js --out json=k6.json
+
+                echo $cmd
                 eval "$cmd"
             ;;
 

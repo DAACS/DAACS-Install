@@ -1,27 +1,3 @@
-/*
-
-MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_HOST="IP" MONGODB_PORT="PORT" MONGODB_DATABASE_NAME="" node /Users/victormckenzie/webdev/daacs-loadtest/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/uploadstudents.js
-MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_HOST="IP" MONGODB_PORT="PORT" MONGODB_DATABASE_NAME="" node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js
-
-cat "/home/moo/DAACS-Install/new-env-setups/mongossl/databases/yogurt/webserver-mongo" |  node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js
-
-export $(cat "/home/moo/DAACS-Install/new-env-setups/mongossl/databases/yogurt/webserver-mongo" | xargs) && node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js
-
-
-echo $(cat "/home/moo/DAACS-Install/new-env-setups/mongossl/databases/yogurt/webserver-mongo")  &&  node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js
-
-
-
-MONGO_USERNAME="" MONGO_PASSWORD="" MONGODB_HOST="IP:PORT,IP:PORT,IP:PORT" MONGODB_DATABASE_NAME="" REPLICA_SET="" node /Users/victormckenzie/webdev/daacs-loadtest/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/uploadstudents.js
-
-MONGODB_CRT=/Users/victormckenzie/Desktop/newmongo/home/mongodb.crt
-MONDGODB_PEM=/Users/victormckenzie/Desktop/newmongo/home/mongodb.pem
-
-directConnection=true&serverSelectionTimeoutMS=2000&authSource=admin&tls=true&tlsCAFile=${MONGODB_CRT}&tlsCertificateKeyFile=${MONDGODB_PEM}&appName=mongosh 2.4.0&tlsAllowInvalidHostnames=true
-
-
-*/
-
 let replicaSet = "";
 let host = "";
 let mongo_query_string = "?";
