@@ -1,82 +1,5 @@
 // https://grafana.com/docs/k6/latest/using-k6/k6-options/reference/#summary-mode
-
-
-
 // https://grafana.com/docs/k6/latest/results-output/end-of-test/custom-summary/
-
-
-// scripts/test/k6.assessment.loadtest.js
-// data/input/teststudents.csv
-// output=file=data/output/k6.log
-
-/**
-  k6 run k6.assessment.loadtest.js --env ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
-
-  k6 run k6.assessment.loadtest.js --env ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365"
-  
-  ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js 
- 
-  k6 run k6.assessment.loadtest.js --env ASSESSMENT_ID="e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
-k6 run k6.assessment.loadtest.js --env ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f"
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f,46997151-21a3-4eef-b657-e7dcdd913481" k6 run k6.assessment.loadtest.js
-
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" k6 run --out csv=test_results.csv k6.assessment.loadtest.js
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run --out csv=test_results.csv k6.assessment.loadtest.js
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365" k6 run k6.assessment.loadtest.js
-
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" k6 run k6.assessment.loadtest.js
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s k6 run k6.assessment.loadtest.js
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s k6 run k6.assessment.loadtest.js
-
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="79ba2ed2-0d9a-4eaf-8b3e-ae54ccfaa365,795c8469-9bdd-439a-9251-34457bd04adc,46997151-21a3-4eef-b657-e7dcdd913481,e1ca9e67-2882-4ebb-b3e7-0ac02b321c8f" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html k6 run k6.assessment.loadtest.js
-
-
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" k6 run k6.assessment.loadtest.js
-
-
-
-ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" K6_SUMMARY_MODE="full" LOGGING_STATUS=1 k6 run k6.assessment.loadtest.js --log-output=file=./k6.log
-
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" K6_SUMMARY_MODE="full" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html  k6 run k6.assessment.loadtest.js --log-output=file=./k6.log  --out json=k6.json
-
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html  k6 run k6.assessment.loadtest.js --log-output=file=./k6.log  --out json=k6.json
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html MAX_LOGIN_SLEEP=15  k6 run k6.assessment.loadtest.js --log-output=file=./k6.log  --out json=k6.json
-
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED=fase k6 run k6.assessment.loadtest.js --out json=k6.json
-
-
- VUS TEST
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED=fast LOAD_TEST_TYPE_SCENRIO="vus" VUS=1 INTERATION=1 k6 run k6.assessment.loadtest.js --out json=k6.json
-
-
- STAGES TEST 
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="fast" LOAD_TEST_TYPE_SCENRIO="stages-1" k6 run k6.assessment.loadtest.js --out json=k6.json
-
-
- ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="slow" LOAD_TEST_TYPE_SCENRIO="stages-ramping-vus" STAGES="30s:100,30s:200,30s:500,30s:200,30s:0" GRACEFUL_STOP="300s" GRACEFUL_RAMP_DOWN="300s" RUN_GET_PDF=false RUN_GET_ASSESSMENT_RESULTS=true MAX_LOGIN_SLEEP=30 INSECURE_SKIP_TLS="true" k6 run k6.assessment.loadtest.js --out json=k6.json
-
-
- *  */ 
-
-//  const metrics = {
-//   getUserResponseTime: new Trend("get_user_response_time", true),
-//   updateUserResponseTime: new Trend("update_user_response_time", true),
-//   deleteUserResponseTime: new Trend("delete_user_response_time", true),
-// };
-
 // https://www.google.com/search?q=k6+metrics+per+vu&rlz=1C5OZZY_enUS1152US1152&oq=k6+metrics+per+vu&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRiPAjIHCAIQIRiPAtIBCDM0MjFqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
 // https://oneuptime.com/blog/post/2026-01-28-k6-scenarios/view
 // https://github.com/clinicjs/node-clinic
@@ -94,18 +17,12 @@ import { Gauge, Counter, Rate, Trend } from 'k6/metrics';
 // const slowEndpointTrend = new Trend('slow_endpoint_duration');
 
 
-const myTrend = new Counter('total_byes');
+// const myTrend = new Counter('total_byes');
     const basePath = __ENV.PWD +'/../'
 
 
 export let options = {
   assessment_id: __ENV.ASSESSMENT_ID,
-  // min_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
-  // max_login_sleep: __ENV.MAX_LOGIN_SLEEP == undefined ? 15 : __ENV.MAX_LOGIN_SLEEP,
-  // min_view_start_page_sleep: __ENV.MIN_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MIN_VIEW_START_PAGE_SLEEP,
-  // max_view_start_page_sleep: __ENV.MAX_VIEW_START_PAGE_SLEEP == undefined ? 15 : __ENV.MAX_VIEW_START_PAGE_SLEEP,
-
-
   min_login_sleep: 1,
   max_login_sleep: 1,
   min_view_start_page_sleep: 1,
@@ -115,7 +32,8 @@ export let options = {
   logging_status: __ENV.LOGGING_STATUS == undefined ? 0 : parseInt(__ENV.LOGGING_STATUS),
   host: __ENV.HOST,
   test: __ENV.TEST,
-  // student_file: __ENV.STUDENT_FILE,
+  duration_val: __ENV.DURATION,
+  // maxDuration: __ENV.DURATION,
   number_of_users: __ENV.NUMBER_OF_USERS == undefined || isNaN(parseInt(__ENV.NUMBER_OF_USERS)) == true ? 1 : parseInt(__ENV.NUMBER_OF_USERS),
   number_of_iteration: __ENV.ITERATION == undefined || isNaN(parseInt(__ENV.ITERATION)) == true ? 1 : parseInt(__ENV.ITERATION),
   answer_type: __ENV.ANSWER_TYPE == undefined  ? "RANDOM" : __ENV.ANSWER_TYPE,
@@ -124,7 +42,6 @@ export let options = {
   run_get_assessment_results: __ENV.RUN_GET_ASSESSMENT_RESULTS == "true" ? true : false,
   load_test_type_speed: __ENV.LOAD_TEST_TYPE_SPEED,
   insecureSkipTLSVerify:  __ENV.INSECURE_SKIP_TLS == "true" ? true : false,
-  // httpDebug: 'full',
   thresholds: {
     'http_req_failed{scenario:scenarios}': ['rate<0.01'], // http errors should be less than 0%
     // http_req_failed: ['rate<0.01'], // http errors should be less than 0%
@@ -211,7 +128,6 @@ let total_total = 0;
             
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 1
-       options.maxDuration  = '1h'
     break;
 
 
@@ -231,7 +147,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 5
-       options.maxDuration  = '1h'
+      
 
     break;
 
@@ -252,7 +168,7 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 1
       options.max_view_start_page_sleep = 10
-       options.maxDuration  = '1h'
+      
     break;
 
     case "human":
@@ -264,16 +180,11 @@ let total_total = 0;
       options.assessmentTypeOptions.writing.max_sleep =  15;
       options.assessmentTypeOptions.likert.min_sleep = 25;
       options.assessmentTypeOptions.likert.max_sleep =  45;
-      // options.maxDuration = "1h";
-      // options.duration = "1h";
-      // options.iterations = 1
-
       options.min_login_sleep = 20
       options.max_login_sleep = 45
 
       options.min_view_start_page_sleep = 20
       options.max_view_start_page_sleep = 45
-       options.maxDuration  = '10h'
     break;
 
 
@@ -293,7 +204,6 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 30
       options.max_view_start_page_sleep = 60
-       options.maxDuration  = '10h'
     break;
   }
 
@@ -313,8 +223,8 @@ let total_total = 0;
         contacts: {
           executor: 'constant-vus',
           vus:vus,
-          duration: duration,
-          
+          duration: options.duration,
+          maxDuration: options.duration,
         }
       } 
 
@@ -333,6 +243,8 @@ let total_total = 0;
           executor: 'ramping-vus',
           startvus: start_vus,
           stages: stages,
+          duration: options.duration_val,
+          maxDuration: options.duration_val,
         },
       } 
 
@@ -354,17 +266,19 @@ let total_total = 0;
       // ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" STUDENT_FILE="teststudents.csv" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="fast" LOAD_TEST_TYPE_SCENRIO="stages-constant-arrival-rate" DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=0 MAX_VUS=50 RUN_GET_PDF=true RUN_GET_ASSESSMENT_RESULTS=true k6 run k6.assessment.loadtest.js --out json=k6.json
 
       // DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=2 MAX_VUS=50
-      duration = __ENV.DURATION;
+      // duration = options.duration;
+      // duration = __ENV.DURATION;
       let rate = parseInt(__ENV.RATE);
       timeUnit = __ENV.TIME_UNIT;
       preAllocatedVUs = parseInt(0);
-      let maxVUs = parseInt(__ENV.MAX_VUS);
+      let maxVUs = parseInt(options.number_of_users);
 
       options.scenarios = {
         contacts: {
           executor: 'constant-arrival-rate',
           // How long the test lasts
-          duration: duration,
+          duration: options.duration_val,
+          // maxDuration: options.duration,
 
           // How many iterations per timeUnit
           rate: rate,
@@ -381,6 +295,8 @@ let total_total = 0;
 
         }
       } 
+
+      // options.duration = undefined;
     break;
 
     case "stages-ramping-arrival-rate":
@@ -405,6 +321,7 @@ let total_total = 0;
 
           // Pre-allocate necessary VUs.
           preAllocatedVUs: preAllocatedVUs,
+          maxDuration: options.duration_val,
 
         }
       } 
@@ -414,13 +331,12 @@ let total_total = 0;
     case "per-vu-iterations":
       default:
 
-
         options.scenarios =  { 
           scenarios: {
           executor: 'per-vu-iterations',
           vus: options.number_of_users,
           iterations: options.number_of_iteration,
-          maxDuration: options.maxDuration,
+          maxDuration: options.duration_val,
       }
     }
     break;
@@ -453,12 +369,6 @@ function map_stages(stages){
 
 export async function  setup() {
 
-      console.log(options.scenarios)
-
-  //reset database 
-
-  
-  // console.log(options)
   let [admin_username, admin_password] = options.admin_credentials.split(",")
   let admin_user = await login(admin_username, admin_password);
   options.assessment_id = options.assessment_id.split(",")
@@ -548,7 +458,6 @@ export default async function (data) {
   let student_user = await login(username, password);
   //Do assessments in order that was passed in command line
 
-
   //Dashboard
   let dashboard_data = await my_dashboard(student_user)
   log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
@@ -559,7 +468,7 @@ export default async function (data) {
   // }
   // sleep(Math.ceil(login_sleep / 2));
 
-  add_length_to_trend(get_JSON_request_length(student_user));
+  // add_length_to_trend(get_JSON_request_length(student_user));
   
   switch(options.test){
 
@@ -570,10 +479,7 @@ export default async function (data) {
     
     case "random":
 
-        var rand = Math.random();
-        var f = getFunction(rand);
-
-        switch(f()){
+        switch(getFunction(Math.random())()){
 
           case "classroom":
             await run_classroom_program(student_user, options, dashboard_data, data)
@@ -607,7 +513,7 @@ async function run_dashboard_program(student_user, options, dashboard_data, data
 
   log_user_events(student_user,  options.host + "/s", new Date() , `Dashboard`)
 
-  total_total += student_user.total_kb;
+  // total_total += student_user.total_kb;
 
   // //SRL has to be done first then lets randomize the order of assessments (Math, reading, writing)
   for (const ee of   options.assessment_id.split(",")) {
@@ -615,12 +521,10 @@ async function run_dashboard_program(student_user, options, dashboard_data, data
     await run_program(student_user, data.assessments ,  ee ) 
 
     if(options.run_get_assessment_results == true){
-    const assessment = data.assessments.find(e => e.data.attributes.slug == ee)
-
       await run_user_assessment_results_program(student_user,  data.assessments.find(e => e.data.attributes.slug == ee) )
     }
 
-    total_total += student_user.total_kb;
+    // total_total += student_user.total_kb;
 
   }
 }
@@ -657,7 +561,7 @@ async function run_classroom_program(student_user, options,  dashboard_data, dat
           await run_user_assessment_results_program(student_user, data.assessments.find(e => e.data.attributes.slug == assessmentSlug), classroomSlug )
         }
 
-        total_total += student_user.total_kb;
+        // total_total += student_user.total_kb;
           
       }
     }
@@ -674,6 +578,7 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
         'Authorization': 'Bearer '+ user.accessToken
       },
         tags: { name: 'get_assessment_start_data()' }, 
+        responseType: 'none'
     };
     try{
       
@@ -690,12 +595,12 @@ async function get_assessment_start_data(user,assessmentId, classroomSlug){
     check(response, {
       'status is 200': (r) => r.status === 200
     });
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);
-
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);
+          return resolve()
+        // return resolve(await res_json.json());
 
       }catch(e){
         console.log(`get_assessment_start_data(${user.accessToken})`)
@@ -726,12 +631,12 @@ async function get_student_classroom_data(user, classroomSlug){
     check(response, {
       'status is 200': (r) => r.status === 200
     });
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);
 
-        return resolve(res_json);
+        return resolve(await response.json());
 
       }catch(e){
         console.log(`get_student_classroom_data(${user.accessToken})`)
@@ -760,12 +665,12 @@ async function my_dashboard(user){
     check(response, {
       'status is 200': (r) => r.status === 200
     });
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);
 
-        return resolve(res_json);
+        return resolve(await response.json());
 
       }catch(e){
         console.log(`my_dashboard(${user.accessToken})`)
@@ -861,7 +766,6 @@ async function run_user_assessment_results_program(student_user, data, classroom
         }
       }
     }
-    let max_get = 5
     //force get PDF if we never got it.
     if(options.run_get_PDF == true && is_pdf_ready === false){
 
@@ -873,13 +777,11 @@ async function run_user_assessment_results_program(student_user, data, classroom
           log_student_data_to_console(username, `pdf URL is: ${student_user.pdf_url}. Don't need to check anymore`);
         }else{
           log_student_data_to_console(username, `pdf URL is not ready. Will check again in 10 seconds`);
-          max_get += 1;
           sleep(10);
         }
 
 
       }while(is_pdf_ready == false)
-      // }while(max_get == 5 || is_pdf_ready == false)
     
     }
 
@@ -924,7 +826,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   let title = data.data.attributes.title;
   let username = student_user.user.username;
 
-  let start_data = await get_assessment_start_data(student_user, assessmentId, classroomSlug);
+ await get_assessment_start_data(student_user, assessmentId, classroomSlug);
   const view_start_page_sleep = rando_sleep(options.min_view_start_page_sleep, options.max_view_start_page_sleep);
 
 
@@ -947,7 +849,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   sleep(view_start_page_sleep);
 
   //create assessment  
-  const create_assessment_data = await create_assessment(student_user, assessmentId, classroomSlug);
+  await create_assessment(student_user, assessmentId, classroomSlug);
+
   if(options.logging_status >= 1){
       log_student_data_to_console(username, `created ${title} user assessment. With answer type: ${options.answer_type}`) 
   }
@@ -955,11 +858,6 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
   //get users assessment in progroess
   const users_assessment_in_progress = await get_users_assessment_in_progress(student_user, assessmentId, classroomSlug);
   const userAssessment = users_assessment_in_progress.included.find( e => e.type == "userAssessment");
-
-  if(users_assessment_in_progress == undefined || users_assessment_in_progress.included == undefined || users_assessment_in_progress.included?.find == undefined){
-      console.log(`${username} couldn't find user assessment?`)
-      console.log(create_assessment_data)
-  }
   let userAssessmentId = userAssessment.attributes._id;
   let question = await get_users_assessment_question(student_user, assessmentId, classroomSlug);
   let assessmentType = data.data.attributes.assessmentType;
@@ -1084,7 +982,6 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                       answer: []
                   }
                   indiviual_answer.answer.push(answer[0])
-      
                   answer_response.answers.push(answer[0]);
               
                   sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
@@ -1104,12 +1001,6 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
               }
             
               question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response, classroomSlug);
-              // if(question == undefined || question.data == undefined ||  question.data.attributes.isAssessmentDone == undefined ){
-              //   console.log(`userAssessmentId: ${userAssessmentId}`)
-              //   console.log("question")
-              //   console.log(question)
-              //   throw new Error("BAD ")
-              // }
               isAssessmentDone = question.data.attributes.isAssessmentDone;
   
           break;
@@ -1135,6 +1026,7 @@ async function login(username, password){
         'Content-Type': 'application/x-www-form-urlencoded',
       },
         tags: { name: 'login()' }, 
+
     };
   try{
     const response = await http.post(renderURL("/token"), {
@@ -1149,10 +1041,10 @@ async function login(username, password){
   });
   // slowEndpointTrend.add(response.timings.duration);
 
-      const res_json = await response.json();     
-      const total_kb = get_JSON_request_length(res_json);     
-      res_json.total_kb = parseInt(total_kb); 
-    return resolve(res_json);
+      // const res_json = await response.json();     
+      // const total_kb = get_JSON_request_length(res_json);     
+      // res_json.total_kb = parseInt(total_kb); 
+    return resolve(await response.json());
   }catch(e){
       console.log(`login(${username})`)
       
@@ -1179,8 +1071,8 @@ async function get_basic_assessment_data(user, assessmentId){
   });
 
 
-    const res_json = await response.json();        
-    return resolve(res_json);
+    // const res_json = await response.json();        
+    return resolve(await response.json());
 
   });
 }
@@ -1206,8 +1098,8 @@ async function get_answers_for_assessment(user, assessmentId){
   });
 
 
-    const res_json = await response.json();        
-    return resolve(res_json);
+    // const res_json = await response.json();        
+    return resolve(await response.json());
 
   });
 }
@@ -1240,11 +1132,11 @@ async function get_pdf_url(user, classroomSlug){
         'status is 200': (r) => r.status === 200
       });
     
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-      user.total_kb += get_JSON_request_length(res_json);      
-      return resolve(res_json);
+      // user.total_kb += get_JSON_request_length(res_json);      
+      return resolve(await response.json());
 
 
   });
@@ -1271,11 +1163,11 @@ async function run_get_pdf(user){
         'status is 200': (r) => r.status === 200
       });
     
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-      user.total_kb += get_JSON_request_length(res_json);      
-      return resolve(res_json);
+      // user.total_kb += get_JSON_request_length(res_json);      
+      return resolve(await response.json());
 
 
   });
@@ -1295,12 +1187,10 @@ async function log_user_events(user, url, time, title){
           'Authorization': 'Bearer '+ user.accessToken
         },
         tags: { name: 'log_user_events()' }, 
+        responseType: 'none'
       };
 
       const response = await http.post(renderURL("/api/user-events"), {"log_type":"PAGE_VIEW","url":url,  "title":title, "userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36", "timestamp": time} , params);
-        
-
-      // {"log_type":"PAGE_VIEW","title":"Assessment - Reading","url":"https://loadtest2.moomoodev.com/assessments/795c8469-9bdd-439a-9251-34457bd04adc/take","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36","timestamp":"2025-05-28T15:06:20.156Z"}
 
       check(response, {
         'status is 200': (r) => r.status === 200
@@ -1309,11 +1199,12 @@ async function log_user_events(user, url, time, title){
 
 
     // try{
-        const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+        // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-          user.total_kb += get_JSON_request_length(res_json);      
-          return resolve(res_json);
+          // user.total_kb += get_JSON_request_length(res_json); 
+          return resolve()     
+          // return resolve(await res_json.json());
     // }catch(e){
     //     log_student_data_to_console(user.user.username, `is error page view for ${title}.`)
 
@@ -1334,6 +1225,8 @@ async function create_assessment(user, assessmentId, classroomSlug){
           'Authorization': 'Bearer '+ user.accessToken
         },
         tags: { name: 'create_assessment()' }, 
+        responseType: 'none'
+
       };
 
             let response;
@@ -1353,11 +1246,12 @@ async function create_assessment(user, assessmentId, classroomSlug){
       });
     
     
-        const res_json = await response.json();      
-        add_length_to_trend(get_JSON_request_length(res_json));
+        // const res_json = await response.json();      
+        // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        // return resolve(await res_json.json());
+        return resolve()
     
   });
 }
@@ -1389,11 +1283,11 @@ async function get_users_assessment_in_progress(user, assessmentId, classroomSlu
 
     
   
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(await response.json());
   });
 }
 
@@ -1418,11 +1312,11 @@ async function get_users_assessment_question(user, assessmentId, classroomSlug){
     });
     
   
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(await response.json());
 
   });
 }
@@ -1446,11 +1340,11 @@ async function get_student_q_status(user){
     });
     
   
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(await response.json());
   });
 }
 
@@ -1477,11 +1371,11 @@ async function send_users_writing_answers_for_assessment_question(user, assessme
     });
     
   
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(await response.json());
   });
 }
 
@@ -1506,11 +1400,11 @@ async function send_users_answers_for_assessment_question(user, assessmentId, an
     });
     
   
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);      
+        return resolve(await response.json());
   });
 }
 
@@ -1545,12 +1439,12 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
     check(response, {
       'status is 200': (r) => r.status === 200
     });
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
+      // const res_json = await response.json();      
+      // add_length_to_trend(get_JSON_request_length(res_json));
 
-        user.total_kb += get_JSON_request_length(res_json);
+        // user.total_kb += get_JSON_request_length(res_json);
 
-        return resolve(res_json);
+        return resolve(await response.json());
 
       }catch(e){
         console.log(`get_user_assessment_summaries_data(${user.accessToken})`)
@@ -1559,7 +1453,7 @@ async function get_user_assessment_summaries_data(user, assessmentId, classroomS
   });
 }
 function add_length_to_trend(l){
-  myTrend.add(l);
+  // myTrend.add(l);
 }
 
 function get_JSON_request_length(data){
@@ -1576,6 +1470,7 @@ async function send_users_individual_answer_for_assessment_question(user, assess
         'Authorization': 'Bearer '+ user.accessToken
       },
         tags: { name: 'send_users_individual_answer_for_assessment_question()' }, 
+        responseType: 'none'
     };
     
     const response = await http.put(renderURL("/api/student-assessment-answer"), JSON.stringify(answers), params);
@@ -1585,41 +1480,15 @@ async function send_users_individual_answer_for_assessment_question(user, assess
       'status is 200': (r) => r.status === 200
     });
   
-    const res_json = await response.json();      
-    add_length_to_trend(get_JSON_request_length(res_json));
+    // const res_json = await response.json();      
+    // add_length_to_trend(get_JSON_request_length(res_json));
 
-    user.total_kb += get_JSON_request_length(res_json);      
-    return resolve(res_json);
+    // user.total_kb += get_JSON_request_length(res_json);      
+    // return resolve(await res_json.json());
+    return resolve()
     
   });
 }
-
-
-async function get_avg_for_assessment(user, assessmentId,){
-  return new Promise(async (resolve, reject) => {
-    const params = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer '+ user.accessToken
-      },
-        tags: { name: 'get_avg_for_assessment()' }, 
-
-    };
-    
-    const response = await http.post(renderURL("/api/get_user_assessment_answer_avg"), JSON.stringify({id: assessmentId}), params);
-      
-    check(response, {
-      'status is 200': (r) => r.status === 200
-    });
-
-      const res_json = await response.json();      
-      add_length_to_trend(get_JSON_request_length(res_json));
-
-        user.total_kb += get_JSON_request_length(res_json);      
-        return resolve(res_json);
-  });
-}
-
 
 function renderURL(path){
   return options.host + path;
@@ -1638,14 +1507,13 @@ function get_answers_by_assessment_type(type, data, answerType, answers){
             let answerID = getAnswerChoice(possibleItemAnswers, "RANDOM");
             currentDate = new Date();
 
-            let obj = {
+            return_data.push({
                 domainId: d.domainId,
                 startDate:currentDate,
                 completeDate: currentDate,
                 chosenItemAnswerId: answerID,
                 questionId: d._id
-            }
-            return_data.push(obj);
+            });
         })
 
     break;
@@ -1655,15 +1523,13 @@ function get_answers_by_assessment_type(type, data, answerType, answers){
             let possibleItemAnswers = data.possibleItemAnswers;
             let answerID = getAnswerChoice(possibleItemAnswers, answerType, answers);
             currentDate = new Date();
-
-        let obj = {
+        return_data.push({
             domainId: data.domainId,
             startDate:currentDate,
             completeDate: currentDate,
             chosenItemAnswerId: answerID,
             questionId: data._id
-        }
-        return_data.push(obj);
+        });
     break;
   }
 

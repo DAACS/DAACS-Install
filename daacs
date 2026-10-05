@@ -343,6 +343,10 @@ else
 
             "runk6") 
                 LOAD_TEST_TYPE_SCENRIO=""
+                DURATION="1h" 
+                RATE="" 
+                TIME_UNIT="" 
+
                 #put console output into file
                 if [[ "$parameterQ" == "true" ]]; then
                     parameterQ="--console-output="test_output.log" "
@@ -387,27 +391,23 @@ else
                     LOAD_TEST_TYPE_SCENRIO=$parameterL
                 fi
 
-                DURATION="" 
-                RATE="" 
-                TIME_UNIT="" 
-                MAX_VUS="" 
+                if [[ -z "$parameterD" ]]; then
+                    DURATION="10h"
+                else
+                    DURATION=$parameterD
+                fi
+                
+                echo "DURATION: $DURATION"
                 
                 if [[ "$LOAD_TEST_TYPE_SCENRIO" == "stages-constant-arrival-rate" ]]; then
 
-                    DURATION="10h" 
                     RATE="100" 
                     # TIME_UNIT="5m" # this get .33 itersations a second to login
                     TIME_UNIT="2m"  # this get .83 itersations a second to login
-                    MAX_VUS="1000" 
-                    parameterX=$MAX_VUS
                 fi
 
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} MAX_VUS=${MAX_VUS} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
-
-# daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self-regulated-learning" -j 2 -g fast  -h true -i true -s 10 -t random -u 1 -w 1 -x 1 -y "100%" -lt stages-constant-arrival-rate
-
-                #   ADMIN_CREDENTIALS="admin,password" HOST="https://daacs.victor.com" ASSESSMENT_ID="46997151-21a3-4eef-b657-e7dcdd913481" LOGGING_STATUS=1 K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="fast" LOAD_TEST_TYPE_SCENRIO="stages-constant-arrival-rate" DURATION="1m" RATE=30 TIME_UNIT="1s" PRE_ALLOCATED_VUS=0 MAX_VUS=50 RUN_GET_PDF=true RUN_GET_ASSESSMENT_RESULTS=true k6 run k6.assessment.loadtest.js --out json=k6.json
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
 
                 # echo $cmd
                 eval "$cmd"
