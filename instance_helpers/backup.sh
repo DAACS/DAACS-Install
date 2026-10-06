@@ -81,7 +81,7 @@ create_backup_instance_helper(){
 
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
-    # folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
+    folder_name=$(ask_read_question_or_try_again "Enter name of folder of service to backup: " true)
 
     # if [ $(does_service_exsist $folder_name) = false ]; then
     #     pretty_print "${Color_Off}${Red}Missing service, or invalid service name...\n"
@@ -130,8 +130,8 @@ create_backup_instance_helper(){
     create_directory_if_it_does_exsist "$root_dest/$install_folder_destination/docker/"
 
 
-    FOLDER_NAME=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-digitalocean" "MONGO_DB_FOLDER_NAME") 
-    folder_name=$(get_env_value "$FOLDER_NAME" )
+    # FOLDER_NAME=$(get_environment_value_from_file_by_env_name "$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-digitalocean" "MONGO_DB_FOLDER_NAME") 
+    # folder_name=$(get_env_value "$FOLDER_NAME" )
     
     webserver_docker_file_to=$(write_service_subsititions_to_docker_file "$instance_type_defintion" "$install_folder_destination" "$install_env_path" "$environment_type_defintion" "s/#backup_service_name/$backup_service_name/g " $docker_file)
 
