@@ -123,7 +123,7 @@ create_mongo_instance_helper(){
     case "$environment_type_defintion" in
         "env-dev") 
             qserver_files_to="$install_env_path/$instance_type_defintion/docker/Dockerfile-webserver-mongo-dev"
-            MONGO_IMAGE_NAME="daacs-mongo"
+            MONGO_IMAGE_NAME="daacs-mongo-dev"
                     
         ;;
         "env-prod") 

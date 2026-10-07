@@ -53,7 +53,7 @@ Select an option: ")
 
         if grep -wq "$current_dir" "$home_directory/.bashrc"
         then
-            $(pretty_print "${Color_Off}${Red}daacs${Color_Off} command already installed...")
+            pretty_print "${Color_Off}${Red}daacs${Color_Off} command already installed..."
         else
         
             command="PATH=$(escape_backslash "$current_dir:${PATH}")"
@@ -208,14 +208,14 @@ daacs -f runk6 -a admin,password -b https://loadtest.victor.com -c true -e "self
 
 #K6 RESET LOAD TEST DB
 
-daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065 -z 15
-daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -z 15
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -h 4 -i 192.168.29.235 -k 27065 -z 15
+daacs -f resetloadtestdb -a mongossl -b loadtest -c "192.168.29.235" -k "27065" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -h 100 -z 15
 
-daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
-daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
+daacs -f resetloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -h 100 -k 27065 -z 15
 
 #REFRESH LOAD TEST DB
-daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -k 27065 
+daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -k 27065 
 
 #CLEAR CONTAINER LOGS
 daacs -f clear-docker-logs -a yogurtweb
@@ -229,9 +229,23 @@ daacs -f flushredis -a rediscontainername -p google
 #LOAD TEST
 
 #restart whole test
-daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j /home/moo/DAACS-Install/new-env-setups/mongossl/ssl/home/ -g true -k 27065   &&  daacs -f clear-docker-logs -a yogurtweb && docker restart 4f6a95840bdd  && daacs -f flushredis -a redisdaacs -p google
+daacs -f refreshloadtestdb -a mongossl -b yogurt -c "192.168.29.235" -j $current_dir/new-env-setups/mongossl/ssl/home/ -g true -k 27065   &&  daacs -f clear-docker-logs -a yogurtweb && docker restart 4f6a95840bdd  && daacs -f flushredis -a redisdaacs -p google
 
 
+
+
+Load DB for loadtest 
+daacs -f resetloadtestdb -a mongoloadtest1 -b loadtest1 -c localhost -h 3000 -k 27099 -z 15
+daacs -f resetloadtestdb -a mongoloadtest1 -b loadtest2 -c localhost -h 3000 -k 27099 -z 15
+daacs -f resetloadtestdb -a mongoloadtest1 -b loadtest3 -c localhost -h 3000 -k 27099 -z 15
+daacs -f resetloadtestdb -a mongoloadtest1 -b loadtest4 -c localhost -h 3000 -k 27099 -z 15
+daacs -f resetloadtestdb -a mongoloadtest1 -b loadtest5 -c localhost -h 3000 -k 27099 -z 15
+
+daacs -f resetloadtestdb -a mongoloadtest2 -b loadtest6 -c localhost -h 3000 -k 27098 -z 15
+daacs -f resetloadtestdb -a mongoloadtest2 -b loadtest7 -c localhost -h 3000 -k 27098 -z 15
+daacs -f resetloadtestdb -a mongoloadtest2 -b loadtest8 -c localhost -h 3000 -k 27098 -z 15
+daacs -f resetloadtestdb -a mongoloadtest2 -b loadtest9 -c localhost -h 3000 -k 27098 -z 15
+daacs -f resetloadtestdb -a mongoloadtest2 -b loadtest10 -c localhost -h 3000 -k 27098 -z 15
 '
 
 
@@ -300,7 +314,7 @@ else
             "copy-file-to-container") 
 
                 # docker cp /where/to/save/that/file/or/folder/to/locally service_name:/what/file/or/folder/to/take
-                # docker cp /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Shibboleth-idp/docker/docker-entrypoint.sh 3c09df0bfd77:/entrypoint.sh
+                # docker cp $current_dir/DAACS-Install-Defaults/DAACS-Shibboleth-idp/docker/docker-entrypoint.sh 3c09df0bfd77:/entrypoint.sh
             ;;
             "copy-file-from-container") 
 
@@ -451,10 +465,10 @@ else
                     MONGODB_PORT=$parameterK
                 fi
 
-                mongo_envs=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
+                mongo_envs=$(cat $current_dir/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
 
                 export $mongo_envs
-                cmd="MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/refreshloadtestdb/refreshloadtestdb.js"
+                cmd="MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK node $current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/refreshloadtestdb/refreshloadtestdb.js"
                 
                 #  echo $cmd
                 eval "$cmd"
@@ -491,10 +505,11 @@ else
                 if [[ "$parameterZ" != "" ]]; then
                     STUDENTS_PER_CLASS=$parameterZ
                 fi
-                mongo_envs=$(cat /home/moo/DAACS-Install/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo )
+                mongo_envs=$(cat "$current_dir/new-env-setups/$parameterA/databases/$parameterB/webserver-mongo" )
 
                 export $mongo_envs
-                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK STUDENTS_PER_CLASS=$STUDENTS_PER_CLASS node /home/moo/DAACS-Install/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
+                cmd="NUMBER_TO_UPLOAD=$NUMBER_TO_UPLOAD MONGODB_SSL=$MONGODB_SSL MONGODB_CRT=$MONGODB_CRT MONDGODB_PEM=$MONDGODB_PEM MONGODB_HOST=$parameterC MONGODB_PORT=$parameterK STUDENTS_PER_CLASS=$STUDENTS_PER_CLASS node $current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/utils/upload-students/uploadstudents.js"
+
                 
                 #  echo $cmd
                 eval "$cmd"
