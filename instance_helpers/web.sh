@@ -255,7 +255,7 @@ update_web_instance_helper(){
 create_webserver_instance_helper(){
 
     printf "\nCREATING Webserver instance....\n"
-
+    to_base_new_env_setups_dir="${1}/new-env-setups"
     instance_type="7"
     env_to_create=$(get_env_files_for_editing $instance_type $install_env_path $environment_type)
     environment_type_defintion=$(get_env_type_definition "$environment_type")
@@ -307,7 +307,7 @@ create_webserver_instance_helper(){
                 mongo_database_name=$mongo_database_directory
                 api_client_id=$(ask_read_question_or_try_again "Enter mongo api client id: " false)
 
-                mong_env_file_dir1="$root_dest/$mongo_folder/databases/$mongo_database_directory"
+                mong_env_file_dir1="$to_base_new_env_setups_dir/$mongo_folder/databases/$mongo_database_directory"
                 create_directory_if_it_does_exsist "$mong_env_file_dir1"
 
                 mongo_manual_set_mongo="MONGO_MANUAL_MODE=true"
@@ -347,6 +347,8 @@ create_webserver_instance_helper(){
  
                 #todo - add if IS_SSL=true or IS_SSL=false
                 write_mongo_config_file "$absolute_dir" "$database_instance_type_defintion" "$mongo_folder" "$mongo_database_directory" "$install_folder_destination"
+
+                # todo need to write the mongo_container username password blah blah to file
 
             else
 
@@ -595,9 +597,11 @@ update_webserver_instance_helper(){
     absolute_env_dir="$root_dest/$mongo_folder/$environment_type_defintion/$environment_type_defintion-"
     env_oauth_file="${absolute_database_dir}oauth"
     env_webserver_mongo_file="${absolute_database_dir}webserver-mongo"
+    mongo_manual_set_mongo=""
+    
 
     case "$database_instance_type_defintion" in
-        "S") 
+        "S" | "M" ) 
 
             env_mongo_file_db="${absolute_env_dir}webserver-mongo"
 
@@ -606,9 +610,13 @@ update_webserver_instance_helper(){
                 run_fillout_program_for_update "$env_webserver_mongo_file"
                 run_fillout_program_for_update "$env_oauth_file"
                 run_fillout_program_for_update "$env_mongo_file_db"
-
             fi
 
+            if [ "$database_instance_type_defintion" = "M" ]; then
+
+                mongo_manual_set_mongo="MONGO_MANUAL_MODE=true"
+    
+            fi
 
             mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_CONTAINER_NAME")
             mongo_port=$(get_environment_value_from_file_by_env_name "${env_mongo_file_db}" "MONGODB_MAPPED_PORT")
@@ -655,7 +663,7 @@ update_webserver_instance_helper(){
         ;;
     esac
 
-    mongo_envs=" ${mongo_port} ${mongo_username} ${api_client_id} ${mongo_password} ${mongo_database_name} ${mongo_replica_set_mongo} ${mongodb_replica_set_id} ${mongo_replica_host_list} ${mongo_container_name} "
+    mongo_envs=" ${mongo_port} ${mongo_username} ${api_client_id} ${mongo_password} ${mongo_database_name} ${mongo_replica_set_mongo} ${mongodb_replica_set_id} ${mongo_replica_host_list} ${mongo_container_name} ${mongo_manual_set_mongo} "
 # ${env_memcached_dir}
     # filename - enviroment variables for webserver
     env_webserver_file="${env_absolute_dir}$environment_type_defintion-webserver"
