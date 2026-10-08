@@ -567,7 +567,7 @@ run_docker_with_envs(){
 
     # # run docker file
     catted="${envs_for_docker_processed} docker compose -f ${webserver_docker_file_to} up -d ${sould_recreate_command_args} ${service_name} "   
-
+    # echo $catted
     if [ -n "$command_after" ]; then
         catted="${catted} && ${command_after}"
     fi
@@ -823,16 +823,18 @@ create_docker_services(){
 
 recreate_service(){
 
+
+    # install_folder_destination="${1}"
     base_path_folder_destination="${2}"
     install_folder_destination="${3}"
     instance_type="${4}"
     environment_type="${5}"
-    service_name="${1}"
 
     force_recreate=true #only for recreate
 
     install_root=""
     install_env_path=""
+    envs=""
 
     if [ "$install_env_path" = "" ]; then
         install_root=$current_dir
@@ -845,21 +847,27 @@ recreate_service(){
     absolute_dir="$root_dest/$install_folder_destination/$environment_type_defintion/$environment_type_defintion-"
     docker_file=$(get_docker_file_by_enviroment_and_by_instsance_type "$instance_type" "$environment_type_defintion")
 
-    web_env_array=("REPLICAS" "PORT")
-    declare -a mong_env_array=("MONGODB_MAPPED_PORT" "MONGODB_CONTAINER_NAME")
+    case "$instance_type_defintion" in
+        "DAACS-Website" ) 
+        
+            source "$current_dir/instance_helpers/webserver-helpers.sh"
 
-    dest=( $(get_web_server_env_values "$absolute_dir" "webserver" web_env_array) $(get_web_server_env_values "$absolute_dir" "webserver-mongo" mong_env_array ) )
+            envs=$(get_mongo_values_for_web_instance $environment_type_defintion $root_dest $install_folder_destination)
+            web_env_array=("REPLICAS" "PORT")
+            dest=( $(get_web_server_env_values "$absolute_dir" "webserver-replicas" web_env_array))
+            envs="$envs $dest"
+        ;;
 
+    esac
+    
     absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
     full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
     full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
 
-    local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
     folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
 
-    env_string="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${dest[1]} ${dest[0]} ${dest[3]} ${dest[2]}"
-
+    env_string="${folder_start_env} ${env_dir} ${envs}"
 
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
     create_docker_services "${env_string}" "${webserver_docker_file_to}" "${force_recreate}" "${service_name}"
