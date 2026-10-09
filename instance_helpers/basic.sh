@@ -789,6 +789,23 @@ get_docker_file_by_enviroment_and_by_instsance_type(){
 
 
         ;;
+        "2") 
+
+        case "$environment_type_defintion" in
+            "env-dev") 
+                docker_file="Docker-Queueserver.dev.yml"
+            ;;
+            "env-prod") 
+                docker_file="Docker-Queueserver.prod.yml"
+            ;;
+            *)
+                echo "Invalid instance option"
+                exit -1
+            ;;
+        esac
+
+
+        ;;
 
     esac
 
@@ -856,17 +873,40 @@ recreate_service(){
             web_env_array=("REPLICAS" "PORT")
             dest=( $(get_web_server_env_values "$absolute_dir" "webserver-replicas" web_env_array))
             envs="$envs $dest"
+            absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+            folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+            
+        ;;
+
+        "DAACS-QServer" )
+
+                # # filename - enviroment variables for webserver
+                env_queueserver_file="${absolute_dir}queueserver"
+                # # filename - enviroment variables for webserver mongo
+                env_queue_mongo_file="${absolute_dir}queuemongo"
+
+                mongo_container_name=$(get_environment_value_from_file_by_env_name "${env_queue_mongo_file}" "MONGODB_CONTAINER_NAME")
+                mongo_port=$(get_environment_value_from_file_by_env_name "${env_queue_mongo_file}" "MONGODB_MAPPED_PORT")
+                qserver_container_name=$(get_environment_value_from_file_by_env_name "${env_queueserver_file}" "WEBSERVER_CONTAINER_NAME")
+
+                absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
+
+                full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
+                full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
+
+                local_path_to_mongo_dir="LOCAL_PATH_TO_MONGODB_DIR=$full_daacs_install_defaults_path_to_docker"
+                folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
+                env_dir="ENV_DIR=$absolute_dir"
+
+                envs="${local_path_to_mongo_dir} ${folder_start_env} ${env_dir} ${mongo_container_name} ${mongo_port} ${qserver_container_name}"
+                
+                
+
         ;;
 
     esac
-    
-    absolute_path_to_path_to_project_directory="$base_path_folder_destination/$install_folder_destination"
-    full_daacs_install_defaults_path="$install_env_path/$instance_type_defintion"
-    full_daacs_install_defaults_path_to_docker="$full_daacs_install_defaults_path/docker/mongodb"
 
-    folder_start_env="FOLDER_START=$absolute_path_to_path_to_project_directory"
     env_dir="ENV_DIR=$absolute_dir"
-
     env_string="${folder_start_env} ${env_dir} ${envs}"
 
     webserver_docker_file_to=$(generate_docker_file_path "to" "$install_folder_destination" "$docker_file" "$install_env_path" "$instance_type_defintion" )
