@@ -296,6 +296,7 @@ else
 
 
                 printf "Running recreate on ${parameterS} \n"
+                # recreate_service "$parameterS" "$current_dir" "$parameterD" "$parameterT" "$parameterE"
                 recreate_service "$parameterS" "$parameterB" "$parameterD" "$parameterT" "$parameterE"
             ;;
 
@@ -411,7 +412,7 @@ else
                     DURATION=$parameterD
                 fi
                 
-                echo "DURATION: $DURATION"
+                # echo "DURATION: $DURATION"
                 
                 if [[ "$LOAD_TEST_TYPE_SCENRIO" == "stages-constant-arrival-rate" ]]; then
 
@@ -420,8 +421,17 @@ else
                     TIME_UNIT="2m"  # this get .83 itersations a second to login
                 fi
 
+                # run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
+                #  cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
+                
+                # todo need to check if port is open before trying and if not find open port 
+                # open_port_to_use= $( get_open_port_for_k6 5665)
+                # lsof -i :5665 | wc -l
+# K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html
+    # K6_WEB_DASHBOARD
+    
                 run_from="$current_dir/DAACS-Install-Defaults/DAACS-Scripts/load-test/scripts/"
-                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_PERIOD=2s K6_WEB_DASHBOARD_EXPORT=html-report.html LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
+                 cmd="cd $run_from && ADMIN_CREDENTIALS="${parameterA}" HOST="${parameterB}" INSECURE_SKIP_TLS="${parameterC}" ASSESSMENT_ID="${parameterE}" LOGGING_STATUS="${parameterJ}" LOAD_TEST_TYPE_SPEED="${parameterG}" RUN_GET_PDF=${parameterH} RUN_GET_ASSESSMENT_RESULTS=${parameterI} TEST=${parameterT} ITERATION=${parameterW} NUMBER_OF_USERS=${parameterX} ANSWER_TYPE=${parameterY} LOAD_TEST_TYPE_SCENRIO=${LOAD_TEST_TYPE_SCENRIO} DURATION=${DURATION} RATE=${RATE} TIME_UNIT=${TIME_UNIT} k6 run --log-format raw  ./test/k6.assessment.loadtest.js ${parameterQ} ${parameterR} "
 
                 # echo $cmd
                 eval "$cmd"

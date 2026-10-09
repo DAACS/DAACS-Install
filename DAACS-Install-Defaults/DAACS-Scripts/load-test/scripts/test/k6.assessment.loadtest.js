@@ -58,6 +58,8 @@ export let options = {
     'http_req_duration{name:send_users_answers_for_assessment_question()}': [],
     'http_req_duration{name:get_user_assessment_summaries_data()}': [],
     'http_req_duration{name:send_users_individual_answer_for_assessment_question()}': [],
+    'http_req_duration{name:get_basic_assessment_data()}': [],
+    'http_req_duration{name:get_answers_for_assessment()}': [],
   },
   assessmentTypeOptions: {
     "cat": {
@@ -185,22 +187,26 @@ let total_total = 0;
 
       options.min_view_start_page_sleep = 20
       options.max_view_start_page_sleep = 45
+
+
+
+
     break;
 
 
     case "human-human":
-      options.userAssessmentOptions.user_results.min_sleep = 30;
-      options.userAssessmentOptions.user_results.max_sleep = 60;
-      options.assessmentTypeOptions.cat.min_sleep = 30;
-      options.assessmentTypeOptions.cat.max_sleep =  100;
-      options.assessmentTypeOptions.writing.min_sleep = 10; 
-      options.assessmentTypeOptions.writing.max_sleep =  20;
-      options.assessmentTypeOptions.likert.min_sleep = 25;
-      options.assessmentTypeOptions.likert.max_sleep =  60;
+            options.userAssessmentOptions.user_results.min_sleep = 60;
+      options.userAssessmentOptions.user_results.max_sleep = 120;
+      options.assessmentTypeOptions.cat.min_sleep = 60;
+      options.assessmentTypeOptions.cat.max_sleep =  90;
+      options.assessmentTypeOptions.writing.min_sleep = 20; 
+      options.assessmentTypeOptions.writing.max_sleep =  60;
+      options.assessmentTypeOptions.likert.min_sleep = 60;
+      options.assessmentTypeOptions.likert.max_sleep =  90;
 
 
-      options.min_login_sleep = 30
-      options.max_login_sleep = 45
+      options.min_login_sleep = 20
+      options.max_login_sleep = 30
 
       options.min_view_start_page_sleep = 30
       options.max_view_start_page_sleep = 60
@@ -748,7 +754,7 @@ async function run_user_assessment_results_program(student_user, data, classroom
 
     //no longer need to keep getting summary data since we don't do that anymore
     for (const index of range_) {
-      log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${index}`, new Date() , `Assessment - ${assessmentTitle}`)
+      log_user_events(student_user,  `${options.host}/assessments/${assessment_id}/${(index + 1)}`, new Date() , `Assessment - ${assessmentTitle}`)
 
       const view_results_page_sleep = rando_sleep(options.userAssessmentOptions.user_results.min_sleep, options.userAssessmentOptions.user_results.max_sleep);
       log_student_data_to_console(username, `viewing assessment results for - ${assessmentTitle} - Domain: ${index} - Viewing time: ${view_results_page_sleep} seconds`);
@@ -917,7 +923,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
               sl = rando_sleep(options.assessmentTypeOptions.writing.min_sleep, options.assessmentTypeOptions.writing.max_sleep);
 
               if(options.logging_status >= 2){
-                log_student_data_to_console(username, `is thinking about what to write for ${sl} seconds.`) 
+                log_student_data_to_console(username, `is thinking about what to write for ${sl} seconds for the ${title} assessment. Progress: ${parseFloat(question.progress).toFixed(2) * 100}%`) 
               }
               sleep(sl);
               i += 120;
@@ -943,7 +949,7 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   sl = rando_sleep(options.assessmentTypeOptions.likert.min_sleep, options.assessmentTypeOptions.likert.max_sleep);
               
                 if(options.logging_status >= 2){
-                  log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for SRL question #${(data.data.attributes.itemGroups.data.attributes.itemGroups.findIndex(d => d._id === questionId)) + 1}.`) 
+                  log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for ${title} assessment question #${(data.data.attributes.itemGroups.data.attributes.itemGroups.findIndex(d => d._id === questionId)) + 1}. Progress: ${(question.data.attributes.progress + 0.1).toFixed(2) * 100}%`) 
                 }
                 question = await send_users_answers_for_assessment_question(student_user, assessmentId, answer_response);
                 isAssessmentDone = question.data.attributes.isAssessmentDone;
@@ -968,6 +974,8 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
             
               let count = question.data.attributes.questions.items.length - 1;
               let index = 0;
+              let return_data = {data : {attributes: {progress: 0 }}}
+
               for(const q of question.data.attributes.questions.items){
                   
                   let answersForQuestion = answerGroup.items.find(d=> d._id ==  q._id);
@@ -987,13 +995,13 @@ async function run_program(student_user, assessments, assessmentSlug, classroomS
                   sl = rando_sleep( options.assessmentTypeOptions.cat.min_sleep,  options.assessmentTypeOptions.cat.max_sleep);
 
                   if(options.logging_status >= 2){
-                    log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for question.`) 
+                   log_student_data_to_console(username, `is thinking for ${sl} seconds about the answer for ${title} assessment question. Progress: ${return_data.data.attributes.progress.toFixed(2) * 100}%`) 
                   }
                   sleep(sl);
 
                   if(count != index ){
                     
-                      await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
+                     return_data =  await send_users_individual_answer_for_assessment_question(student_user, assessmentId, indiviual_answer);
 
                   } 
 
@@ -1470,7 +1478,7 @@ async function send_users_individual_answer_for_assessment_question(user, assess
         'Authorization': 'Bearer '+ user.accessToken
       },
         tags: { name: 'send_users_individual_answer_for_assessment_question()' }, 
-        responseType: 'none'
+        // responseType: 'none'
     };
     
     const response = await http.put(renderURL("/api/student-assessment-answer"), JSON.stringify(answers), params);
@@ -1484,8 +1492,8 @@ async function send_users_individual_answer_for_assessment_question(user, assess
     // add_length_to_trend(get_JSON_request_length(res_json));
 
     // user.total_kb += get_JSON_request_length(res_json);      
-    // return resolve(await res_json.json());
-    return resolve()
+    return resolve(await response.json());
+    // return resolve()
     
   });
 }

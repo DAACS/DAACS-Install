@@ -1,4 +1,6 @@
 #!/bin/sh
+current_dir="$(dirname $0)"
+source "$current_dir/instance_helpers/basic.sh"
 
 #docker
 sudo apt-get update
@@ -34,3 +36,17 @@ sudo apt-get install -y nodejs
 
 # Vim & Zip
 sudo apt-get update && sudo apt-get install vim -y && sudo apt-get install -y zip
+
+ARCHITECTURE=$(get_system_archtechture)
+case "${ARCHITECTURE}" in
+    "aarch64") 
+    sudo wget https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-arm64 -O /usr/local/bin/ctop
+    sudo chmod +x /usr/local/bin/ctop
+
+    ;;
+    "x86_64") 
+      sudo wget https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-amd64 -O /usr/local/bin/ctop
+      sudo chmod +x /usr/local/bin/ctop
+
+    ;;
+esac
